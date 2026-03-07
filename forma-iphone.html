@@ -1,0 +1,2272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FORMA">
+<title>FORMA — Training Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --surface3: #252530;
+    --border: rgba(255,255,255,0.08);
+    --accent: #c8ff3e;
+    --accent2: #ff6b35;
+    --accent3: #7c6ef5;
+    --text: #f0f0f5;
+    --text2: #9090a8;
+    --text3: #606075;
+    --safe-top: env(safe-area-inset-top, 44px);
+    --safe-bottom: env(safe-area-inset-bottom, 34px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --tab-height: 60px;
+    --header-height: 56px;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-lg: 22px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── APP SHELL ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: 100%;
+    position: relative;
+  }
+
+  /* ── STATUS BAR SPACER ── */
+  .status-bar {
+    height: var(--safe-top);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  /* ── TOP HEADER ── */
+  .app-header {
+    height: var(--header-height);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 90;
+  }
+
+  .header-logo {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 14px;
+    color: var(--text2);
+  }
+  .header-btn:active { transform: scale(0.9); background: var(--surface3); }
+
+  .week-badge {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    background: var(--surface2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .app-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    padding-bottom: calc(var(--tab-height) + var(--safe-bottom) + 12px);
+  }
+
+  /* ── SCREEN PAGES ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── BOTTOM TAB BAR ── */
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    height: calc(var(--tab-height) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
+    background: rgba(13,13,20,0.92);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    z-index: 200;
+  }
+
+  .tab-item {
+    flex: 1;
+    height: var(--tab-height);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .tab-icon {
+    font-size: 20px;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    line-height: 1;
+  }
+
+  .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.3px;
+    font-family: var(--font-display);
+    transition: color 0.2s;
+  }
+
+  .tab-item.active .tab-icon { transform: scale(1.15) translateY(-1px); }
+  .tab-item.active .tab-label { color: var(--accent); }
+
+  .tab-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .tab-item:active .tab-icon { transform: scale(0.9); }
+
+  /* ── SECTION PADDING ── */
+  .section-pad { padding: 20px 16px 0; }
+
+  /* ── GREETING HERO ── */
+  .greeting-hero {
+    padding: 24px 20px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .greeting-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(200,255,62,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .greeting-label {
+    font-size: 13px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .greeting-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+
+  .greeting-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-top: 6px;
+    font-weight: 400;
+  }
+
+  /* ── STAT CARDS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 0 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-user-select: none;
+  }
+  .stat-card:active { transform: scale(0.97); background: var(--surface2); }
+
+  .stat-card .edit-dot {
+    position: absolute; top: 10px; right: 10px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+  }
+
+  .stat-emoji { font-size: 22px; margin-bottom: 8px; }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .stat-unit {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .sec-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 12px;
+  }
+
+  .sec-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  .sec-action {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* ── WEEK SCHEDULE ── */
+  .week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    padding: 0 16px;
+  }
+
+  .day-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .day-pill.today {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .day-pill.today .day-name,
+  .day-pill.today .day-num { color: var(--bg); }
+
+  .day-pill:active { transform: scale(0.93); }
+
+  .day-name {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .day-num {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .day-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent3);
+  }
+
+  .day-pill.today .day-dot { background: var(--bg); opacity: 0.5; }
+
+  /* ── MACRO PROGRESS CARD ── */
+  .macro-card {
+    margin: 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .macro-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .macro-kcal {
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1;
+  }
+
+  .macro-kcal span { font-size: 14px; color: var(--text2); font-weight: 400; letter-spacing: 0; }
+
+  .macro-ring-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .ring-mini {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: conic-gradient(var(--accent) 0%, rgba(255,255,255,0.08) 0%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+
+  .ring-mini::after {
+    content: '';
+    position: absolute;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+
+  .macro-bars { display: flex; flex-direction: column; gap: 10px; }
+
+  .macro-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .macro-bar-label {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 500;
+    width: 48px;
+    flex-shrink: 0;
+  }
+
+  .macro-bar-track {
+    flex: 1;
+    height: 5px;
+    background: var(--surface3);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .macro-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .macro-bar-val {
+    font-size: 11px;
+    color: var(--text3);
+    width: 36px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── PROGRESS CARD ── */
+  .progress-card {
+    margin: 0 16px;
+    background: linear-gradient(135deg, #1a1a26 0%, #12121c 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-card::before {
+    content: '';
+    position: absolute;
+    bottom: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(200,255,62,0.1) 0%, transparent 70%);
+  }
+
+  .progress-bar-track {
+    height: 8px;
+    background: var(--surface3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 14px 0;
+    position: relative;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #a8e832);
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  .progress-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .prog-stat {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .prog-stat-val {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .prog-stat-label {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── WORKOUT CARDS ── */
+  .workout-scroll {
+    display: flex;
+    gap: 12px;
+    padding: 0 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .workout-scroll::-webkit-scrollbar { display: none; }
+
+  .workout-chip {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    min-width: 140px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .workout-chip:active { transform: scale(0.95); }
+
+  .workout-chip.today-workout {
+    background: linear-gradient(135deg, rgba(200,255,62,0.15), rgba(200,255,62,0.05));
+    border-color: rgba(200,255,62,0.3);
+  }
+
+  .wc-day {
+    font-size: 10px;
+    color: var(--text3);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .wc-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .wc-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 7px;
+    border-radius: 20px;
+    background: rgba(200,255,62,0.15);
+    color: var(--accent);
+  }
+
+  /* ── TRAINING SCREEN ── */
+  .workout-list { padding: 0 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .workout-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .workout-item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    cursor: pointer;
+  }
+
+  .workout-item-header:active { background: var(--surface2); }
+
+  .wi-left { display: flex; flex-direction: column; gap: 3px; }
+
+  .wi-name {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .wi-meta {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .wi-chevron {
+    font-size: 12px;
+    color: var(--text3);
+    transition: transform 0.2s;
+  }
+
+  .workout-item.open .wi-chevron { transform: rotate(180deg); }
+
+  .workout-detail {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+
+  .workout-item.open .workout-detail { display: block; }
+
+  .exercise-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .exercise-row:last-child { border-bottom: none; }
+
+  .ex-name { font-size: 14px; font-weight: 500; }
+  .ex-sets {
+    font-size: 12px;
+    color: var(--text3);
+    background: var(--surface2);
+    padding: 3px 8px;
+    border-radius: 8px;
+  }
+
+  /* ── ACTION BUTTON ── */
+  .action-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    height: 52px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-user-select: none;
+  }
+  .action-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+
+  .action-btn.secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  /* ── NUTRITION SCREEN ── */
+  .food-log-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px 12px;
+  }
+
+  .food-search-bar {
+    flex: 1;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    display: flex; align-items: center;
+    padding: 0 14px;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .food-search-bar span { font-size: 13px; color: var(--text3); }
+
+  .food-add-btn {
+    width: 44px; height: 44px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--bg);
+    font-weight: 700;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .food-add-btn:active { transform: scale(0.9); }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px 32px;
+  }
+
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; color: var(--text3); line-height: 1.5; }
+
+  /* ── MACRO CIRCLE BIG ── */
+  .macro-circles-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 16px;
+  }
+
+  .macro-circle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .macro-circle-wrap {
+    position: relative;
+    width: 72px; height: 72px;
+  }
+
+  .macro-circle-svg {
+    width: 72px; height: 72px;
+    transform: rotate(-90deg);
+  }
+
+  .macro-circle-bg {
+    fill: none;
+    stroke: var(--surface3);
+    stroke-width: 5;
+  }
+
+  .macro-circle-fill {
+    fill: none;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 188;
+    stroke-dashoffset: 188;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .macro-circle-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .mc-val {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 800;
+    display: block;
+    line-height: 1;
+  }
+
+  .mc-unit { font-size: 9px; color: var(--text3); }
+
+  .macro-circle-name {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── PROGRESS SCREEN ── */
+  .chart-card {
+    margin: 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .chart-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text2);
+  }
+
+  .chart-placeholder {
+    height: 140px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-line {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 100%;
+  }
+
+  .weigh-in-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin: 0 16px;
+  }
+
+  .form-field {
+    margin-bottom: 14px;
+  }
+
+  .form-label {
+    font-size: 12px;
+    color: var(--text2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .form-input {
+    width: 100%;
+    height: 48px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    padding: 0 14px;
+    outline: none;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  /* ── SETTINGS SCREEN ── */
+  .settings-section {
+    margin: 0 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-user-select: none;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-row:active { background: var(--surface2); }
+
+  .sr-left { display: flex; align-items: center; gap: 12px; }
+
+  .sr-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .sr-text {}
+  .sr-title { font-size: 15px; font-weight: 500; }
+  .sr-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+  .sr-arrow { font-size: 12px; color: var(--text3); }
+
+  /* Toggle */
+  .toggle {
+    width: 48px; height: 28px;
+    border-radius: 14px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--accent); border-color: var(--accent); }
+
+  .toggle-dot {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .toggle.on .toggle-dot { transform: translateX(20px); }
+
+  /* ── EDIT MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 500;
+    display: none;
+    align-items: flex-end;
+  }
+  .modal-overlay.visible { display: flex; }
+
+  .modal-sheet {
+    width: 100%;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    padding: 12px 20px 20px;
+    padding-bottom: calc(20px + var(--safe-bottom));
+    animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+
+  .modal-btns {
+    display: flex; gap: 10px; margin-top: 16px;
+  }
+
+  /* ── ONBOARDING ── */
+  #onboarding {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    padding: var(--safe-top) 0 var(--safe-bottom);
+  }
+
+  .onboard-inner {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .onboard-step { display: none; flex: 1; flex-direction: column; }
+  .onboard-step.active { display: flex; }
+
+  .step-indicator {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .step-dot {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--surface3);
+    transition: background 0.3s;
+  }
+  .step-dot.done { background: var(--accent); }
+
+  .onboard-emoji { font-size: 48px; margin-bottom: 16px; }
+
+  .onboard-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .onboard-sub {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .input-group { margin-bottom: 14px; }
+
+  .input-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text3);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .bmi-display {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  .bmi-val {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .bmi-label { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  .gender-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .gender-btn {
+    height: 52px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .gender-btn.selected {
+    background: rgba(200,255,62,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .gender-btn:active { transform: scale(0.97); }
+
+  .activity-btn {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .activity-btn.selected {
+    background: rgba(200,255,62,0.08);
+    border-color: rgba(200,255,62,0.4);
+    color: var(--text);
+  }
+
+  .activity-btn:active { transform: scale(0.98); }
+
+  .activity-check { font-size: 16px; opacity: 0; }
+  .activity-btn.selected .activity-check { opacity: 1; }
+
+  .plan-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .plan-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    text-align: center;
+  }
+
+  .plan-item-val {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .plan-item-label {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .onboard-footer {
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .onboard-btn-row {
+    display: flex; gap: 10px;
+  }
+
+  /* ── CALENDAR ── */
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 0 16px;
+  }
+
+  .cal-day-hdr {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    padding: 4px 0;
+    letter-spacing: 0.3px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .cal-day:active { transform: scale(0.88); }
+  .cal-day.today { background: var(--accent); color: var(--bg); font-weight: 700; }
+  .cal-day.logged { color: var(--text); }
+  .cal-day.logged::after {
+    content: '';
+    position: absolute;
+    bottom: 3px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent3);
+  }
+  .cal-day.today::after { background: var(--bg); }
+
+  /* ── UTILITY ── */
+  .spacer-12 { height: 12px; }
+  .spacer-20 { height: 20px; }
+  .divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+  .pill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    background: rgba(200,255,62,0.1);
+    color: var(--accent);
+    border: 1px solid rgba(200,255,62,0.2);
+  }
+
+  /* ── LIVE DOT ── */
+  .live-dot {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: #ff6b6b; font-weight: 600;
+  }
+  .live-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ff6b6b;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* cardio card */
+  .cardio-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 16px; }
+  .cardio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+  }
+  .cardio-emoji { font-size: 20px; margin-bottom: 6px; }
+  .cardio-name { font-size: 11px; font-weight: 700; font-family: var(--font-display); line-height: 1.2; }
+  .cardio-dur { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .cardio-hr { font-size: 9px; color: var(--accent); margin-top: 2px; font-weight: 600; }
+
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+  <div class="onboard-inner">
+
+    <!-- STEP 1 -->
+    <div class="onboard-step active" id="step1">
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-dot"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="onboard-emoji">⚖️</div>
+      <div class="onboard-title">Let's set up your profile</div>
+      <div class="onboard-sub">Enter your current stats so we can personalise everything for you.</div>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label class="input-label">Current Weight</label>
+          <input class="form-input" type="number" id="ob-weight" placeholder="e.g. 100 kg" inputmode="decimal">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Target Weight</label>
+          <input class="form-input" type="number" id="ob-target" placeholder="e.g. 88 kg" inputmode="decimal">
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-group">
+          <label class="input-label">Height (cm)</label>
+          <input class="form-input" type="number" id="ob-height" placeholder="e.g. 178" inputmode="decimal">
+        </div>
+        <div class="input-group">
+          <label class="input-label">Waist (cm)</label>
+          <input class="form-input" type="number" id="ob-waist" placeholder="e.g. 109" inputmode="decimal">
+        </div>
+      </div>
+
+      <div class="bmi-display" id="bmi-preview">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:4px">YOUR BMI</div>
+        <div class="bmi-val" id="ob-bmi-val">—</div>
+        <div class="bmi-label" id="ob-bmi-cat">Enter your stats above</div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="onboard-step" id="step2">
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="onboard-emoji">🏃</div>
+      <div class="onboard-title">Your activity level</div>
+      <div class="onboard-sub">This helps us calculate your daily calorie needs accurately.</div>
+
+      <div class="gender-row">
+        <button class="gender-btn selected" id="btn-male" onclick="selectGender('male')">♂ Male</button>
+        <button class="gender-btn" id="btn-female" onclick="selectGender('female')">♀ Female</button>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label">Age</label>
+        <input class="form-input" type="number" id="ob-age" placeholder="e.g. 32" inputmode="numeric">
+      </div>
+
+      <button class="activity-btn selected" data-level="1.2" onclick="selectActivity(this)">
+        <span>😴 Sedentary</span><span class="activity-check">✓</span>
+      </button>
+      <button class="activity-btn" data-level="1.375" onclick="selectActivity(this)">
+        <span>🚶 Lightly active (1–3 days/week)</span><span class="activity-check">✓</span>
+      </button>
+      <button class="activity-btn" data-level="1.55" onclick="selectActivity(this)">
+        <span>🏋️ Moderately active (3–5 days)</span><span class="activity-check">✓</span>
+      </button>
+      <button class="activity-btn" data-level="1.725" onclick="selectActivity(this)">
+        <span>🔥 Very active (6–7 days)</span><span class="activity-check">✓</span>
+      </button>
+      <button class="activity-btn" data-level="1.9" onclick="selectActivity(this)">
+        <span>⚡ Extra active (physical job)</span><span class="activity-check">✓</span>
+      </button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="onboard-step" id="step3">
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+        <div class="step-dot done"></div>
+      </div>
+      <div class="onboard-emoji">📊</div>
+      <div class="onboard-title">Your personalised plan</div>
+      <div class="onboard-sub">Based on your stats — edit anytime in Settings.</div>
+
+      <div class="plan-grid">
+        <div class="plan-item"><div class="plan-item-val" id="plan-kcal">—</div><div class="plan-item-label">Calories/day</div></div>
+        <div class="plan-item"><div class="plan-item-val" id="plan-protein">—</div><div class="plan-item-label">Protein (g)</div></div>
+        <div class="plan-item"><div class="plan-item-val" id="plan-carbs">—</div><div class="plan-item-label">Carbs (g)</div></div>
+        <div class="plan-item"><div class="plan-item-val" id="plan-fats">—</div><div class="plan-item-label">Fats (g)</div></div>
+      </div>
+
+      <div style="background:rgba(200,255,62,0.08);border:1px solid rgba(200,255,62,0.2);border-radius:var(--radius);padding:14px 16px;margin-top:4px">
+        <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:4px">✓ DEFICIT PLAN</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.5">At −500 kcal/day, expect ~0.5–1 kg loss per week — sustainable and safe.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="onboard-footer">
+    <div class="onboard-btn-row" id="onboard-btns">
+      <button class="action-btn secondary" id="btn-skip" onclick="skipOnboarding()" style="flex:0 0 auto;width:auto;padding:0 20px">Skip</button>
+      <button class="action-btn" id="btn-next" onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div class="status-bar"></div>
+  <div class="app-header">
+    <div class="header-logo">FORMA</div>
+    <div class="header-right">
+      <div class="week-badge" id="hdr-week">Week 1 of 20</div>
+      <div class="header-btn" onclick="showModal('profile-modal')">👤</div>
+    </div>
+  </div>
+
+  <div class="app-content" id="app-content">
+
+    <!-- OVERVIEW SCREEN -->
+    <div class="screen active" id="screen-overview">
+      <div class="greeting-hero">
+        <div class="greeting-label" id="greeting-time">Good morning</div>
+        <div class="greeting-name">Ready to crush it? 💪</div>
+        <div class="greeting-sub">Week 1 · Stay consistent. You've got this.</div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stats-row">
+        <div class="stat-card" onclick="showEditModal('weight','Current Weight (kg)')">
+          <div class="edit-dot">✏️</div>
+          <div class="stat-emoji">⚖️</div>
+          <div><span class="stat-value" id="s-weight">100</span><span class="stat-unit"> kg</span></div>
+          <div class="stat-label">Current Weight</div>
+        </div>
+        <div class="stat-card" onclick="showEditModal('target','Target Weight (kg)')">
+          <div class="edit-dot">✏️</div>
+          <div class="stat-emoji">🎯</div>
+          <div><span class="stat-value" id="s-target">88</span><span class="stat-unit"> kg</span></div>
+          <div class="stat-label">Target Weight</div>
+        </div>
+        <div class="stat-card" onclick="showEditModal('bmi','BMI')">
+          <div class="edit-dot">📊</div>
+          <div class="stat-emoji">📊</div>
+          <div><span class="stat-value" id="s-bmi">33.8</span></div>
+          <div class="stat-label" id="s-bmi-cat">Obese Class I</div>
+        </div>
+        <div class="stat-card" onclick="showEditModal('waist','Waist (cm)')">
+          <div class="edit-dot">✏️</div>
+          <div class="stat-emoji">📏</div>
+          <div><span class="stat-value" id="s-waist">109</span><span class="stat-unit"> cm</span></div>
+          <div class="stat-label">Waist</div>
+        </div>
+      </div>
+
+      <!-- Today's Macros -->
+      <div class="sec-header">
+        <div class="sec-title">Today's Macros</div>
+        <div class="sec-action live-dot">Live</div>
+      </div>
+      <div class="macro-card">
+        <div class="macro-top">
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Consumed</div>
+            <div class="macro-kcal">0 <span>/ 2,000 kcal</span></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">Remaining</div>
+            <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent)">2,000</div>
+          </div>
+        </div>
+        <div class="macro-bars">
+          <div class="macro-bar-row">
+            <span class="macro-bar-label">Protein</span>
+            <div class="macro-bar-track"><div class="macro-bar-fill" style="width:0%;background:#c8ff3e"></div></div>
+            <span class="macro-bar-val">0/180g</span>
+          </div>
+          <div class="macro-bar-row">
+            <span class="macro-bar-label">Carbs</span>
+            <div class="macro-bar-track"><div class="macro-bar-fill" style="width:0%;background:#7c6ef5"></div></div>
+            <span class="macro-bar-val">0/175g</span>
+          </div>
+          <div class="macro-bar-row">
+            <span class="macro-bar-label">Fats</span>
+            <div class="macro-bar-track"><div class="macro-bar-fill" style="width:0%;background:#ff6b35"></div></div>
+            <span class="macro-bar-val">0/65g</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Schedule -->
+      <div class="sec-header">
+        <div class="sec-title">This Week</div>
+        <div class="sec-action">View All</div>
+      </div>
+      <div class="week-row" id="week-schedule">
+        <!-- Generated by JS -->
+      </div>
+
+      <!-- Journey Progress -->
+      <div class="sec-header">
+        <div class="sec-title">Journey to Goal</div>
+        <div class="sec-action">100kg → 88kg</div>
+      </div>
+      <div class="progress-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Start</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700">100 kg</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--accent);font-weight:600">0%</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Goal</div>
+            <div style="font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--accent)">88 kg</div>
+          </div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-stats-row">
+          <div class="prog-stat"><div class="prog-stat-val">100 kg</div><div class="prog-stat-label">Current</div></div>
+          <div class="prog-stat"><div class="prog-stat-val" style="color:var(--accent)">0 kg</div><div class="prog-stat-label">Lost</div></div>
+          <div class="prog-stat"><div class="prog-stat-val">12 kg</div><div class="prog-stat-label">Remaining</div></div>
+        </div>
+      </div>
+
+      <div class="spacer-20"></div>
+    </div>
+
+    <!-- TRAINING SCREEN -->
+    <div class="screen" id="screen-training">
+      <div class="greeting-hero">
+        <div class="greeting-label">Today's Session</div>
+        <div class="greeting-name">Upper A 🏋️</div>
+        <div class="greeting-sub">Chest & Shoulders · 4–6 reps · Heavy</div>
+      </div>
+
+      <!-- Today workout highlight -->
+      <div style="padding:0 16px;margin-bottom:16px">
+        <div style="background:linear-gradient(135deg,rgba(200,255,62,0.15),rgba(200,255,62,0.05));border:1px solid rgba(200,255,62,0.25);border-radius:var(--radius-lg);padding:18px 18px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <span class="pill-tag">📅 Today</span>
+            <span style="font-size:12px;color:var(--text3)">Upper A</span>
+          </div>
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:4px">Chest & Shoulders</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:16px">5 exercises · 45–60 min</div>
+          <button class="action-btn" style="height:46px;font-size:14px">Start Workout ▶</button>
+        </div>
+      </div>
+
+      <!-- Weekly scroll -->
+      <div class="sec-header" style="padding-top:4px">
+        <div class="sec-title">Full Week</div>
+      </div>
+      <div class="workout-scroll">
+        <div class="workout-chip today-workout">
+          <div class="wc-day">Mon · Day 1</div>
+          <div class="wc-name">Upper A</div>
+          <div class="wc-badge">Today</div>
+        </div>
+        <div class="workout-chip">
+          <div class="wc-day">Tue · Day 2</div>
+          <div class="wc-name">Lower A</div>
+          <div class="wc-badge" style="background:rgba(124,110,245,0.15);color:var(--accent3);border-color:rgba(124,110,245,0.2)">Legs</div>
+        </div>
+        <div class="workout-chip">
+          <div class="wc-day">Wed · Day 3</div>
+          <div class="wc-name">Cardio</div>
+          <div class="wc-badge" style="background:rgba(255,107,53,0.1);color:var(--accent2);border-color:rgba(255,107,53,0.2)">Cardio</div>
+        </div>
+        <div class="workout-chip">
+          <div class="wc-day">Thu · Day 4</div>
+          <div class="wc-name">Legs A</div>
+          <div class="wc-badge" style="background:rgba(124,110,245,0.15);color:var(--accent3);border-color:rgba(124,110,245,0.2)">Legs</div>
+        </div>
+        <div class="workout-chip">
+          <div class="wc-day">Fri · Day 5</div>
+          <div class="wc-name">Upper B</div>
+          <div class="wc-badge">Push</div>
+        </div>
+        <div class="workout-chip">
+          <div class="wc-day">Sat · Day 6</div>
+          <div class="wc-name">Legs B</div>
+          <div class="wc-badge" style="background:rgba(124,110,245,0.15);color:var(--accent3);border-color:rgba(124,110,245,0.2)">Hamstrings</div>
+        </div>
+        <div class="workout-chip" style="opacity:0.5">
+          <div class="wc-day">Sun · Day 7</div>
+          <div class="wc-name">Rest</div>
+          <div class="wc-badge" style="background:rgba(255,255,255,0.05);color:var(--text3);border-color:transparent">Recovery</div>
+        </div>
+      </div>
+
+      <div class="spacer-12"></div>
+
+      <!-- Preset Plans -->
+      <div class="sec-header">
+        <div class="sec-title">Preset Plans</div>
+      </div>
+      <div class="workout-list">
+        <div class="workout-item" onclick="toggleWorkout(this)">
+          <div class="workout-item-header">
+            <div class="wi-left"><div class="wi-name">Upper A — Chest & Shoulders</div><div class="wi-meta">5 exercises · Push focus</div></div>
+            <span class="wi-chevron">▾</span>
+          </div>
+          <div class="workout-detail">
+            <div class="exercise-row"><span class="ex-name">Bench Press</span><span class="ex-sets">4×4–6</span></div>
+            <div class="exercise-row"><span class="ex-name">Overhead Press</span><span class="ex-sets">4×4–6</span></div>
+            <div class="exercise-row"><span class="ex-name">Incline DB Press</span><span class="ex-sets">3×8–10</span></div>
+            <div class="exercise-row"><span class="ex-name">Lateral Raises</span><span class="ex-sets">3×12–15</span></div>
+            <div class="exercise-row"><span class="ex-name">Tricep Pushdown</span><span class="ex-sets">3×10–12</span></div>
+          </div>
+        </div>
+        <div class="workout-item" onclick="toggleWorkout(this)">
+          <div class="workout-item-header">
+            <div class="wi-left"><div class="wi-name">Lower A — Back & Biceps</div><div class="wi-meta">5 exercises · Pull focus</div></div>
+            <span class="wi-chevron">▾</span>
+          </div>
+          <div class="workout-detail">
+            <div class="exercise-row"><span class="ex-name">Pull-Ups / Lat Pulldown</span><span class="ex-sets">4×4–6</span></div>
+            <div class="exercise-row"><span class="ex-name">Barbell Row</span><span class="ex-sets">4×6–8</span></div>
+            <div class="exercise-row"><span class="ex-name">Seated Cable Row</span><span class="ex-sets">3×8–10</span></div>
+            <div class="exercise-row"><span class="ex-name">Face Pulls</span><span class="ex-sets">3×12–15</span></div>
+            <div class="exercise-row"><span class="ex-name">Barbell Curl</span><span class="ex-sets">3×10–12</span></div>
+          </div>
+        </div>
+        <div class="workout-item" onclick="toggleWorkout(this)">
+          <div class="workout-item-header">
+            <div class="wi-left"><div class="wi-name">Legs A — Quads Focus</div><div class="wi-meta">5 exercises · Quad dominant</div></div>
+            <span class="wi-chevron">▾</span>
+          </div>
+          <div class="workout-detail">
+            <div class="exercise-row"><span class="ex-name">Squat</span><span class="ex-sets">4×4–6</span></div>
+            <div class="exercise-row"><span class="ex-name">Leg Press</span><span class="ex-sets">3×8–10</span></div>
+            <div class="exercise-row"><span class="ex-name">Walking Lunges</span><span class="ex-sets">3×10/leg</span></div>
+            <div class="exercise-row"><span class="ex-name">Leg Extension</span><span class="ex-sets">3×12–15</span></div>
+            <div class="exercise-row"><span class="ex-name">Calf Raise</span><span class="ex-sets">4×15</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cardio guidelines -->
+      <div class="sec-header"><div class="sec-title">Cardio Guidelines</div></div>
+      <div class="cardio-grid">
+        <div class="cardio-card">
+          <div class="cardio-emoji">🚶</div>
+          <div class="cardio-name">LISS Walk</div>
+          <div class="cardio-dur">35–45 min</div>
+          <div class="cardio-hr">60–65% MHR</div>
+        </div>
+        <div class="cardio-card">
+          <div class="cardio-emoji">🏃</div>
+          <div class="cardio-name">Incline Treadmill</div>
+          <div class="cardio-dur">25–30 min</div>
+          <div class="cardio-hr">65–70% MHR</div>
+        </div>
+        <div class="cardio-card">
+          <div class="cardio-emoji">⚡</div>
+          <div class="cardio-name">HIIT</div>
+          <div class="cardio-dur">15–20 min</div>
+          <div class="cardio-hr">155–165 bpm</div>
+        </div>
+      </div>
+
+      <div class="spacer-20"></div>
+    </div>
+
+    <!-- NUTRITION SCREEN -->
+    <div class="screen" id="screen-nutrition">
+      <div class="greeting-hero">
+        <div class="greeting-label">Nutrition</div>
+        <div class="greeting-name">Fuel your gains 🥗</div>
+      </div>
+
+      <!-- Macro circles -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin:0 16px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">Today</div>
+            <div style="font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:-1px">0 <span style="font-size:14px;color:var(--text2);font-weight:400">kcal</span></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:11px;color:var(--text3)">Goal</div>
+            <div style="font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--accent)">2,000</div>
+          </div>
+        </div>
+        <div class="macro-circles-row" style="padding:0">
+          <div class="macro-circle-item">
+            <div class="macro-circle-wrap">
+              <svg class="macro-circle-svg" viewBox="0 0 72 72">
+                <circle class="macro-circle-bg" cx="36" cy="36" r="30"/>
+                <circle class="macro-circle-fill" cx="36" cy="36" r="30" stroke="#c8ff3e" style="stroke-dashoffset:188"/>
+              </svg>
+              <div class="macro-circle-text"><span class="mc-val">0</span><span class="mc-unit">g</span></div>
+            </div>
+            <div class="macro-circle-name">Protein</div>
+          </div>
+          <div class="macro-circle-item">
+            <div class="macro-circle-wrap">
+              <svg class="macro-circle-svg" viewBox="0 0 72 72">
+                <circle class="macro-circle-bg" cx="36" cy="36" r="30"/>
+                <circle class="macro-circle-fill" cx="36" cy="36" r="30" stroke="#7c6ef5" style="stroke-dashoffset:188"/>
+              </svg>
+              <div class="macro-circle-text"><span class="mc-val">0</span><span class="mc-unit">g</span></div>
+            </div>
+            <div class="macro-circle-name">Carbs</div>
+          </div>
+          <div class="macro-circle-item">
+            <div class="macro-circle-wrap">
+              <svg class="macro-circle-svg" viewBox="0 0 72 72">
+                <circle class="macro-circle-bg" cx="36" cy="36" r="30"/>
+                <circle class="macro-circle-fill" cx="36" cy="36" r="30" stroke="#ff6b35" style="stroke-dashoffset:188"/>
+              </svg>
+              <div class="macro-circle-text"><span class="mc-val">0</span><span class="mc-unit">g</span></div>
+            </div>
+            <div class="macro-circle-name">Fats</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spacer-12"></div>
+
+      <!-- Food log -->
+      <div class="sec-header"><div class="sec-title">Food Log</div></div>
+      <div class="food-log-header">
+        <div class="food-search-bar"><span>🔍</span><span>Search food...</span></div>
+        <div class="food-add-btn" onclick="showModal('food-modal')">+</div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin:0 16px;overflow:hidden">
+        <div class="empty-state">
+          <div class="empty-icon">🍽️</div>
+          <div class="empty-title">Nothing logged yet</div>
+          <div class="empty-sub">Tap + to add your first meal and start tracking macros</div>
+        </div>
+      </div>
+
+      <div class="spacer-20"></div>
+    </div>
+
+    <!-- PROGRESS SCREEN -->
+    <div class="screen" id="screen-progress">
+      <div class="greeting-hero">
+        <div class="greeting-label">Progress</div>
+        <div class="greeting-name">Track your wins 📈</div>
+      </div>
+
+      <!-- Summary stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px">
+        <div class="stat-card" style="text-align:center;cursor:default">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Start</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:800">100<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>
+        </div>
+        <div class="stat-card" style="text-align:center;cursor:default">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Lost</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--accent)">0<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>
+        </div>
+        <div class="stat-card" style="text-align:center;cursor:default">
+          <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Goal</div>
+          <div style="font-family:var(--font-display);font-size:22px;font-weight:800;color:var(--accent3)">88<span style="font-size:12px;color:var(--text2);font-weight:400"> kg</span></div>
+        </div>
+      </div>
+
+      <!-- Chart placeholder -->
+      <div class="sec-header"><div class="sec-title">Weight History</div></div>
+      <div class="chart-card">
+        <div class="chart-placeholder">
+          <svg class="chart-line" viewBox="0 0 300 140" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#c8ff3e" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#c8ff3e" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M0,100 Q75,100 150,100 Q225,100 300,100" fill="none" stroke="rgba(200,255,62,0.3)" stroke-width="2" stroke-dasharray="4,4"/>
+            <circle cx="150" cy="100" r="5" fill="#c8ff3e"/>
+          </svg>
+          <div style="text-align:center;z-index:1">
+            <div style="font-size:13px;color:var(--text3)">Log weigh-ins to see your chart</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weigh-in form -->
+      <div class="sec-header"><div class="sec-title">Log Weigh-In</div></div>
+      <div class="weigh-in-form">
+        <div class="form-field">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" id="wi-date">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-field">
+            <label class="form-label">Weight (kg)</label>
+            <input class="form-input" type="number" id="wi-weight" placeholder="100" inputmode="decimal">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Waist (cm)</label>
+            <input class="form-input" type="number" id="wi-waist" placeholder="109" inputmode="decimal">
+          </div>
+        </div>
+        <button class="action-btn" onclick="logWeighIn()">+ Log Entry</button>
+      </div>
+
+      <div class="spacer-20"></div>
+    </div>
+
+    <!-- CALENDAR SCREEN -->
+    <div class="screen" id="screen-calendar">
+      <div class="greeting-hero">
+        <div class="greeting-label">Calendar</div>
+        <div class="greeting-name" id="cal-month-title">March 2026 📅</div>
+      </div>
+
+      <!-- Calendar grid -->
+      <div style="padding:0 16px">
+        <div class="calendar-grid" id="cal-day-headers">
+          <div class="cal-day-hdr">M</div>
+          <div class="cal-day-hdr">T</div>
+          <div class="cal-day-hdr">W</div>
+          <div class="cal-day-hdr">T</div>
+          <div class="cal-day-hdr">F</div>
+          <div class="cal-day-hdr">S</div>
+          <div class="cal-day-hdr">S</div>
+        </div>
+        <div class="calendar-grid" id="cal-grid" style="margin-top:4px"></div>
+      </div>
+
+      <!-- Selected day form -->
+      <div class="sec-header" style="margin-top:8px"><div class="sec-title" id="cal-selected-label">Select a day</div></div>
+      <div class="weigh-in-form" id="cal-form">
+        <div class="form-field">
+          <label class="form-label">Session Type</label>
+          <select class="form-input" id="cal-session">
+            <option>Upper A — Chest & Shoulders</option>
+            <option>Lower A — Back & Biceps</option>
+            <option>Legs A — Quads</option>
+            <option>Upper B — Chest & Shoulders</option>
+            <option>Legs B — Hamstrings</option>
+            <option>Cardio</option>
+            <option>Rest Day</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Notes</label>
+          <input class="form-input" type="text" placeholder="How did it go?" id="cal-notes">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="action-btn" onclick="saveCalEntry()">Save Entry</button>
+          <button class="action-btn secondary" style="flex:0 0 auto;padding:0 20px;width:auto" onclick="deleteCalEntry()">Delete</button>
+        </div>
+      </div>
+      <div class="spacer-20"></div>
+    </div>
+
+    <!-- SETTINGS SCREEN -->
+    <div class="screen" id="screen-settings">
+      <div class="greeting-hero">
+        <div class="greeting-label">Settings</div>
+        <div class="greeting-name">Customise FORMA ⚙️</div>
+      </div>
+
+      <div style="padding:0 16px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Body Stats</div>
+      <div class="settings-section">
+        <div class="settings-row" onclick="showEditModal('weight','Current Weight (kg)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(200,255,62,0.1)">⚖️</div><div class="sr-text"><div class="sr-title">Current Weight</div><div class="sr-sub">Used for BMI and progress</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('target','Target Weight (kg)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(200,255,62,0.1)">🎯</div><div class="sr-text"><div class="sr-title">Target Weight</div><div class="sr-sub">Your goal weight</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('height','Height (cm)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(124,110,245,0.1)">📏</div><div class="sr-text"><div class="sr-title">Height</div><div class="sr-sub">In centimetres</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('waist','Waist (cm)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(255,107,53,0.1)">📐</div><div class="sr-text"><div class="sr-title">Waist</div><div class="sr-sub">In centimetres</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+      </div>
+
+      <div style="padding:0 16px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Macro Targets</div>
+      <div class="settings-section">
+        <div class="settings-row" onclick="showEditModal('calories','Daily Calories (kcal)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(200,255,62,0.1)">🔥</div><div class="sr-text"><div class="sr-title">Daily Calories</div><div class="sr-sub">Total kcal goal</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('protein','Protein (g)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(200,255,62,0.1)">🟣</div><div class="sr-text"><div class="sr-title">Protein</div><div class="sr-sub">Target grams per day</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('carbs','Carbohydrates (g)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(124,110,245,0.1)">🟢</div><div class="sr-text"><div class="sr-title">Carbohydrates</div><div class="sr-sub">Target grams per day</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="showEditModal('fats','Fats (g)')">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(255,107,53,0.1)">🟠</div><div class="sr-text"><div class="sr-title">Fats</div><div class="sr-sub">Target grams per day</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+      </div>
+
+      <div style="padding:0 16px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Appearance</div>
+      <div class="settings-section">
+        <div class="settings-row">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(124,110,245,0.1)">🌙</div><div class="sr-text"><div class="sr-title">Dark Mode</div><div class="sr-sub">Currently enabled</div></div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-dot"></div></div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px;margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text3)">Account</div>
+      <div class="settings-section">
+        <div class="settings-row">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(200,255,62,0.1)">☁️</div><div class="sr-text"><div class="sr-title">Cloud Sync</div><div class="sr-sub">Sign in to sync across devices</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" onclick="restartOnboarding()">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(255,107,53,0.1)">↺</div><div class="sr-text"><div class="sr-title">Redo Setup</div><div class="sr-sub">Restart the setup quiz</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+        <div class="settings-row" style="border-bottom:none" onclick="clearData()">
+          <div class="sr-left"><div class="sr-icon" style="background:rgba(255,59,48,0.1)">🗑</div><div class="sr-text"><div class="sr-title" style="color:#ff3b30">Clear All Data</div><div class="sr-sub">Wipe all local data</div></div></div>
+          <span class="sr-arrow">›</span>
+        </div>
+      </div>
+
+      <div class="spacer-20"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab-item active" id="tab-overview" onclick="switchTab('overview')">
+      <div class="tab-icon">🏠</div>
+      <div class="tab-label">Home</div>
+    </div>
+    <div class="tab-item" id="tab-training" onclick="switchTab('training')">
+      <div class="tab-icon">🏋️</div>
+      <div class="tab-label">Train</div>
+    </div>
+    <div class="tab-item" id="tab-nutrition" onclick="switchTab('nutrition')">
+      <div class="tab-icon">🥗</div>
+      <div class="tab-label">Nutrition</div>
+    </div>
+    <div class="tab-item" id="tab-progress" onclick="switchTab('progress')">
+      <div class="tab-icon">📈</div>
+      <div class="tab-label">Progress</div>
+    </div>
+    <div class="tab-item" id="tab-calendar" onclick="switchTab('calendar')">
+      <div class="tab-icon">📅</div>
+      <div class="tab-label">Calendar</div>
+    </div>
+    <div class="tab-item" id="tab-settings" onclick="switchTab('settings')">
+      <div class="tab-icon">⚙️</div>
+      <div class="tab-label">Settings</div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" onclick="closeModal('edit-modal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="edit-modal-title">Edit Value</div>
+    <div class="form-field">
+      <label class="form-label">Value</label>
+      <input class="form-input" type="number" id="edit-modal-input" inputmode="decimal">
+    </div>
+    <div class="modal-btns">
+      <button class="action-btn secondary" onclick="closeModal('edit-modal')">Cancel</button>
+      <button class="action-btn" onclick="saveEditModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOD MODAL -->
+<div class="modal-overlay" id="food-modal" onclick="closeModal('food-modal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Log Food</div>
+    <div class="form-field"><label class="form-label">Food Item</label><input class="form-input" type="text" id="food-name" placeholder="e.g. Chicken Breast"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-field"><label class="form-label">Calories</label><input class="form-input" type="number" id="food-kcal" placeholder="200" inputmode="numeric"></div>
+      <div class="form-field"><label class="form-label">Protein (g)</label><input class="form-input" type="number" id="food-protein" placeholder="30" inputmode="decimal"></div>
+      <div class="form-field"><label class="form-label">Carbs (g)</label><input class="form-input" type="number" id="food-carbs" placeholder="0" inputmode="decimal"></div>
+      <div class="form-field"><label class="form-label">Fats (g)</label><input class="form-input" type="number" id="food-fats" placeholder="5" inputmode="decimal"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="action-btn secondary" onclick="closeModal('food-modal')">Cancel</button>
+      <button class="action-btn" onclick="addFood()">+ Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const state = {
+  weight: 100, target: 88, height: 178, waist: 109,
+  calories: 2000, protein: 180, carbs: 175, fats: 65,
+  bmi: 33.8, gender: 'male', age: 32, activity: 1.2,
+  foods: [], weighIns: [], calEntries: {},
+  currentEditKey: null
+};
+
+// ── ONBOARDING ──
+let obStep = 1;
+
+function nextStep() {
+  if (obStep === 1) {
+    const w = parseFloat(document.getElementById('ob-weight').value) || 100;
+    const t = parseFloat(document.getElementById('ob-target').value) || 88;
+    const h = parseFloat(document.getElementById('ob-height').value) || 178;
+    const wa = parseFloat(document.getElementById('ob-waist').value) || 109;
+    state.weight = w; state.target = t; state.height = h; state.waist = wa;
+    state.bmi = parseFloat((w / ((h/100)**2)).toFixed(1));
+    obStep = 2;
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+  } else if (obStep === 2) {
+    const age = parseFloat(document.getElementById('ob-age').value) || 32;
+    state.age = age;
+    calcMacros();
+    obStep = 3;
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step3').classList.add('active');
+    document.getElementById('btn-next').textContent = "Let's go 🚀";
+    document.getElementById('btn-skip').style.display = 'none';
+  } else {
+    launchApp();
+  }
+}
+
+function calcMacros() {
+  let bmr;
+  if (state.gender === 'male') {
+    bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age + 5;
+  } else {
+    bmr = 10 * state.weight + 6.25 * state.height - 5 * state.age - 161;
+  }
+  const tdee = bmr * state.activity;
+  const deficit = tdee - 500;
+  state.calories = Math.round(deficit);
+  state.protein = Math.round(state.weight * 1.8);
+  state.carbs = Math.round((deficit * 0.35) / 4);
+  state.fats = Math.round((deficit * 0.25) / 9);
+  document.getElementById('plan-kcal').textContent = state.calories;
+  document.getElementById('plan-protein').textContent = state.protein;
+  document.getElementById('plan-carbs').textContent = state.carbs;
+  document.getElementById('plan-fats').textContent = state.fats;
+}
+
+function selectGender(g) {
+  state.gender = g;
+  document.getElementById('btn-male').classList.toggle('selected', g === 'male');
+  document.getElementById('btn-female').classList.toggle('selected', g === 'female');
+}
+
+function selectActivity(btn) {
+  document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.activity = parseFloat(btn.dataset.level);
+}
+
+// Live BMI calc in step 1
+['ob-weight','ob-height'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const w = parseFloat(document.getElementById('ob-weight').value);
+    const h = parseFloat(document.getElementById('ob-height').value);
+    if (w && h) {
+      const bmi = parseFloat((w / ((h/100)**2)).toFixed(1));
+      document.getElementById('ob-bmi-val').textContent = bmi;
+      const cats = [[16,'Severely Underweight'],[18.5,'Underweight'],[25,'Normal'],[30,'Overweight'],[35,'Obese Class I'],[40,'Obese Class II'],[Infinity,'Obese Class III']];
+      const cat = cats.find(c => bmi < c[0]);
+      document.getElementById('ob-bmi-cat').textContent = cat ? cat[1] : 'Obese Class III';
+    }
+  });
+});
+
+function skipOnboarding() { launchApp(); }
+
+function launchApp() {
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  initApp();
+}
+
+// ── APP INIT ──
+function initApp() {
+  setGreeting();
+  renderWeekSchedule();
+  renderCalendar();
+  updateStatCards();
+  // Set today's date in weigh-in
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('wi-date').value = today;
+}
+
+function setGreeting() {
+  const h = new Date().getHours();
+  const greetings = {morning:'Good morning ☀️', afternoon:'Good afternoon ⛅', evening:'Good evening 🌙'};
+  const g = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('greeting-time').textContent = greetings[g];
+}
+
+function updateStatCards() {
+  document.getElementById('s-weight').textContent = state.weight;
+  document.getElementById('s-target').textContent = state.target;
+  document.getElementById('s-bmi').textContent = state.bmi;
+  document.getElementById('s-waist').textContent = state.waist;
+  const cats = [[16,'Severely Underweight'],[18.5,'Underweight'],[25,'Normal'],[30,'Overweight'],[35,'Obese Class I'],[40,'Obese Class II'],[Infinity,'Obese Class III']];
+  const cat = cats.find(c => state.bmi < c[0]);
+  document.getElementById('s-bmi-cat').textContent = cat ? cat[1] : '—';
+}
+
+// ── WEEK SCHEDULE ──
+const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const workouts = ['Upper A','Lower A','Cardio','Legs A','Upper B','Legs B','Rest'];
+
+function renderWeekSchedule() {
+  const today = new Date().getDay(); // 0=Sun
+  const todayIdx = today === 0 ? 6 : today - 1;
+  const container = document.getElementById('week-schedule');
+  container.innerHTML = days.map((d, i) => `
+    <div class="day-pill ${i === todayIdx ? 'today' : ''}">
+      <span class="day-name">${d}</span>
+      <span class="day-num">${i + 1}</span>
+      <span class="day-dot"></span>
+    </div>
+  `).join('');
+}
+
+// ── CALENDAR ──
+function renderCalendar() {
+  const now = new Date(2026, 2, 7); // March 2026
+  const year = 2026, month = 2;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  const grid = document.getElementById('cal-grid');
+  let html = '';
+  for (let i = 0; i < offset; i++) html += '<div></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = d === 7;
+    const isLogged = state.calEntries[d];
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${isLogged ? 'logged' : ''}" onclick="selectCalDay(${d})">${d}</div>`;
+  }
+  grid.innerHTML = html;
+  document.getElementById('cal-month-title').textContent = 'March 2026 📅';
+}
+
+let selectedCalDay = null;
+function selectCalDay(d) {
+  selectedCalDay = d;
+  document.getElementById('cal-selected-label').textContent = `March ${d}, 2026`;
+  const entry = state.calEntries[d];
+  if (entry) {
+    document.getElementById('cal-session').value = entry.session;
+    document.getElementById('cal-notes').value = entry.notes || '';
+  }
+}
+
+function saveCalEntry() {
+  if (!selectedCalDay) return;
+  state.calEntries[selectedCalDay] = {
+    session: document.getElementById('cal-session').value,
+    notes: document.getElementById('cal-notes').value
+  };
+  renderCalendar();
+  showToast('Session saved ✓');
+}
+
+function deleteCalEntry() {
+  if (!selectedCalDay) return;
+  delete state.calEntries[selectedCalDay];
+  renderCalendar();
+  showToast('Entry deleted');
+}
+
+// ── TAB SWITCHING ──
+function switchTab(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('app-content').scrollTop = 0;
+}
+
+// ── WORKOUT ACCORDION ──
+function toggleWorkout(el) {
+  el.classList.toggle('open');
+}
+
+// ── EDIT MODAL ──
+function showEditModal(key, title) {
+  state.currentEditKey = key;
+  document.getElementById('edit-modal-title').textContent = 'Edit ' + title;
+  document.getElementById('edit-modal-input').value = state[key] || '';
+  showModal('edit-modal');
+  setTimeout(() => document.getElementById('edit-modal-input').focus(), 300);
+}
+
+function saveEditModal() {
+  const val = parseFloat(document.getElementById('edit-modal-input').value);
+  if (!isNaN(val) && state.currentEditKey) {
+    state[state.currentEditKey] = val;
+    if (['weight','height'].includes(state.currentEditKey)) {
+      state.bmi = parseFloat((state.weight / ((state.height/100)**2)).toFixed(1));
+    }
+    updateStatCards();
+    showToast('Saved ✓');
+  }
+  closeModal('edit-modal');
+}
+
+// ── FOOD LOG ──
+function addFood() {
+  const name = document.getElementById('food-name').value;
+  const kcal = parseFloat(document.getElementById('food-kcal').value) || 0;
+  const protein = parseFloat(document.getElementById('food-protein').value) || 0;
+  const carbs = parseFloat(document.getElementById('food-carbs').value) || 0;
+  const fats = parseFloat(document.getElementById('food-fats').value) || 0;
+  if (!name) return;
+  state.foods.push({ name, kcal, protein, carbs, fats });
+  closeModal('food-modal');
+  showToast('Food logged ✓');
+}
+
+// ── WEIGH-IN ──
+function logWeighIn() {
+  const date = document.getElementById('wi-date').value;
+  const weight = parseFloat(document.getElementById('wi-weight').value);
+  const waist = parseFloat(document.getElementById('wi-waist').value);
+  if (!date || !weight) return;
+  state.weighIns.push({ date, weight, waist });
+  state.weight = weight;
+  if (waist) state.waist = waist;
+  state.bmi = parseFloat((weight / ((state.height/100)**2)).toFixed(1));
+  updateStatCards();
+  showToast('Weigh-in logged ✓');
+}
+
+// ── MODAL HELPERS ──
+function showModal(id) {
+  document.getElementById(id).classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.style.cssText = `
+      position:fixed;bottom:calc(var(--tab-height) + var(--safe-bottom) + 16px);
+      left:50%;transform:translateX(-50%) translateY(20px);
+      background:#1c1c26;border:1px solid rgba(200,255,62,0.3);
+      color:#f0f0f5;padding:10px 20px;border-radius:24px;
+      font-size:14px;font-weight:600;z-index:999;
+      opacity:0;transition:all 0.25s;white-space:nowrap;
+      font-family:'DM Sans',sans-serif;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2200);
+}
+
+// ── SETTINGS ACTIONS ──
+function restartOnboarding() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('onboarding').style.display = 'flex';
+  obStep = 1;
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('btn-next').textContent = 'Next →';
+  document.getElementById('btn-skip').style.display = '';
+}
+
+function clearData() {
+  if (confirm('Clear all data? This cannot be undone.')) {
+    state.foods = []; state.weighIns = []; state.calEntries = {};
+    showToast('Data cleared');
+  }
+}
+
+// ── PREVENT SCROLL BOUNCE ──
+document.addEventListener('touchmove', (e) => {
+  if (!e.target.closest('.app-content') && !e.target.closest('.modal-sheet') && !e.target.closest('.workout-scroll')) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+// ── HAPTIC FEEDBACK SIMULATION ──
+document.querySelectorAll('.tab-item, .action-btn, .stat-card').forEach(el => {
+  el.addEventListener('touchstart', () => {
+    if (navigator.vibrate) navigator.vibrate(5);
+  }, { passive: true });
+});
+</script>
+</body>
+</html>
