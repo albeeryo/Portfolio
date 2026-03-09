@@ -2519,6 +2519,23 @@ function renderHoldings(changed){
   // Show DCA section whenever there are holdings
   $('dca-sec').style.display = S.holdings.length ? 'block' : 'none';
   renderDCA();
+  // Refresh budget investments card with latest portfolio value
+  if (document.getElementById('view-budget') && document.getElementById('view-budget').style.display !== 'none') {
+    renderBudget();
+  } else {
+    // update just the investments card without a full re-render
+    try {
+      const allBgtEntries = bgtLoad();
+      const loggedInvest = allBgtEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
+      const portfolioEur = tv * (eurRate || 0.92);
+      const investEl = document.getElementById('bgt-invest-total');
+      const fmtB = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      if (investEl) {
+        investEl.textContent = fmtB(loggedInvest + portfolioEur);
+        investEl.title = `Budget investments: ${fmtB(loggedInvest)} + Portfolio: ${fmtB(portfolioEur)}`;
+      }
+    } catch(e) {}
+  }
 }
 
 // ══════════════════════════════════════════
@@ -3678,10 +3695,11 @@ function getCatById(id) { return ALL_CATS.find(c => c.id === id) || {label: id, 
 function renderBudget() {
   const entries = getFilteredEntries();
   const allEntries = bgtLoad();
-  const income = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const income  = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
   const expense = entries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
   const invest  = entries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
-  const balance = income - expense - invest;
+  const savings = entries.filter(e => e.type === 'savings').reduce((s, e) => s + e.amount, 0);
+  const balance = income - expense - invest - savings;
   const fmt = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
   document.getElementById('bgt-total-income').textContent = fmt(income);
@@ -3690,10 +3708,28 @@ function renderBudget() {
   balEl.textContent = fmt(balance);
   balEl.style.color = balance >= 0 ? 'var(--accent)' : 'var(--red)';
 
-  // Investments total (filtered period)
-  const investTotal = allEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
+  // Investments card = logged budget investments + live portfolio total value
+  const loggedInvest = allEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
+  let portfolioValueEur = 0;
+  try {
+    // tv is calculated in renderHoldings — recompute it here
+    let tvUsd = 0;
+    if (typeof S !== 'undefined' && S.holdings) {
+      S.holdings.forEach(h => {
+        const lp = priceOf(h);
+        const p = lp ? lp.usd : (h.buyPrice || 0);
+        tvUsd += h.amount * p;
+      });
+    }
+    portfolioValueEur = tvUsd * (eurRate || 0.92);
+  } catch(e) {}
   const investEl = document.getElementById('bgt-invest-total');
-  if (investEl) { investEl.textContent = fmt(investTotal); investEl.style.color = 'var(--amber)'; }
+  if (investEl) {
+    const combined = loggedInvest + portfolioValueEur;
+    investEl.textContent = fmt(combined);
+    investEl.style.color = 'var(--amber)';
+    investEl.title = `Budget investments: ${fmt(loggedInvest)} + Portfolio: ${fmt(portfolioValueEur)}`;
+  }
 
   // Savings pot total (all time)
   const potTotal = allEntries.filter(e => e.type === 'savings').reduce((s, e) => s + e.amount, 0);
