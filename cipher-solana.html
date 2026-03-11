@@ -452,11 +452,11 @@ async function fetchTokenBalance(sym) {
     const conn    = getConnection();
     const owner   = new (web3().PublicKey)(walletPubkey);
     const mint    = new (web3().PublicKey)(token.mint);
-    const progId  = new (web3().PublicKey)(TOKEN_PROGRAM_ID);
     const ata     = await getAssociatedTokenAddress(mint, owner);
     const info    = await conn.getTokenAccountBalance(ata);
-    balances[sym] = parseFloat(info.value.uiAmount || 0);
+    balances[sym] = parseFloat(info.value.uiAmount ?? 0);
   } catch(e) {
+    // Account may not exist yet (no tokens) — treat as 0
     balances[sym] = 0;
   }
 }
@@ -683,8 +683,16 @@ async function handleSend() {
     showAlert('err', '⚠️ Recipient is the same as your wallet.');
     return;
   }
-  const bal = balances[selectedSym] ?? 0;
-  if (amount > bal) {
+  // Re-fetch balance live before checking, in case it wasn't loaded yet
+  try {
+    if (selectedSym === 'SOL') await fetchSOLBalance();
+    else await fetchTokenBalance(selectedSym);
+    updateAllBalanceDisplays();
+  } catch(e) { /* proceed anyway, let chain reject if truly insufficient */ }
+
+  const bal = balances[selectedSym];
+  // Only block if we have a confirmed balance and it's insufficient
+  if (bal != null && amount > bal) {
     markError('amountRow');
     showAlert('err', `⚠️ Insufficient balance. You have ${fmtAmt(bal, selectedSym)} ${selectedSym}.`);
     return;
