@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VanityForge — Custom EVM Wallet Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;
+  --accent:#00ffb3;--accent2:#7c3aed;--accent3:#f59e0b;
+  --text:#e8e8f0;--muted:#6b6b8a;--danger:#ef4444;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,179,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,179,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.container{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:40px 20px 80px;}
+.header{text-align:center;margin-bottom:56px;}
+.logo-mark{display:inline-flex;align-items:center;gap:10px;margin-bottom:24px;}
+.logo-hex{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:20px;animation:pulse-hex 3s ease-in-out infinite;}
+@keyframes pulse-hex{0%,100%{box-shadow:0 0 0 rgba(0,255,179,0)}50%{box-shadow:0 0 24px rgba(0,255,179,0.4)}}
+.logo-text{font-size:22px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(90deg,var(--accent),#fff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+h1{font-size:clamp(32px,6vw,52px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;}
+h1 span{background:linear-gradient(90deg,var(--accent) 0%,var(--accent2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.subtitle{color:var(--muted);font-size:15px;font-family:'Space Mono',monospace;line-height:1.6;}
+.turbo-pill{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,var(--accent2),var(--accent));padding:6px 14px;border-radius:20px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:#fff;margin-top:14px;font-weight:700;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;margin-bottom:20px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0.6;}
+.section-label{font-size:10px;font-family:'Space Mono',monospace;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.chain-tabs{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap;}
+.chain-tab{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+.chain-tab:hover{border-color:var(--accent);color:var(--text);}
+.chain-tab.active{border-color:var(--accent);background:rgba(0,255,179,0.08);color:var(--accent);}
+.chain-dot{width:8px;height:8px;border-radius:50%;}
+
+.input-row{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:end;margin-bottom:20px;}
+@media(max-width:540px){.input-row{grid-template-columns:1fr;}.or-divider{display:none;}}
+.input-group label{display:block;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.input-wrapper{position:relative;}
+.prefix-badge{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);pointer-events:none;}
+.input-wrapper input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 14px 14px 34px;color:var(--text);font-family:'Space Mono',monospace;font-size:15px;letter-spacing:1px;transition:border-color 0.2s,box-shadow 0.2s;outline:none;}
+.input-wrapper input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,255,179,0.08);}
+.input-wrapper input.valid{border-color:var(--accent);}
+.char-count{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);}
+.char-count.warn{color:var(--accent3);}.char-count.max{color:var(--danger);}
+.or-divider{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-bottom:14px;color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;}
+.or-divider::before,.or-divider::after{content:'';width:1px;height:20px;background:var(--border);}
+
+.options-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;}
+.toggle-label{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;color:var(--muted);user-select:none;transition:color 0.2s;}
+.toggle-label:hover{color:var(--text);}
+.toggle{width:36px;height:20px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;position:relative;transition:background 0.2s;flex-shrink:0;}
+.toggle::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:var(--muted);top:2px;left:2px;transition:all 0.2s;}
+input[type=checkbox]:checked+.toggle{background:rgba(0,255,179,0.2);border-color:var(--accent);}
+input[type=checkbox]:checked+.toggle::after{left:18px;background:var(--accent);}
+input[type=checkbox]{display:none;}
+
+/* Thread indicator */
+.thread-strip{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-top:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.thread-pips{display:flex;gap:4px;flex-wrap:wrap;}
+.tpip{width:10px;height:10px;border-radius:2px;background:var(--border);transition:background 0.3s;}
+.tpip.on{background:var(--accent);box-shadow:0 0 6px rgba(0,255,179,0.4);}
+
+.difficulty-bar{margin-top:16px;padding:14px 16px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:11px;}
+.diff-icon{font-size:16px;}.diff-text{flex:1;color:var(--muted);line-height:1.5;}.diff-text strong{color:var(--text);}
+.diff-badge{padding:4px 10px;border-radius:6px;font-size:10px;letter-spacing:1px;font-weight:700;}
+.diff-easy{background:rgba(0,255,179,0.12);color:var(--accent);}.diff-medium{background:rgba(245,158,11,0.12);color:var(--accent3);}.diff-hard{background:rgba(239,68,68,0.12);color:var(--danger);}
+
+.btn-generate{width:100%;padding:18px;background:linear-gradient(135deg,var(--accent) 0%,#00d494 100%);border:none;border-radius:12px;color:#0a0a0f;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;margin-top:24px;}
+.btn-generate::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,0.15));}
+.btn-generate:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,255,179,0.3);}
+.btn-generate:active{transform:translateY(0);}
+.btn-generate:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-stop{width:100%;padding:18px;background:transparent;border:1px solid var(--danger);border-radius:12px;color:var(--danger);font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:24px;display:none;}
+.btn-stop:hover{background:rgba(239,68,68,0.08);}
+
+#progressCard{display:none;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+@media(max-width:540px){.stats-grid{grid-template-columns:1fr 1fr;}}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;}
+.stat-val{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent);margin-bottom:4px;letter-spacing:-0.5px;}
+.stat-lbl{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.progress-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:2px;width:0%;transition:width 0.3s;}
+.progress-label{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);text-align:center;}
+.live-preview{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);word-break:break-all;line-height:1.8;min-height:44px;margin-top:16px;}
+.live-prefix{color:var(--accent);font-weight:700;}.live-suffix{color:var(--accent2);font-weight:700;}
+
+#resultCard{display:none;}
+.result-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.success-badge{width:44px;height:44px;background:rgba(0,255,179,0.1);border:1px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;animation:pop 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+.result-title{font-size:20px;font-weight:700;}.result-sub{color:var(--muted);font-size:13px;font-family:'Space Mono',monospace;}
+.result-field{margin-bottom:16px;}
+.result-field label{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block;}
+.result-value{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'Space Mono',monospace;font-size:12px;word-break:break-all;line-height:1.6;display:flex;align-items:flex-start;gap:12px;}
+.result-value.address-field{border-color:rgba(0,255,179,0.3);}
+.result-addr-text{flex:1;}
+.addr-match{color:var(--accent);font-weight:700;}.addr-match2{color:var(--accent2);font-weight:700;}
+.copy-btn{flex-shrink:0;background:rgba(0,255,179,0.08);border:1px solid rgba(0,255,179,0.2);border-radius:6px;padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.copy-btn:hover{background:rgba(0,255,179,0.15);}.copy-btn.copied{color:var(--accent3);border-color:var(--accent3);}
+.pk-hidden{filter:blur(6px);transition:filter 0.3s;user-select:none;flex:1;}
+.pk-hidden.revealed{filter:none;user-select:text;}
+.reveal-btn{flex-shrink:0;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:6px;padding:4px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--danger);cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.reveal-btn:hover{background:rgba(239,68,68,0.15);}
+.warning-box{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 16px;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);line-height:1.7;margin-top:16px;}
+.warning-box strong{color:var(--danger);}
+.btn-download{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-top:12px;}
+.btn-download:hover{border-color:var(--accent);color:var(--accent);}
+.btn-new{background:linear-gradient(135deg,var(--accent2),#a855f7);border:none;color:#fff;margin-top:8px;}
+.btn-new:hover{opacity:0.9;color:#fff;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.info-grid{grid-template-columns:1fr;}}
+.info-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.info-block-icon{font-size:22px;margin-bottom:10px;}.info-block-title{font-size:13px;font-weight:700;margin-bottom:6px;}.info-block-text{font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);line-height:1.6;}
+footer{text-align:center;margin-top:60px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);line-height:2;}
+.fade-in{animation:fadeIn 0.4s ease forwards;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo-mark">
+      <div class="logo-hex">⬡</div>
+      <span class="logo-text">VanityForge</span>
+    </div>
+    <h1>Forge Your<br/><span>Custom Wallet</span></h1>
+    <p class="subtitle">Generate personalized EVM wallet addresses<br/>that start or end with your chosen text</p>
+    <div class="turbo-pill">⚡ TURBO — All CPU Cores + Batch Processing</div>
+  </div>
+
+  <div class="card">
+    <div class="section-label">01 — Select Network</div>
+    <div class="chain-tabs">
+      <button class="chain-tab active" onclick="selectChain(this)"><span class="chain-dot" style="background:#627eea"></span>Ethereum / EVM</button>
+      <button class="chain-tab" onclick="selectChain(this)"><span class="chain-dot" style="background:#f7931a"></span>Polygon</button>
+      <button class="chain-tab" onclick="selectChain(this)"><span class="chain-dot" style="background:#2775ca"></span>BNB Chain</button>
+      <button class="chain-tab" onclick="selectChain(this)"><span class="chain-dot" style="background:#ff0420"></span>Base</button>
+    </div>
+    <div class="section-label">02 — Set Vanity Pattern</div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Starts with</label>
+        <div class="input-wrapper">
+          <span class="prefix-badge">0x</span>
+          <input type="text" id="prefixInput" placeholder="e.g. cafe" maxlength="5"
+            oninput="onPrefixInput(this)" autocomplete="off" spellcheck="false"/>
+          <span class="char-count" id="prefixCount">0/5</span>
+        </div>
+      </div>
+      <div class="or-divider">OR</div>
+      <div class="input-group">
+        <label>Ends with</label>
+        <div class="input-wrapper">
+          <span class="prefix-badge" style="color:transparent">0x</span>
+          <input type="text" id="suffixInput" placeholder="e.g. dead" maxlength="5"
+            oninput="onSuffixInput(this)" autocomplete="off" spellcheck="false" style="padding-left:14px"/>
+          <span class="char-count" id="suffixCount">0/5</span>
+        </div>
+      </div>
+    </div>
+    <div class="options-row">
+      <label class="toggle-label">
+        <input type="checkbox" id="caseInsensitive" checked/>
+        <span class="toggle"></span>
+        Case insensitive
+      </label>
+    </div>
+
+    <div class="thread-strip" id="threadStrip">
+      <span style="white-space:nowrap">CPU Threads:</span>
+      <div class="thread-pips" id="threadPips"></div>
+      <span id="threadInfo" style="margin-left:auto;"></span>
+    </div>
+
+    <div class="difficulty-bar" id="difficultyBar">
+      <span class="diff-icon">⚡</span>
+      <span class="diff-text">Enter a prefix or suffix to see estimated difficulty</span>
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="startGeneration()">⬡ &nbsp;Forge Wallet Address</button>
+    <button class="btn-stop" id="stopBtn" onclick="stopGeneration()">✕ &nbsp;Stop Generation</button>
+  </div>
+
+  <div class="card fade-in" id="progressCard">
+    <div class="section-label">03 — Mining Address</div>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-val" id="statAttempts">0</div><div class="stat-lbl">Attempts</div></div>
+      <div class="stat-box"><div class="stat-val" id="statSpeed">0</div><div class="stat-lbl">Keys/sec</div></div>
+      <div class="stat-box"><div class="stat-val" id="statThreads">0</div><div class="stat-lbl">Threads</div></div>
+      <div class="stat-box"><div class="stat-val" id="statTime">0s</div><div class="stat-lbl">Elapsed</div></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">Searching the blockchain space...</div>
+    <div class="live-preview" id="livePreview"><span style="color:var(--muted);font-size:11px;">Scanning addresses...</span></div>
+  </div>
+
+  <div class="card fade-in" id="resultCard">
+    <div class="result-header">
+      <div class="success-badge">✓</div>
+      <div>
+        <div class="result-title">Vanity Address Found!</div>
+        <div class="result-sub" id="resultStats">Found in 0 attempts</div>
+      </div>
+    </div>
+    <div class="result-field">
+      <label>Wallet Address (Public)</label>
+      <div class="result-value address-field">
+        <span class="result-addr-text" id="resultAddress">—</span>
+        <button class="copy-btn" onclick="copyField('resultAddress',this)">COPY</button>
+      </div>
+    </div>
+    <div class="result-field">
+      <label>Private Key — ⚠ Keep secret!</label>
+      <div class="result-value">
+        <span class="pk-hidden" id="resultPrivKey">—</span>
+        <button class="reveal-btn" id="revealBtn" onclick="toggleReveal()">REVEAL</button>
+        <button class="copy-btn" onclick="copyField('resultPrivKey',this)" style="margin-left:4px">COPY</button>
+      </div>
+    </div>
+    <div class="warning-box">
+      <strong>⚠ SECURITY WARNING:</strong> This private key gives complete control of your wallet. Never share it. <strong>This tool runs 100% in your browser — no keys are ever sent to any server.</strong>
+    </div>
+    <a class="btn-download" onclick="downloadKeystore()">↓ &nbsp;Download Keystore File</a>
+    <button class="btn-download btn-new" onclick="resetUI()">⬡ &nbsp;Generate Another Address</button>
+  </div>
+
+  <div class="info-grid" style="margin-bottom:20px;">
+    <div class="info-block"><div class="info-block-icon">🚀</div><div class="info-block-title">Turbo Mode</div><div class="info-block-text">All logical CPU cores utilized via Web Workers + 50-key batch processing per cycle.</div></div>
+    <div class="info-block"><div class="info-block-icon">🔒</div><div class="info-block-title">100% Client-Side</div><div class="info-block-text">All generation happens in your browser. No data is ever sent to any server.</div></div>
+    <div class="info-block"><div class="info-block-icon">🎯</div><div class="info-block-title">Up to 5 Characters</div><div class="info-block-text">Choose up to 5 hex characters as prefix or suffix for your address.</div></div>
+    <div class="info-block"><div class="info-block-icon">🌐</div><div class="info-block-title">EVM Compatible</div><div class="info-block-text">Works with Ethereum, Polygon, BNB, Base, and all EVM-compatible chains.</div></div>
+  </div>
+
+  <footer>VanityForge Turbo — Open source vanity address generator<br/>All key generation happens locally in your browser. No servers. No tracking.</footer>
+</div>
+
+<script>
+// ── Worker source — optimized: 50-key batches, typed-array keccak, secp256k1 ──
+const WORKER_SRC = `
+// secp256k1 — BigInt (fastest portable pure-JS option)
+const CP={
+  p:0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2Fn,
+  n:0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141n,
+  Gx:0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798n,
+  Gy:0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8n,
+};
+function mpow(b,e,m){let r=1n;b%=m;while(e>0n){if(e&1n)r=r*b%m;e>>=1n;b=b*b%m;}return r;}
+function padd(P,Q){
+  if(!P)return Q;if(!Q)return P;
+  const p=CP.p;let lam;
+  if(P[0]===Q[0]&&P[1]===Q[1])lam=(3n*P[0]*P[0]*mpow(2n*P[1],p-2n,p))%p;
+  else{const dx=(Q[0]-P[0]+p)%p;lam=((Q[1]-P[1]+p)*mpow(dx,p-2n,p))%p;}
+  const x=(lam*lam-P[0]-Q[0]+2n*p)%p;
+  const y=(lam*(P[0]-x+p)-P[1]+p)%p;
+  return[x,y];
+}
+function pmul(k,P){let R=null,Q=P;while(k>0n){if(k&1n)R=padd(R,Q);Q=padd(Q,Q);k>>=1n;}return R;}
+
+// keccak256 — optimized with Uint32Array
+const RC=[1,0,32898,0,32906,2147483648,2147516416,2147483648,32907,0,2147483649,0,2147516545,2147483648,32777,2147483648,138,0,136,0,2147516425,0,2147483658,0,2147516555,0,139,2147483648,32905,2147483648,32771,2147483648,32770,2147483648,128,2147483648,32778,0,2147483658,2147483648,2147516545,2147483648,32896,2147483648,2147483649,0,2147516424,2147483648];
+const ROTC=[1,62,28,27,36,44,6,55,3,41,18,21,15,25,10,45,2,43,61,56,20,14,39,8];
+const PIL=[10,7,11,17,18,3,5,16,8,21,24,4,15,23,19,13,12,2,20,14,22,9,6,1];
+
+function keccak256bytes(msg){
+  const buf=new Uint8Array(msg.length+1+((136-((msg.length+1)%136))%136)+1);
+  buf.set(msg);buf[msg.length]=0x01;buf[buf.length-1]|=0x80;
+  const s=new Int32Array(50);
+  for(let i=0;i<buf.length;i+=136){
+    for(let j=0;j<17;j++){
+      const o=i+j*4;
+      s[j*2]^=buf[o]|(buf[o+1]<<8)|(buf[o+2]<<16)|(buf[o+3]<<24);
+      s[j*2+1]^=buf[o+4]|(buf[o+5]<<8)|(buf[o+6]<<16)|(buf[o+7]<<24);
+    }
+    for(let r=0;r<24;r++){
+      // theta
+      const c=new Int32Array(10);
+      for(let x=0;x<10;x++)c[x]=s[x]^s[x+10]^s[x+20]^s[x+30]^s[x+40];
+      for(let x=0;x<10;x+=2){
+        const tx=c[(x+2)%10]^((c[(x+2)%10+1-1+2)%10]<<31|c[(x+2)%10]>>>1)
+        // simplified - use standard keccak reference below
+      }
+      // Full keccak-f via lookup
+      let[a00,a01,a10,a11,a20,a21,a30,a31,a40,a41,
+          a02,a03,a12,a13,a22,a23,a32,a33,a42,a43,
+          a04,a05,a14,a15,a24,a25,a34,a35,a44,a45,
+          a06,a07,a16,a17,a26,a27,a36,a37,a46,a47,
+          a08,a09,a18,a19,a28,a29,a38,a39,a48,a49]=s;
+      // theta
+      let c0=a00^a10^a20^a30^a40,c1=a01^a11^a21^a31^a41;
+      let c2=a02^a12^a22^a32^a42,c3=a03^a13^a23^a33^a43;
+      let c4=a04^a14^a24^a34^a44,c5=a05^a15^a25^a35^a45;
+      let c6=a06^a16^a26^a36^a46,c7=a07^a17^a27^a37^a47;
+      let c8=a08^a18^a28^a38^a48,c9=a09^a19^a29^a39^a49;
+      let h=c8^(c2<<1|c3>>>31),l=c9^(c3<<1|c2>>>31);
+      a00^=h;a01^=l;a10^=h;a11^=l;a20^=h;a21^=l;a30^=h;a31^=l;a40^=h;a41^=l;
+      h=c0^(c4<<1|c5>>>31);l=c1^(c5<<1|c4>>>31);
+      a02^=h;a03^=l;a12^=h;a13^=l;a22^=h;a23^=l;a32^=h;a33^=l;a42^=h;a43^=l;
+      h=c2^(c6<<1|c7>>>31);l=c3^(c7<<1|c6>>>31);
+      a04^=h;a05^=l;a14^=h;a15^=l;a24^=h;a25^=l;a34^=h;a35^=l;a44^=h;a45^=l;
+      h=c4^(c8<<1|c9>>>31);l=c5^(c9<<1|c8>>>31);
+      a06^=h;a07^=l;a16^=h;a17^=l;a26^=h;a27^=l;a36^=h;a37^=l;a46^=h;a47^=l;
+      h=c6^(c0<<1|c1>>>31);l=c7^(c1<<1|c0>>>31);
+      a08^=h;a09^=l;a18^=h;a19^=l;a28^=h;a29^=l;a38^=h;a39^=l;a48^=h;a49^=l;
+      // rho+pi (unrolled via PIL+ROTC)
+      let b00=a00,b01=a01;
+      let v=a02,w=a03;let t;
+      // just reassign per PIL table - compact version
+      const st=[a00,a01,a10,a11,a20,a21,a30,a31,a40,a41,a02,a03,a12,a13,a22,a23,a32,a33,a42,a43,a04,a05,a14,a15,a24,a25,a34,a35,a44,a45,a06,a07,a16,a17,a26,a27,a36,a37,a46,a47,a08,a09,a18,a19,a28,a29,a38,a39,a48,a49];
+      const nb=new Int32Array(50);
+      nb[0]=st[0];nb[1]=st[1];
+      for(let i=0;i<24;i++){
+        const src=PIL[i]*2;
+        const rc=ROTC[i];
+        if(rc<32){nb[(i+1)*2]=st[src]<<rc|st[src+1]>>>32-rc;nb[(i+1)*2+1]=st[src+1]<<rc|st[src]>>>32-rc;}
+        else{nb[(i+1)*2]=st[src+1]<<rc-32|st[src]>>>64-rc;nb[(i+1)*2+1]=st[src]<<rc-32|st[src+1]>>>64-rc;}
+      }
+      // chi
+      for(let y=0;y<50;y+=10)for(let x=0;x<10;x+=2){s[y+x]=nb[y+x]^(~nb[y+(x+2)%10]&nb[y+(x+4)%10]);s[y+x+1]=nb[y+x+1]^(~nb[y+(x+2)%10+1]&nb[y+(x+4)%10+1]);}
+      // iota
+      s[0]^=RC[r*2];s[1]^=RC[r*2+1];
+    }
+  }
+  return s;
+}
+
+// Simpler but optimized keccak256 returning hex string
+function keccak256hex(msgBytes){
+  // Use standard reference implementation - faster than BigInt
+  const rate=136,M=new Uint8Array(msgBytes.length+1+((rate-((msgBytes.length+1)%rate))%rate)+1);
+  M.set(msgBytes);M[msgBytes.length]=0x01;M[M.length-1]|=0x80;
+  const S=new Int32Array(50);
+  const rol=(h,l,s)=>s<32?[h<<s|l>>>32-s,l<<s|h>>>32-s]:[l<<s-32|h>>>64-s,h<<s-32|l>>>64-s];
+  for(let i=0;i<M.length;i+=rate){
+    for(let j=0;j<rate/8;j++){const o=i+j*8;S[j*2]^=M[o]|M[o+1]<<8|M[o+2]<<16|M[o+3]<<24;S[j*2+1]^=M[o+4]|M[o+5]<<8|M[o+6]<<16|M[o+7]<<24;}
+    for(let r=0;r<24;r++){
+      // theta
+      const C=new Int32Array(10);
+      for(let x=0;x<5;x++){C[x*2]=S[x*2]^S[(x+5)*2]^S[(x+10)*2]^S[(x+15)*2]^S[(x+20)*2];C[x*2+1]=S[x*2+1]^S[(x+5)*2+1]^S[(x+10)*2+1]^S[(x+15)*2+1]^S[(x+20)*2+1];}
+      for(let x=0;x<5;x++){const nx=(x+1)%5;const[rh,rl]=rol(C[nx*2],C[nx*2+1],1);const dh=C[((x+4)%5)*2]^rh,dl=C[((x+4)%5)*2+1]^rl;for(let y=0;y<25;y+=5){S[(y+x)*2]^=dh;S[(y+x)*2+1]^=dl;}}
+      // rho+pi
+      const B=new Int32Array(50);B[0]=S[0];B[1]=S[1];
+      let cur=1;const rots=[1,62,28,27,36,44,6,55,3,41,18,21,15,25,10,45,2,43,61,56,20,14,39,8];
+      const pi=[10,7,11,17,18,3,5,16,8,21,24,4,15,23,19,13,12,2,20,14,22,9,6,1];
+      for(let i=0;i<24;i++){const s2=pi[i];const[rh,rl]=rol(S[cur*2],S[cur*2+1],rots[i]);B[s2*2]=rh;B[s2*2+1]=rl;cur=s2;}
+      // chi
+      for(let y=0;y<25;y+=5)for(let x=0;x<5;x++){S[(y+x)*2]=B[(y+x)*2]^(~B[(y+(x+1)%5)*2]&B[(y+(x+2)%5)*2]);S[(y+x)*2+1]=B[(y+x)*2+1]^(~B[(y+(x+1)%5)*2+1]&B[(y+(x+2)%5)*2+1]);}
+      // iota
+      S[0]^=${JSON.stringify(Array.from({length:24},(_,i)=>i))}[r]>23?0:([1,0,32898,0,32906,2147483648,2147516416,2147483648,32907,0,2147483649,0,2147516545,2147483648,32777,2147483648,138,0,136,0,2147516425,0,2147483658,0,2147516555,0,139,2147483648,32905,2147483648,32771,2147483648,32770,2147483648,128,2147483648,32778,0,2147483658,2147483648,2147516545,2147483648,32896,2147483648,2147483649,0,2147516424,2147483648][r*2]);
+      S[1]^=[1,0,32898,0,32906,2147483648,2147516416,2147483648,32907,0,2147483649,0,2147516545,2147483648,32777,2147483648,138,0,136,0,2147516425,0,2147483658,0,2147516555,0,139,2147483648,32905,2147483648,32771,2147483648,32770,2147483648,128,2147483648,32778,0,2147483658,2147483648,2147516545,2147483648,32896,2147483648,2147483649,0,2147516424,2147483648][r*2+1];
+    }
+  }
+  let h='';
+  for(let i=0;i<8;i++){const lo=S[i*2],hi=S[i*2+1];for(const v of[lo,hi]){for(let b=0;b<4;b++)h+=(((v>>(b*8))&0xff)).toString(16).padStart(2,'0');}}
+  return h;
+}
+
+function privToAddr(pk){
+  const k=BigInt('0x'+pk);
+  const pub=pmul(k,[CP.Gx,CP.Gy]);
+  let x=pub[0].toString(16).padStart(64,'0');
+  let y=pub[1].toString(16).padStart(64,'0');
+  const xy=new Uint8Array(64);
+  for(let i=0;i<32;i++){xy[i]=parseInt(x.slice(i*2,i*2+2),16);xy[32+i]=parseInt(y.slice(i*2,i*2+2),16);}
+  return '0x'+keccak256hex(xy).slice(-40);
+}
+function randPK(){const a=new Uint8Array(32);crypto.getRandomValues(a);return Array.from(a).map(b=>b.toString(16).padStart(2,'0')).join('');}
+
+const BATCH=50;
+self.onmessage=function(e){
+  const{prefix,suffix,caseInsensitive}=e.data;
+  let count=0;
+  function loop(){
+    for(let i=0;i<BATCH;i++){
+      const pk=randPK();
+      const addr=privToAddr(pk);
+      const ca=caseInsensitive?addr.toLowerCase():addr;
+      const cb=ca.slice(2);
+      const cp=caseInsensitive?prefix.toLowerCase():prefix;
+      const cs=caseInsensitive?suffix.toLowerCase():suffix;
+      count++;
+      if((!cp||cb.startsWith(cp))&&(!cs||cb.endsWith(cs))){
+        self.postMessage({type:'found',privKey:pk,address:addr,count});return;
+      }
+    }
+    const probe=randPK();
+    self.postMessage({type:'progress',count,lastAddr:privToAddr(probe)});
+    count=0;
+    setTimeout(loop,0);
+  }
+  loop();
+};
+`;
+
+// ── UI State ──
+let workers=[], totalAttempts=0, startTime=null, statsInterval=null, found=false, resultData=null;
+const NUM_WORKERS = navigator.hardwareConcurrency || 4;
+
+// Init thread pips
+(function(){
+  const c=document.getElementById('threadPips');
+  const ti=document.getElementById('threadInfo');
+  for(let i=0;i<NUM_WORKERS;i++){
+    const p=document.createElement('span');
+    p.className='tpip'; p.id='tpip'+i; c.appendChild(p);
+  }
+  ti.textContent=NUM_WORKERS+' threads';
+})();
+
+function selectChain(el){document.querySelectorAll('.chain-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function onPrefixInput(el){el.value=el.value.replace(/[^0-9a-fA-F]/gi,'');const n=el.value.length;const c=document.getElementById('prefixCount');c.textContent=n+'/5';c.className='char-count'+(n>=5?' max':n>=4?' warn':'');if(n)el.classList.add('valid');else el.classList.remove('valid');updateDifficulty();}
+function onSuffixInput(el){el.value=el.value.replace(/[^0-9a-fA-F]/gi,'');const n=el.value.length;const c=document.getElementById('suffixCount');c.textContent=n+'/5';c.className='char-count'+(n>=5?' max':n>=4?' warn':'');if(n)el.classList.add('valid');else el.classList.remove('valid');updateDifficulty();}
+
+function updateDifficulty(){
+  const pfx=document.getElementById('prefixInput').value;
+  const sfx=document.getElementById('suffixInput').value;
+  const total=pfx.length+sfx.length;
+  const bar=document.getElementById('difficultyBar');
+  if(!total){bar.innerHTML='<span class="diff-icon">⚡</span><span class="diff-text">Enter a prefix or suffix to see estimated difficulty</span>';return;}
+  const attempts=Math.pow(16,total);
+  const speedEst=50000*NUM_WORKERS;
+  let label,cls,time;
+  if(total<=2){label='Instant';cls='diff-easy';time='< 1 second';}
+  else if(total<=4){label='Easy';cls='diff-easy';time='~'+fmtT(attempts/speedEst);}
+  else if(total<=7){label='Medium';cls='diff-medium';time='~'+fmtT(attempts/speedEst);}
+  else{label='Hard';cls='diff-hard';time='~'+fmtT(attempts/speedEst);}
+  bar.innerHTML=`<span class="diff-icon">🎯</span><span class="diff-text"><strong>${total} chars</strong> — ~${attempts.toLocaleString()} attempts · Est. <strong>${time}</strong> on ${NUM_WORKERS} threads</span><span class="diff-badge ${cls}">${label}</span>`;
+}
+function fmtT(s){if(s<60)return Math.ceil(s)+'s';if(s<3600)return Math.ceil(s/60)+'m';return Math.ceil(s/3600)+'h';}
+
+function startGeneration(){
+  const prefix=document.getElementById('prefixInput').value.trim();
+  const suffix=document.getElementById('suffixInput').value.trim();
+  const caseInsensitive=document.getElementById('caseInsensitive').checked;
+  if(!prefix&&!suffix){alert('Please enter at least a prefix or suffix.');return;}
+  found=false; totalAttempts=0; startTime=Date.now();
+  document.getElementById('generateBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='block';
+  document.getElementById('progressCard').style.display='block';
+  document.getElementById('resultCard').style.display='none';
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('statAttempts').textContent='0';
+  document.getElementById('statSpeed').textContent='0';
+  document.getElementById('statTime').textContent='0s';
+  document.getElementById('statThreads').textContent=NUM_WORKERS;
+  const blob=new Blob([WORKER_SRC],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  workers=[];
+  for(let i=0;i<NUM_WORKERS;i++){
+    const w=new Worker(url);
+    w.postMessage({prefix,suffix,caseInsensitive});
+    w.onmessage=ev=>handleWorkerMsg(ev,prefix,suffix);
+    setTimeout(()=>document.getElementById('tpip'+i)?.classList.add('on'),i*60);
+    workers.push(w);
+  }
+  statsInterval=setInterval(updateStats,400);
+}
+
+function handleWorkerMsg(e,prefix,suffix){
+  const msg=e.data;
+  if(msg.type==='progress'){
+    totalAttempts+=msg.count;
+    const addr=msg.lastAddr, body=addr.slice(2), pfxLen=prefix.length, sfxLen=suffix.length;
+    let html='0x';
+    if(pfxLen)html+=`<span class="live-prefix">${body.slice(0,pfxLen)}</span>`;
+    html+=`<span class="live-middle">${body.slice(pfxLen,40-(sfxLen||0))}</span>`;
+    if(sfxLen)html+=`<span class="live-suffix">${body.slice(-sfxLen)}</span>`;
+    document.getElementById('livePreview').innerHTML=html;
+  } else if(msg.type==='found'&&!found){
+    found=true; totalAttempts+=msg.count;
+    stopWorkers();
+    showResult(msg.address,msg.privKey,prefix,suffix);
+  }
+}
+
+function updateStats(){
+  const el=(Date.now()-startTime)/1000;
+  const spd=Math.round(totalAttempts/el);
+  document.getElementById('statAttempts').textContent=totalAttempts.toLocaleString();
+  document.getElementById('statSpeed').textContent=spd>1000?(spd/1000).toFixed(1)+'k':spd;
+  document.getElementById('statTime').textContent=el<60?Math.round(el)+'s':Math.floor(el/60)+'m'+Math.round(el%60)+'s';
+  const exp=Math.pow(16,(document.getElementById('prefixInput').value.length+document.getElementById('suffixInput').value.length)||1);
+  document.getElementById('progressFill').style.width=Math.min(94,(totalAttempts/exp)*100)+'%';
+  document.getElementById('progressLabel').textContent=totalAttempts.toLocaleString()+' addresses checked at '+spd.toLocaleString()+' keys/sec across '+NUM_WORKERS+' threads';
+}
+
+function stopWorkers(){
+  clearInterval(statsInterval);
+  workers.forEach(w=>w.terminate());
+  workers=[];
+  document.querySelectorAll('.tpip').forEach(p=>p.classList.remove('on'));
+}
+
+function stopGeneration(){
+  stopWorkers();
+  document.getElementById('generateBtn').style.display='block';
+  document.getElementById('stopBtn').style.display='none';
+  document.getElementById('progressCard').style.display='none';
+}
+
+function showResult(address,privKey,prefix,suffix){
+  clearInterval(statsInterval);
+  document.getElementById('stopBtn').style.display='none';
+  document.getElementById('generateBtn').style.display='block';
+  document.getElementById('progressCard').style.display='none';
+  const body=address.slice(2), pfxLen=prefix.length, sfxLen=suffix.length;
+  let html='0x';
+  if(pfxLen)html+=`<span class="addr-match">${body.slice(0,pfxLen)}</span>`;
+  html+=`<span style="color:var(--text)">${body.slice(pfxLen,40-(sfxLen||0))}</span>`;
+  if(sfxLen)html+=`<span class="addr-match2">${body.slice(-sfxLen)}</span>`;
+  document.getElementById('resultAddress').innerHTML=html;
+  document.getElementById('resultAddress').dataset.raw=address;
+  document.getElementById('resultPrivKey').textContent='0x'+privKey;
+  document.getElementById('resultPrivKey').dataset.raw='0x'+privKey;
+  document.getElementById('resultStats').textContent=`Found after ${totalAttempts.toLocaleString()} attempts in ${((Date.now()-startTime)/1000).toFixed(1)}s using ${NUM_WORKERS} threads`;
+  document.getElementById('resultCard').style.display='block';
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth',block:'center'});
+  resultData={address,privKey:'0x'+privKey};
+}
+
+function toggleReveal(){const el=document.getElementById('resultPrivKey'),btn=document.getElementById('revealBtn');el.classList.toggle('revealed');btn.textContent=el.classList.contains('revealed')?'HIDE':'REVEAL';}
+function copyField(id,btn){const el=document.getElementById(id);navigator.clipboard.writeText(el.dataset.raw||el.textContent).then(()=>{btn.textContent='COPIED!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('copied');},2000);});}
+function downloadKeystore(){if(!resultData)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({tool:'VanityForge Turbo',network:'EVM',address:resultData.address,privateKey:resultData.privKey,warning:'KEEP SECURE',generated:new Date().toISOString()},null,2)],{type:'application/json'}));a.download='evm-vanity-'+resultData.address.slice(2,8)+'.json';a.click();}
+function resetUI(){document.getElementById('resultCard').style.display='none';document.getElementById('prefixInput').value='';document.getElementById('suffixInput').value='';document.getElementById('prefixCount').textContent='0/5';document.getElementById('suffixCount').textContent='0/5';updateDifficulty();window.scrollTo({top:0,behavior:'smooth'});}
+</script>
+</body>
+</html>
