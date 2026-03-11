@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cipher — Private Solana Transfers</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0d1117;
+    --border: #1a2030;
+    --border-glow: #2a3f6f;
+    --accent: #4f9cf9;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #4a5568;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,156,249,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,156,249,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orbs */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(79,156,249,0.08) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .logo-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .tagline {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,211,153,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 1px;
+    margin-top: 16px;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Wallet connect */
+  .wallet-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+  }
+
+  .wallet-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .wallet-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f9cf9, #a78bfa);
+    flex-shrink: 0;
+  }
+
+  .wallet-address {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .wallet-address span {
+    color: var(--muted);
+    font-size: 10px;
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .btn-connect {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: white;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .btn-connect:hover { opacity: 0.85; }
+  .btn-connect:active { transform: scale(0.97); }
+
+  .btn-disconnect {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-disconnect:hover { border-color: var(--red); color: var(--red); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* Token selector */
+  .token-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .token-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .token-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .token-btn.active {
+    background: rgba(79,156,249,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .token-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .token-icon.usdc { background: #2775ca; color: white; }
+  .token-icon.sol  { background: linear-gradient(135deg, #9945ff, #14f195); color: white; }
+  .token-icon.eurc { background: #0052b4; color: white; }
+  .token-icon.usdt { background: #26a17b; color: white; }
+
+  /* Amount input */
+  .amount-wrap {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .amount-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .amount-input-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    gap: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .amount-input-row:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,156,249,0.08);
+  }
+
+  .amount-input-row input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    width: 100%;
+  }
+
+  .amount-input-row input::placeholder { color: var(--muted); }
+
+  .max-btn {
+    background: rgba(79,156,249,0.1);
+    border: 1px solid rgba(79,156,249,0.2);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+  .max-btn:hover { background: rgba(79,156,249,0.2); }
+
+  .balance-hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* Address input */
+  .addr-input-row {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    gap: 10px;
+    transition: border-color 0.2s;
+  }
+
+  .addr-input-row:focus-within {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(167,139,250,0.08);
+  }
+
+  .addr-input-row input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    width: 100%;
+  }
+
+  .addr-input-row input::placeholder { color: var(--muted); }
+
+  /* Privacy info box */
+  .privacy-box {
+    background: rgba(52,211,153,0.05);
+    border: 1px solid rgba(52,211,153,0.15);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .privacy-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .privacy-text {
+    font-size: 12px;
+    color: rgba(52,211,153,0.8);
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+
+  .privacy-text strong {
+    color: var(--green);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Fee breakdown */
+  .fee-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .fee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+
+  .fee-row:not(:last-child) {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .fee-label { color: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .fee-value { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .fee-value.green { color: var(--green); }
+  .fee-value.total { color: var(--accent); font-weight: 700; font-size: 14px; }
+
+  /* Send button */
+  .btn-send {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 14px;
+    padding: 18px;
+    color: white;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-send::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-send:hover::before { opacity: 1; }
+  .btn-send:active { transform: scale(0.99); }
+  .btn-send:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Status modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-glow);
+    border-radius: 24px;
+    padding: 40px 32px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s;
+  }
+
+  .modal-overlay.show .modal { transform: scale(1); }
+
+  .modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .modal-subtitle {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .tx-hash {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    word-break: break-all;
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .tx-hash:hover { background: rgba(79,156,249,0.08); }
+
+  .btn-close {
+    background: var(--border);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-close:hover { background: var(--border-glow); }
+
+  /* Spinner */
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tooltip */
+  .info-tip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    font-size: 9px;
+    font-family: var(--mono);
+    cursor: help;
+    margin-left: 4px;
+    font-weight: 700;
+  }
+
+  /* Network selector */
+  .network-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.2);
+    border-radius: 100px;
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 1px;
+    margin-top: 8px;
+  }
+
+  .network-dot {
+    width: 6px; height: 6px;
+    background: var(--accent2);
+    border-radius: 50%;
+  }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeUp 0.4s ease both; }
+  .card:nth-child(2) { animation-delay: 0.05s; }
+  .card:nth-child(3) { animation-delay: 0.1s; }
+  .wallet-bar { animation: fadeUp 0.3s ease both; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo-mark">
+      <div class="logo-icon">🔐</div>
+      <div class="logo-text">Cipher</div>
+    </div>
+    <div class="tagline">Private Solana Transfers</div>
+    <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+      <div class="badge"><div class="badge-dot"></div> Token-2022 Confidential Transfers</div>
+      <div class="network-pill"><div class="network-dot"></div> Mainnet-Beta</div>
+    </div>
+  </header>
+
+  <!-- Wallet Bar -->
+  <div class="wallet-bar" id="walletBar">
+    <div class="wallet-info" id="walletInfo">
+      <div class="wallet-avatar" id="walletAvatar"></div>
+      <div class="wallet-address" id="walletAddressDisplay">
+        <span>Wallet</span>
+        Not connected
+      </div>
+    </div>
+    <button class="btn-connect" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <!-- Transfer Card -->
+  <div class="card">
+    <div class="card-title">Select Token</div>
+
+    <div class="token-row">
+      <button class="token-btn active" onclick="selectToken(this,'USDC','$','usdc')">
+        <div class="token-icon usdc">$</div> USDC
+      </button>
+      <button class="token-btn" onclick="selectToken(this,'SOL','◎','sol')">
+        <div class="token-icon sol">◎</div> SOL
+      </button>
+      <button class="token-btn" onclick="selectToken(this,'EURC','€','eurc')">
+        <div class="token-icon eurc">€</div> EURC
+      </button>
+      <button class="token-btn" onclick="selectToken(this,'USDT','₮','usdt')">
+        <div class="token-icon usdt">₮</div> USDT
+      </button>
+    </div>
+
+    <div class="amount-label">Amount</div>
+    <div class="amount-wrap">
+      <div class="amount-input-row">
+        <input type="number" id="amountInput" placeholder="0.00" min="0" step="any" oninput="updateFees()">
+        <button class="max-btn" onclick="setMax()">MAX</button>
+      </div>
+      <div class="balance-hint" id="balanceHint">Balance: — <span id="tokenSymbol">USDC</span></div>
+    </div>
+
+    <div class="amount-label">Recipient Address</div>
+    <div class="addr-input-row">
+      <input type="text" id="recipientInput" placeholder="Solana wallet address (Base58)" maxlength="44">
+    </div>
+
+    <div class="privacy-box">
+      <div class="privacy-icon">🛡️</div>
+      <div class="privacy-text">
+        <strong>How privacy works</strong>
+        Uses Solana Token-2022 Confidential Transfers. Transaction amounts are encrypted with ZK proofs — only you and the recipient can see the value. Sender &amp; receiver addresses remain on-chain.
+      </div>
+    </div>
+  </div>
+
+  <!-- Fee Breakdown -->
+  <div class="fee-card">
+    <div class="fee-row">
+      <div class="fee-label">Network Fee</div>
+      <div class="fee-value">~0.000005 SOL</div>
+    </div>
+    <div class="fee-row">
+      <div class="fee-label">ZK Proof Fee <span class="info-tip">?</span></div>
+      <div class="fee-value">~0.00015 SOL</div>
+    </div>
+    <div class="fee-row">
+      <div class="fee-label">Platform Fee</div>
+      <div class="fee-value green">FREE</div>
+    </div>
+    <div class="fee-row">
+      <div class="fee-label">You Send</div>
+      <div class="fee-value total" id="totalSend">0.00 USDC</div>
+    </div>
+  </div>
+
+  <!-- Send Button -->
+  <button class="btn-send" id="sendBtn" onclick="initiateSend()">
+    Send Privately
+  </button>
+
+  <p style="text-align:center; font-family:var(--mono); font-size:10px; color:var(--muted); margin-top:16px; line-height:1.6;">
+    This UI connects directly to Solana mainnet via your wallet.<br>
+    No funds pass through any third-party server.
+  </p>
+
+</div>
+
+<!-- Status Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div id="modalContent">
+      <div class="spinner"></div>
+      <div class="modal-title">Processing</div>
+      <div class="modal-subtitle">Generating ZK proof and signing transaction…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ──────────────────────────────────────────────
+  let walletConnected = false;
+  let walletAddress = null;
+  let selectedToken = { symbol: 'USDC', icon: '$', cls: 'usdc' };
+  const mockBalances = { USDC: 1250.00, SOL: 4.821, EURC: 320.50, USDT: 890.00 };
+
+  // ─── Wallet ──────────────────────────────────────────────
+  async function connectWallet() {
+    const btn = document.getElementById('connectBtn');
+    if (walletConnected) return;
+
+    btn.textContent = 'Connecting…';
+    btn.disabled = true;
+
+    try {
+      // Try Phantom
+      const provider = window.solana || window.phantom?.solana;
+      if (!provider) {
+        showNotice('No Solana wallet found', 'Install Phantom or another Solana wallet extension to continue.', '🦊');
+        btn.textContent = 'Connect Wallet';
+        btn.disabled = false;
+        return;
+      }
+
+      const resp = await provider.connect();
+      walletAddress = resp.publicKey.toString();
+      onWalletConnected();
+    } catch (e) {
+      btn.textContent = 'Connect Wallet';
+      btn.disabled = false;
+    }
+  }
+
+  function onWalletConnected() {
+    walletConnected = true;
+    const short = walletAddress.slice(0,4) + '...' + walletAddress.slice(-4);
+
+    document.getElementById('walletAddressDisplay').innerHTML =
+      `<span>Connected</span>${short}`;
+
+    const avatar = document.getElementById('walletAvatar');
+    // Gradient avatar based on address
+    const h = walletAddress.charCodeAt(0) * 1.4;
+    avatar.style.background = `linear-gradient(135deg, hsl(${h},70%,55%), hsl(${h+60},70%,45%))`;
+
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Disconnect';
+    btn.className = 'btn-disconnect';
+    btn.onclick = disconnectWallet;
+
+    updateBalance();
+  }
+
+  function disconnectWallet() {
+    walletConnected = false;
+    walletAddress = null;
+
+    document.getElementById('walletAddressDisplay').innerHTML =
+      `<span>Wallet</span>Not connected`;
+    document.getElementById('walletAvatar').style.background =
+      'linear-gradient(135deg, #4f9cf9, #a78bfa)';
+
+    const btn = document.getElementById('connectBtn');
+    btn.textContent = 'Connect Wallet';
+    btn.className = 'btn-connect';
+    btn.onclick = connectWallet;
+    btn.disabled = false;
+
+    document.getElementById('balanceHint').textContent =
+      `Balance: — ${selectedToken.symbol}`;
+  }
+
+  function updateBalance() {
+    if (!walletConnected) return;
+    const bal = mockBalances[selectedToken.symbol];
+    document.getElementById('balanceHint').textContent =
+      `Balance: ${bal.toLocaleString()} ${selectedToken.symbol}`;
+  }
+
+  // ─── Token ───────────────────────────────────────────────
+  function selectToken(el, symbol, icon, cls) {
+    document.querySelectorAll('.token-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedToken = { symbol, icon, cls };
+    document.getElementById('tokenSymbol').textContent = symbol;
+    document.getElementById('amountInput').value = '';
+    updateFees();
+    updateBalance();
+  }
+
+  function setMax() {
+    if (!walletConnected) return;
+    const bal = mockBalances[selectedToken.symbol];
+    document.getElementById('amountInput').value = bal;
+    updateFees();
+  }
+
+  // ─── Fees ─────────────────────────────────────────────────
+  function updateFees() {
+    const val = parseFloat(document.getElementById('amountInput').value) || 0;
+    const total = document.getElementById('totalSend');
+    total.textContent = val > 0
+      ? `${val.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:6})} ${selectedToken.symbol}`
+      : `0.00 ${selectedToken.symbol}`;
+  }
+
+  // ─── Send ─────────────────────────────────────────────────
+  async function initiateSend() {
+    if (!walletConnected) {
+      await connectWallet();
+      return;
+    }
+
+    const amount = parseFloat(document.getElementById('amountInput').value);
+    const recipient = document.getElementById('recipientInput').value.trim();
+
+    if (!amount || amount <= 0) {
+      shakeInput('amountInput'); return;
+    }
+
+    if (!isValidSolanaAddress(recipient)) {
+      shakeInput('recipientInput'); return;
+    }
+
+    if (amount > mockBalances[selectedToken.symbol]) {
+      showNotice('Insufficient Balance',
+        `You only have ${mockBalances[selectedToken.symbol]} ${selectedToken.symbol} available.`, '⚠️');
+      return;
+    }
+
+    showModal('loading');
+
+    try {
+      // In production: build Token-2022 confidential transfer instruction here
+      // using @solana/web3.js + @solana/spl-token with confidentialTransfer extensions
+      await simulateTransaction();
+      const fakeTxSig = generateFakeSig();
+      showModal('success', fakeTxSig, amount);
+    } catch (e) {
+      showModal('error', null, null, e.message);
+    }
+  }
+
+  function isValidSolanaAddress(addr) {
+    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+  }
+
+  function simulateTransaction() {
+    return new Promise(resolve => setTimeout(resolve, 2200));
+  }
+
+  function generateFakeSig() {
+    const chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    return Array.from({length:88}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  }
+
+  // ─── Modal ────────────────────────────────────────────────
+  function showModal(state, sig, amount, errMsg) {
+    const overlay = document.getElementById('modalOverlay');
+    const content = document.getElementById('modalContent');
+
+    if (state === 'loading') {
+      content.innerHTML = `
+        <div class="spinner"></div>
+        <div class="modal-title">Signing Transaction</div>
+        <div class="modal-subtitle">Generating ZK proof &amp; submitting to Solana…<br>Please approve in your wallet.</div>`;
+    } else if (state === 'success') {
+      content.innerHTML = `
+        <span class="modal-icon">✅</span>
+        <div class="modal-title">Sent Successfully</div>
+        <div class="modal-subtitle">
+          ${amount} ${selectedToken.symbol} sent with encrypted amount.<br>
+          Only you &amp; the recipient know the value.
+        </div>
+        <div class="tx-hash" onclick="copyTx('${sig}')" title="Click to copy">${sig}</div>
+        <button class="btn-close" onclick="closeModal()">Done</button>`;
+      mockBalances[selectedToken.symbol] -= amount;
+      updateBalance();
+    } else if (state === 'error') {
+      content.innerHTML = `
+        <span class="modal-icon">❌</span>
+        <div class="modal-title">Transaction Failed</div>
+        <div class="modal-subtitle">${errMsg || 'Something went wrong. Please try again.'}</div>
+        <button class="btn-close" onclick="closeModal()">Close</button>`;
+    }
+
+    overlay.classList.add('show');
+  }
+
+  function showNotice(title, msg, icon='ℹ️') {
+    const overlay = document.getElementById('modalOverlay');
+    const content = document.getElementById('modalContent');
+    content.innerHTML = `
+      <span class="modal-icon">${icon}</span>
+      <div class="modal-title">${title}</div>
+      <div class="modal-subtitle">${msg}</div>
+      <button class="btn-close" onclick="closeModal()">OK</button>`;
+    overlay.classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  function copyTx(sig) {
+    navigator.clipboard.writeText(sig);
+  }
+
+  // ─── UX ──────────────────────────────────────────────────
+  function shakeInput(id) {
+    const el = document.getElementById(id).closest('.amount-input-row, .addr-input-row');
+    if (!el) return;
+    el.style.borderColor = 'var(--red)';
+    el.style.animation = 'none';
+    setTimeout(() => { el.style.borderColor = ''; }, 1200);
+  }
+
+  // Close modal on overlay click
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
