@@ -309,11 +309,10 @@
 // ═══════════════════════════════════════════════════════
 
 // ── Constants ──────────────────────────────────────────
-const RPC = {
+const RPC_ENDPOINTS = {
   mainnet: [
-    'https://solana-mainnet.g.alchemy.com/v2/demo',
     'https://rpc.ankr.com/solana',
-    'https://mainnet.helius-rpc.com/?api-key=1d8e3aa5-3e23-4f3e-8af6-fd4e73f0ba8c',
+    'https://solana-mainnet.rpc.extrnode.com',
     'https://api.mainnet-beta.solana.com',
   ],
   devnet: [
@@ -322,27 +321,34 @@ const RPC = {
   ]
 };
 
-async function getWorkingRPC(net) {
-  const urls = RPC[net];
-  for (const url of urls) {
+let _rpcUrl = null;
+
+// Direct JSON-RPC call — no web3.js Connection needed for simple balance queries
+async function rpcCall(method, params = []) {
+  const endpoints = RPC_ENDPOINTS[network];
+  let lastErr;
+  for (const url of endpoints) {
     try {
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'getHealth' }),
-        signal: AbortSignal.timeout(4000)
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
       });
       const data = await res.json();
-      if (data.result === 'ok' || data.result) return url;
-    } catch(e) { continue; }
+      if (data.error) throw new Error(data.error.message);
+      _rpcUrl = url; // remember working endpoint
+      return data.result;
+    } catch(e) { lastErr = e; continue; }
   }
-  return urls[0]; // fallback to first
+  throw lastErr || new Error('All RPC endpoints failed');
 }
 
-let _rpcUrl = null;
 async function getRPCUrl() {
-  if (!_rpcUrl) _rpcUrl = await getWorkingRPC(network);
-  return _rpcUrl;
+  if (!_rpcUrl) {
+    // Warm up by doing a cheap call
+    try { await rpcCall('getSlot'); } catch(e) {}
+  }
+  return _rpcUrl || RPC_ENDPOINTS[network][0];
 }
 
 const TOKEN_PROGRAM_ID       = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -370,7 +376,7 @@ function web3() {
 }
 
 function getConnection(url) {
-  const rpc = url || _rpcUrl || RPC[network][0];
+  const rpc = url || _rpcUrl || RPC_ENDPOINTS[network][0];
   return new (web3().Connection)(rpc, 'confirmed');
 }
 
@@ -438,7 +444,7 @@ function onConnected() {
   btn.onclick     = disconnectWallet;
 
   showAlert('ok', '✅ Wallet connected: ' + short);
-  getRPCUrl().then(() => { fetchAllBalances(); }); // pre-warm RPC then fetch
+  fetchAllBalances(); // fetch balances (rpcCall auto-picks best endpoint)
   fetchPrices();
 }
 
@@ -484,24 +490,35 @@ async function fetchAllBalances() {
 }
 
 async function fetchSOLBalance() {
-  const conn = await getConnectionAsync();
-  const pk   = new (web3().PublicKey)(walletPubkey);
-  const lamports = await conn.getBalance(pk);
-  balances['SOL'] = lamports / 1e9;
+  try {
+    const result = await rpcCall('getBalance', [walletPubkey, { commitment: 'confirmed' }]);
+    balances['SOL'] = (result?.value ?? result ?? 0) / 1e9;
+  } catch(e) {
+    console.error('SOL balance fetch failed:', e);
+  }
 }
 
 async function fetchTokenBalance(sym) {
   const token = TOKENS[sym];
   if (!token.mint) return;
   try {
-    const conn    = await getConnectionAsync();
-    const owner   = new (web3().PublicKey)(walletPubkey);
-    const mint    = new (web3().PublicKey)(token.mint);
-    const ata     = await getAssociatedTokenAddress(mint, owner);
-    const info    = await conn.getTokenAccountBalance(ata);
-    balances[sym] = parseFloat(info.value.uiAmount ?? 0);
+    // Get all token accounts for this mint owned by the wallet
+    const result = await rpcCall('getTokenAccountsByOwner', [
+      walletPubkey,
+      { mint: token.mint },
+      { encoding: 'jsonParsed', commitment: 'confirmed' }
+    ]);
+    const accounts = result?.value || [];
+    if (accounts.length === 0) { balances[sym] = 0; return; }
+    // Sum all accounts (usually just one)
+    let total = 0;
+    for (const acc of accounts) {
+      const amt = acc.account?.data?.parsed?.info?.tokenAmount?.uiAmount ?? 0;
+      total += parseFloat(amt);
+    }
+    balances[sym] = total;
   } catch(e) {
-    // Account may not exist yet (no tokens) — treat as 0
+    console.error(sym + ' balance fetch failed:', e);
     balances[sym] = 0;
   }
 }
