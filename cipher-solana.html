@@ -310,9 +310,40 @@
 
 // ── Constants ──────────────────────────────────────────
 const RPC = {
-  mainnet: 'https://api.mainnet-beta.solana.com',
-  devnet:  'https://api.devnet.solana.com'
+  mainnet: [
+    'https://solana-mainnet.g.alchemy.com/v2/demo',
+    'https://rpc.ankr.com/solana',
+    'https://mainnet.helius-rpc.com/?api-key=1d8e3aa5-3e23-4f3e-8af6-fd4e73f0ba8c',
+    'https://api.mainnet-beta.solana.com',
+  ],
+  devnet: [
+    'https://api.devnet.solana.com',
+    'https://rpc.ankr.com/solana_devnet',
+  ]
 };
+
+async function getWorkingRPC(net) {
+  const urls = RPC[net];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc:'2.0', id:1, method:'getHealth' }),
+        signal: AbortSignal.timeout(4000)
+      });
+      const data = await res.json();
+      if (data.result === 'ok' || data.result) return url;
+    } catch(e) { continue; }
+  }
+  return urls[0]; // fallback to first
+}
+
+let _rpcUrl = null;
+async function getRPCUrl() {
+  if (!_rpcUrl) _rpcUrl = await getWorkingRPC(network);
+  return _rpcUrl;
+}
 
 const TOKEN_PROGRAM_ID       = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ASSOC_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bxv';
@@ -338,13 +369,20 @@ function web3() {
   return window.solanaWeb3;
 }
 
-function getConnection() {
-  return new (web3().Connection)(RPC[network], 'confirmed');
+function getConnection(url) {
+  const rpc = url || _rpcUrl || RPC[network][0];
+  return new (web3().Connection)(rpc, 'confirmed');
+}
+
+async function getConnectionAsync() {
+  const url = await getRPCUrl();
+  return getConnection(url);
 }
 
 // ── Network ────────────────────────────────────────────
 function setNetwork(net) {
   network = net;
+  _rpcUrl = null; // reset so we re-pick best RPC for new network
   document.getElementById('netMain').className = 'net-btn' + (net==='mainnet'?' active':'');
   document.getElementById('netDev').className  = 'net-btn' + (net==='devnet' ?' active-dev':'');
   balances = {};
@@ -400,11 +438,17 @@ function onConnected() {
   btn.onclick     = disconnectWallet;
 
   showAlert('ok', '✅ Wallet connected: ' + short);
-  fetchAllBalances();
+  getRPCUrl().then(() => { fetchAllBalances(); }); // pre-warm RPC then fetch
   fetchPrices();
 }
 
-function disconnectWallet() {
+async function disconnectWallet() {
+  // Tell the wallet extension to disconnect so it allows reconnecting
+  try {
+    const provider = window.phantom?.solana || window.solflare || window.solana;
+    if (provider && provider.disconnect) await provider.disconnect();
+  } catch(e) { /* ignore */ }
+
   walletPubkey   = null;
   walletProvider = null;
   balances = {};
@@ -417,6 +461,7 @@ function disconnectWallet() {
   const btn = document.getElementById('mainWalletBtn');
   btn.textContent = 'Connect Wallet';
   btn.className   = 'btn-connect';
+  btn.disabled    = false;
   btn.onclick     = connectWallet;
 
   updateAllBalanceDisplays();
@@ -439,7 +484,7 @@ async function fetchAllBalances() {
 }
 
 async function fetchSOLBalance() {
-  const conn = getConnection();
+  const conn = await getConnectionAsync();
   const pk   = new (web3().PublicKey)(walletPubkey);
   const lamports = await conn.getBalance(pk);
   balances['SOL'] = lamports / 1e9;
@@ -449,7 +494,7 @@ async function fetchTokenBalance(sym) {
   const token = TOKENS[sym];
   if (!token.mint) return;
   try {
-    const conn    = getConnection();
+    const conn    = await getConnectionAsync();
     const owner   = new (web3().PublicKey)(walletPubkey);
     const mint    = new (web3().PublicKey)(token.mint);
     const ata     = await getAssociatedTokenAddress(mint, owner);
@@ -700,7 +745,7 @@ async function handleSend() {
 
   showModal('loading');
   const W    = web3();
-  const conn = getConnection();
+  const conn = await getConnectionAsync();
   const from = new W.PublicKey(walletPubkey);
   const to   = new W.PublicKey(recipient);
 
