@@ -594,6 +594,93 @@
   @keyframes spin   { to{transform:rotate(360deg)} }
   @keyframes shake  { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
   .error { animation: shake .3s ease; border-color: rgba(239,68,68,.5) !important; }
+
+  /* ── Currency Toggle ── */
+  .currency-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .cur-btn {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: var(--mono);
+    font-weight: 500;
+    border-radius: 100px;
+    border: none;
+    background: none;
+    color: var(--text3);
+    cursor: pointer;
+    transition: all .18s;
+    letter-spacing: .3px;
+  }
+  .cur-btn.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+  }
+
+  /* ── Swap Tab ── */
+  .swap-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:8px; }
+  .swap-direction-btn {
+    display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:50%;
+    background:var(--surface2); border:1px solid var(--border);
+    color:var(--accent); font-size:18px; cursor:pointer;
+    margin:8px auto; transition:all .2s;
+  }
+  .swap-direction-btn:hover { background:var(--accent-dim); border-color:rgba(252,114,255,.3); transform:rotate(180deg); }
+  .swap-token-select {
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface3); border:1px solid var(--border);
+    border-radius:var(--radius-xs); padding:10px 12px; cursor:pointer;
+    transition:all .18s; flex-shrink:0;
+  }
+  .swap-token-select:hover { border-color:var(--border-hover); }
+  .swap-token-select select {
+    background:none; border:none; outline:none;
+    font-family:var(--sans); font-size:14px; font-weight:600;
+    color:var(--text); cursor:pointer; min-width:60px;
+  }
+  .swap-token-select select option { background:var(--surface3); }
+  .swap-input-row { display:flex; align-items:center; gap:8px; }
+  .swap-amount-input {
+    flex:1; background:none; border:none; outline:none;
+    font-family:var(--sans); font-size:26px; font-weight:500;
+    color:var(--text); min-width:0;
+  }
+  .swap-amount-input::placeholder { color:var(--text3); }
+  .swap-rate-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px; background:var(--surface2); border-radius:var(--radius-xs);
+    font-family:var(--mono); font-size:11px; color:var(--text3); margin-top:6px;
+  }
+  .swap-impact { font-size:10px; }
+  .swap-impact.low  { color:var(--green); }
+  .swap-impact.mid  { color:var(--yellow); }
+  .swap-impact.high { color:var(--red); }
+  .btn-swap {
+    width:100%; background:linear-gradient(135deg,var(--accent2),var(--accent));
+    border:none; border-radius:var(--radius-sm); padding:16px;
+    color:white; font-family:var(--sans); font-weight:600; font-size:16px;
+    cursor:pointer; transition:opacity .18s, transform .1s; margin-top:4px;
+    letter-spacing:-.1px;
+  }
+  .btn-swap:hover { opacity:.9; }
+  .btn-swap:active { transform:scale(.99); }
+  .btn-swap:disabled { opacity:.35; cursor:not-allowed; }
+  .swap-route-box {
+    background:rgba(155,89,255,.06); border:1px solid rgba(155,89,255,.12);
+    border-radius:var(--radius-xs); padding:11px 14px; margin-top:8px;
+    font-family:var(--mono); font-size:10px; color:var(--text3); line-height:1.7;
+  }
+  .route-label { font-size:9px; letter-spacing:1px; color:var(--text3); text-transform:uppercase; margin-bottom:4px; }
+  .route-path { color:var(--text2); font-size:11px; }
+
 </style>
 </head>
 <body>
@@ -609,7 +696,10 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="badge-pill">Zero Fees</div>
+      <div class="currency-toggle">
+        <button class="cur-btn active" id="curUSD" onclick="setCurrency('USD')">USD</button>
+        <button class="cur-btn" id="curEUR" onclick="setCurrency('EUR')">EUR</button>
+      </div>
       <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙</button>
     </div>
   </header>
@@ -676,8 +766,8 @@
   <div class="tabs">
     <button class="tab active" id="tab-portfolio" onclick="switchTab('portfolio')">Portfolio</button>
     <button class="tab" id="tab-send"      onclick="switchTab('send')">Send</button>
+    <button class="tab" id="tab-swap"      onclick="switchTab('swap')">Swap</button>
     <button class="tab" id="tab-history"   onclick="switchTab('history')">History</button>
-    <button class="tab" id="tab-alerts"    onclick="switchTab('alerts')">Alerts</button>
   </div>
 
   <!-- Portfolio Tab -->
@@ -751,7 +841,7 @@
       <div class="swap-box" id="amountRow">
         <div class="swap-box-label">You Send</div>
         <div class="swap-box-row">
-          <input type="number" class="amount-num" id="amountInput" placeholder="0" min="0" step="any" oninput="onAmountChange()">
+          <input type="number" class="amount-num" id="amountInput" placeholder="0" min="0" step="any" oninput="onAmountChange()" onchange="onAmountChange()" onkeyup="onAmountChange()">
           <button class="max-btn" onclick="setMax()">MAX</button>
         </div>
       </div>
@@ -804,6 +894,77 @@
     </div>
   </div>
 
+  <!-- Swap Tab -->
+  <div id="pane-swap" style="display:none">
+    <div class="swap-card">
+      <div class="card-title">Swap Tokens</div>
+
+      <!-- From -->
+      <div class="swap-box" id="swapFromBox">
+        <div class="swap-box-label">You Pay</div>
+        <div class="swap-input-row">
+          <input type="number" class="swap-amount-input" id="swapAmtIn" placeholder="0" min="0" step="any" oninput="onSwapAmountChange()">
+          <div class="swap-token-select">
+            <select id="swapFromToken" onchange="onSwapTokenChange()">
+              <option value="SOL">◎ SOL</option>
+              <option value="USDC">$ USDC</option>
+              <option value="EURC">€ EURC</option>
+              <option value="USDT">₮ USDT</option>
+              <option value="BONK">🐶 BONK</option>
+              <option value="JUP">⚡ JUP</option>
+              <option value="WIF">🎩 WIF</option>
+              <option value="RAY">⚡ RAY</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" id="swapFromBal" style="margin-top:6px;">Balance: —</div>
+      </div>
+
+      <!-- Flip -->
+      <button class="swap-direction-btn" onclick="flipSwapTokens()" title="Flip tokens">⇅</button>
+
+      <!-- To -->
+      <div class="swap-box" id="swapToBox">
+        <div class="swap-box-label">You Receive (est.)</div>
+        <div class="swap-input-row">
+          <div class="swap-amount-input" id="swapAmtOut" style="display:flex;align-items:center;color:var(--text2);">—</div>
+          <div class="swap-token-select">
+            <select id="swapToToken" onchange="onSwapTokenChange()">
+              <option value="USDC">$ USDC</option>
+              <option value="SOL">◎ SOL</option>
+              <option value="EURC">€ EURC</option>
+              <option value="USDT">₮ USDT</option>
+              <option value="BONK">🐶 BONK</option>
+              <option value="JUP">⚡ JUP</option>
+              <option value="WIF">🎩 WIF</option>
+              <option value="RAY">⚡ RAY</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" id="swapToVal" style="margin-top:6px;"></div>
+      </div>
+
+      <!-- Rate info -->
+      <div class="swap-rate-row" id="swapRateRow" style="display:none">
+        <span id="swapRateLabel">Rate: —</span>
+        <span class="swap-impact" id="swapImpact"></span>
+      </div>
+
+      <!-- Route -->
+      <div class="swap-route-box" id="swapRouteBox" style="display:none">
+        <div class="route-label">Route</div>
+        <div class="route-path" id="swapRoutePath">—</div>
+      </div>
+
+      <div style="height:10px"></div>
+      <button class="btn-swap" id="swapBtn" onclick="handleSwap()">Swap</button>
+
+      <div style="margin-top:10px;padding:10px 13px;background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.12);border-radius:var(--radius-xs);font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.7;">
+        🔀 Powered by <strong style="color:var(--text2)">Jupiter</strong> — best price across all Solana DEXes. Only Solana network fee (~0.000005 SOL).
+      </div>
+    </div>
+  </div>
+
   <!-- History Tab -->
   <div id="pane-history" style="display:none">
     <div class="card">
@@ -815,28 +976,7 @@
     </div>
   </div>
 
-  <!-- Alerts Tab -->
-  <div id="pane-alerts" style="display:none">
-    <div class="card">
-      <div class="section-title">Price Alerts</div>
-      <div class="alert-form">
-        <select class="alert-select" id="alertSym">
-          <option>SOL</option><option>USDC</option><option>EURC</option>
-          <option>BONK</option><option>JUP</option><option>WIF</option><option>RAY</option>
-        </select>
-        <select class="alert-select" id="alertDir">
-          <option value="above">Above ↑</option>
-          <option value="below">Below ↓</option>
-        </select>
-        <input class="alert-input" id="alertPrice" type="number" placeholder="Price $" step="any" min="0">
-        <button class="alert-add-btn" onclick="addPriceAlert()">+ Add</button>
-      </div>
-      <div id="alertsList"><div style="text-align:center;padding:24px;font-family:var(--mono);font-size:11px;color:var(--text3)">No alerts set</div></div>
-      <div style="margin-top:12px;padding:10px 12px;background:rgba(155,89,255,.06);border:1px solid rgba(155,89,255,.1);border-radius:var(--radius-xs);font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.6;">
-        💡 Prices update every 60s. Alerts trigger once and stay until dismissed.
-      </div>
-    </div>
-  </div>
+
 
   <div class="footer">
     Transactions execute directly on Solana via your wallet.<br>
@@ -913,6 +1053,7 @@ function setCustomRPC(url) {
 const TOKEN_PROGRAM_ID       = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
 const ASSOC_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bxv';
 const SYSTEM_PROGRAM_ID      = '11111111111111111111111111111111';
+const SYSVAR_RENT_PUBKEY     = 'SysvarRent111111111111111111111111111111111';
 
 const TOKENS = {
   SOL:  { symbol:'SOL',  decimals:9,  mint:null,  icon:'◎', cls:'ti-sol',  cgId:'solana' },
@@ -932,6 +1073,28 @@ let walletProvider = null;
 let selectedSym  = 'SOL';
 let balances     = {};
 let prices       = { SOL:150, USDC:1, EURC:1.08, USDT:1, BONK:0.000025, JUP:0.8, WIF:2.5, RAY:2.2 };
+let displayCurrency = 'USD'; // 'USD' or 'EUR'
+let eurRate = 0.92; // USD→EUR rate, refreshed with prices
+
+// ── Currency helpers ───────────────────────────────────
+function setCurrency(cur) {
+  displayCurrency = cur;
+  document.getElementById('curUSD').classList.toggle('active', cur === 'USD');
+  document.getElementById('curEUR').classList.toggle('active', cur === 'EUR');
+  updatePortfolio();
+  updateHints();
+  updateTotal();
+}
+
+function fmtFiat(usdValue) {
+  if (displayCurrency === 'EUR') {
+    const eur = usdValue * eurRate;
+    return '€' + eur.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  return '$' + usdValue.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function fiatSymbol() { return displayCurrency === 'EUR' ? '€' : '$'; }
 
 // ── Init solanaWeb3 ────────────────────────────────────
 function web3() {
@@ -1113,12 +1276,16 @@ function updateAllBalanceDisplays() {
 async function fetchPrices() {
   try {
     const ids = Object.values(TOKENS).map(t=>t.cgId).filter(Boolean).join(',');
-    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+    const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd,eur`;
     const r   = await fetch(url);
     const d   = await r.json();
     Object.values(TOKENS).forEach(t => {
       if (t.cgId && d[t.cgId]?.usd) prices[t.symbol] = d[t.cgId].usd;
     });
+    // Derive EUR rate from SOL usd+eur prices if available
+    if (d['solana']?.usd && d['solana']?.eur) {
+      eurRate = d['solana'].eur / d['solana'].usd;
+    }
     TOKEN_PRICES_APPROX.SOL  = prices.SOL;
     TOKEN_PRICES_APPROX.BONK = prices.BONK;
     TOKEN_PRICES_APPROX.JUP  = prices.JUP;
@@ -1126,7 +1293,6 @@ async function fetchPrices() {
     TOKEN_PRICES_APPROX.RAY  = prices.RAY;
     onAmountChange();
     updatePortfolio();
-    checkPriceAlerts();
   } catch(e) { /* silent */ }
 }
 
@@ -1144,7 +1310,7 @@ function selectToken(el, sym, icon, cls, mint, decimals) {
     ? 'Balance: ' + fmtAmt(bal, sym) + ' ' + sym
     : 'Balance: —';
   // Reset You Send display to show correct token symbol
-  document.getElementById('totalDisplay').textContent = '0.00 —';
+  document.getElementById('totalDisplay').textContent = '0.00 ' + sym;
   onAmountChange();
   updateHints();
 }
@@ -1174,10 +1340,11 @@ function updateHints() {
     ? 'Balance: ' + fmtAmt(bal, selectedSym) + ' ' + selectedSym
     : 'Balance: —';
 
-  // USD hint
+  // Fiat hint
   const uh = document.getElementById('usdHint');
   if (amt > 0 && prices[selectedSym]) {
-    uh.textContent = '≈ $' + (amt * prices[selectedSym]).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD';
+    const usdVal = amt * prices[selectedSym];
+    uh.textContent = '≈ ' + fmtFiat(usdVal) + ' ' + displayCurrency;
   } else { uh.textContent = ''; }
 }
 
@@ -1242,17 +1409,26 @@ async function ataExists(conn, ata) {
 }
 
 // ── Build create ATA instruction ──────────────────────
+// Accounts required by Associated Token Program v1.1:
+// 0: payer (signer, writable)
+// 1: ATA address (writable)
+// 2: owner wallet
+// 3: mint
+// 4: System Program
+// 5: Token Program
+// 6: Sysvar Rent (required!)
 function createATAInstruction(payer, ata, owner, mint) {
   const W = web3();
   return new W.TransactionInstruction({
     programId: new W.PublicKey(ASSOC_TOKEN_PROGRAM_ID),
     keys: [
-      { pubkey: payer,                            isSigner: true,  isWritable: true  },
-      { pubkey: ata,                              isSigner: false, isWritable: true  },
-      { pubkey: owner,                            isSigner: false, isWritable: false },
-      { pubkey: mint,                             isSigner: false, isWritable: false },
-      { pubkey: new W.PublicKey(SYSTEM_PROGRAM_ID),   isSigner: false, isWritable: false },
-      { pubkey: new W.PublicKey(TOKEN_PROGRAM_ID),    isSigner: false, isWritable: false },
+      { pubkey: payer,                                   isSigner: true,  isWritable: true  },
+      { pubkey: ata,                                     isSigner: false, isWritable: true  },
+      { pubkey: owner,                                   isSigner: false, isWritable: false },
+      { pubkey: mint,                                    isSigner: false, isWritable: false },
+      { pubkey: new W.PublicKey(SYSTEM_PROGRAM_ID),      isSigner: false, isWritable: false },
+      { pubkey: new W.PublicKey(TOKEN_PROGRAM_ID),       isSigner: false, isWritable: false },
+      { pubkey: new W.PublicKey(SYSVAR_RENT_PUBKEY),     isSigner: false, isWritable: false },
     ],
     data: new Uint8Array(0)
   });
@@ -1395,7 +1571,7 @@ async function handleSend() {
 }
 
 // ── Modal ──────────────────────────────────────────────
-function showModal(state, sig, amount, errMsg) {
+function showModal(state, sig, amount, errMsg, isSwap) {
   const overlay = document.getElementById('modalOverlay');
   const content = document.getElementById('modalContent');
   const explorerBase = network === 'mainnet'
@@ -1409,9 +1585,10 @@ function showModal(state, sig, amount, errMsg) {
       <div class="modal-sub">Please confirm the transaction in your wallet.<br>Do not close this window.</div>`;
   } else if (state === 'success') {
     const short = sig.slice(0,8) + '…' + sig.slice(-8);
+    const actionLabel = isSwap ? 'Swapped!' : 'Sent!';
     content.innerHTML = `
       <span class="modal-icon">✅</span>
-      <div class="modal-title">Sent!</div>
+      <div class="modal-title">${actionLabel}</div>
       <div class="modal-sub">
         <strong style="color:var(--green);font-size:18px;">${fmtAmt(amount, selectedSym)} ${selectedSym}</strong><br>
         Transaction confirmed on Solana ${network}.
@@ -1575,13 +1752,18 @@ const _origOnAmountChange = onAmountChange;
 function onAmountChange() {
   _origOnAmountChange();
   // Mirror main amount into comparison
-  const amt = document.getElementById('amountInput').value;
-  const compareInput = document.getElementById('compareAmtInput');
-  if (compareInput && amt) {
-    compareInput.value = amt;
-    document.getElementById('compareTokenSelect').value = selectedSym;
-    renderComparison();
-  }
+  try {
+    const amt = document.getElementById('amountInput').value;
+    const compareInput = document.getElementById('compareAmtInput');
+    const compareSelect = document.getElementById('compareTokenSelect');
+    if (compareInput && amt) {
+      compareInput.value = amt;
+      // Only set compareTokenSelect if this token is in its option list
+      const opts = Array.from(compareSelect.options).map(o => o.value);
+      if (opts.includes(selectedSym)) compareSelect.value = selectedSym;
+      renderComparison();
+    }
+  } catch(e) { /* never block amount display */ }
 }
 
 // ── Settings panel toggle ─────────────────────────────
@@ -1637,12 +1819,13 @@ function applyCustomRPC() {
 
 // ── Tabs ──────────────────────────────────────────────
 function switchTab(name) {
-  ['portfolio','send','history','alerts'].forEach(t => {
+  ['portfolio','send','swap','history'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === name);
     document.getElementById('pane-' + t).style.display = t === name ? '' : 'none';
   });
   if (name === 'history' && walletPubkey) fetchTxHistory();
   if (name === 'portfolio') updatePortfolio();
+  if (name === 'swap') updateSwapBalances();
 }
 
 // ── Portfolio ──────────────────────────────────────────
@@ -1668,25 +1851,35 @@ function updatePortfolio() {
 
   items.sort((a,b) => b.usd - a.usd);
 
-  total.textContent = '$' + totalUSD.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  total.textContent = fmtFiat(totalUSD);
   count.textContent = items.filter(i=>i.bal>0).length + ' tokens';
   upd.textContent   = 'Updated ' + new Date().toLocaleTimeString();
 
   const iconMap = { SOL:'◎', USDC:'$', EURC:'€', USDT:'₮', BONK:'🐶', JUP:'⚡', WIF:'🎩', RAY:'⚡' };
   const clrMap  = { SOL:'linear-gradient(135deg,#9945ff,#14f195)', USDC:'#2775ca', EURC:'#0052b4', USDT:'#26a17b', BONK:'#f97316', JUP:'#16a34a', WIF:'#8b5cf6', RAY:'#6366f1' };
 
-  grid.innerHTML = items.map(({sym,bal,px,usd}) => `
+  grid.innerHTML = items.map(({sym,bal,px,usd}) => {
+    const pxDisplay = displayCurrency === 'EUR'
+      ? (px * eurRate >= 1
+          ? '€' + (px*eurRate).toLocaleString(undefined,{maximumFractionDigits:2})
+          : '€' + (px*eurRate).toFixed(6))
+      : (px >= 1
+          ? '$' + px.toLocaleString(undefined,{maximumFractionDigits:2})
+          : '$' + px.toFixed(6));
+    const valDisplay = usd > 0.001 ? fmtFiat(usd) : ('< ' + fiatSymbol() + '0.001');
+    return `
     <div class="portfolio-item" onclick="quickSelect('${sym}')">
       <div class="pi-top">
         <div style="display:flex;align-items:center;gap:6px">
           <div style="width:22px;height:22px;border-radius:50%;background:${clrMap[sym]||'#333'};display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0">${iconMap[sym]||'?'}</div>
           <div class="pi-sym">${sym}</div>
         </div>
-        <div class="pi-price">$${px >= 1 ? px.toLocaleString(undefined,{maximumFractionDigits:2}) : px.toFixed(6)}</div>
+        <div class="pi-price">${pxDisplay}</div>
       </div>
       <div class="pi-bal">${fmtAmt(bal,sym)}</div>
-      <div class="pi-usd">${usd > 0.001 ? '$'+usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '< $0.001'}</div>
-    </div>`).join('') || '<div style="grid-column:span 2;text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--muted)">No balances found</div>';
+      <div class="pi-usd">${valDisplay}</div>
+    </div>`;
+  }).join('') || '<div style="grid-column:span 2;text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--muted)">No balances found</div>';
 }
 
 function quickSelect(sym) {
@@ -1803,68 +1996,195 @@ function renderTxHistory(txDetails, sigResult) {
   list.innerHTML = html || '<div class="tx-empty">No transactions parsed</div>';
 }
 
-// ── Price Alerts ───────────────────────────────────────
-let priceAlerts = JSON.parse(localStorage.getItem('cipher_alerts') || '[]');
+// ── Jupiter Swap ──────────────────────────────────────
+const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
+const JUPITER_SWAP_API  = 'https://quote-api.jup.ag/v6/swap';
 
-function saveAlerts() {
-  try { localStorage.setItem('cipher_alerts', JSON.stringify(priceAlerts)); } catch(e){}
+let swapQuote = null;
+let swapQuoteTimer = null;
+
+function updateSwapBalances() {
+  const fromSym = document.getElementById('swapFromToken')?.value;
+  const toSym   = document.getElementById('swapToToken')?.value;
+  if (!fromSym || !toSym) return;
+  const fromBal = balances[fromSym];
+  const el = document.getElementById('swapFromBal');
+  if (el) el.textContent = walletPubkey && fromBal != null
+    ? 'Balance: ' + fmtAmt(fromBal, fromSym) + ' ' + fromSym
+    : 'Balance: —';
 }
 
-function addPriceAlert() {
-  const sym   = document.getElementById('alertSym').value;
-  const dir   = document.getElementById('alertDir').value;
-  const price = parseFloat(document.getElementById('alertPrice').value);
-
-  if (!price || price <= 0) { showAlert('err', '⚠️ Enter a valid target price'); return; }
-
-  priceAlerts.push({ id: Date.now(), sym, dir, price, triggered: false });
-  saveAlerts();
-  renderAlerts();
-  document.getElementById('alertPrice').value = '';
-  showAlert('ok', `✅ Alert set: ${sym} ${dir} $${price}`);
+function onSwapTokenChange() {
+  updateSwapBalances();
+  document.getElementById('swapAmtIn').value = '';
+  document.getElementById('swapAmtOut').textContent = '—';
+  document.getElementById('swapRateRow').style.display = 'none';
+  document.getElementById('swapRouteBox').style.display = 'none';
+  swapQuote = null;
 }
 
-function removeAlert(id) {
-  priceAlerts = priceAlerts.filter(a => a.id !== id);
-  saveAlerts();
-  renderAlerts();
+function flipSwapTokens() {
+  const from = document.getElementById('swapFromToken');
+  const to   = document.getElementById('swapToToken');
+  const tmp  = from.value;
+  from.value = to.value;
+  to.value   = tmp;
+  onSwapTokenChange();
 }
 
-function renderAlerts() {
-  const list = document.getElementById('alertsList');
-  if (!priceAlerts.length) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;font-family:var(--mono);font-size:11px;color:var(--muted)">No alerts set</div>';
+function onSwapAmountChange() {
+  clearTimeout(swapQuoteTimer);
+  swapQuoteTimer = setTimeout(fetchSwapQuote, 600);
+}
+
+function setSwapMax() {
+  const sym = document.getElementById('swapFromToken').value;
+  const bal = balances[sym];
+  if (bal == null || !walletPubkey) return;
+  const safe = sym === 'SOL' ? Math.max(0, bal - 0.01) : bal;
+  document.getElementById('swapAmtIn').value = safe > 0 ? +safe.toFixed(TOKENS[sym]?.decimals || 6) : 0;
+  fetchSwapQuote();
+}
+
+async function fetchSwapQuote() {
+  const fromSym  = document.getElementById('swapFromToken').value;
+  const toSym    = document.getElementById('swapToToken').value;
+  const amtStr   = document.getElementById('swapAmtIn').value;
+  const amt      = parseFloat(amtStr);
+
+  const outEl    = document.getElementById('swapAmtOut');
+  const rateRow  = document.getElementById('swapRateRow');
+  const routeBox = document.getElementById('swapRouteBox');
+
+  if (!amt || amt <= 0 || fromSym === toSym) {
+    outEl.textContent = '—';
+    rateRow.style.display = 'none';
+    routeBox.style.display = 'none';
+    swapQuote = null;
     return;
   }
-  list.innerHTML = priceAlerts.map(a => {
-    const cur = prices[a.sym] || 0;
-    const pctAway = cur > 0 ? ((a.price - cur) / cur * 100).toFixed(1) : '?';
-    return `<div class="alert-item ${a.triggered?'triggered':''}">
-      <div class="pi-sym" style="color:var(--text)">${a.sym}</div>
-      <div class="alert-cond">
-        ${a.dir === 'above' ? '↑ Above' : '↓ Below'} <strong style="color:var(--text)">$${a.price.toLocaleString(undefined,{maximumFractionDigits:6})}</strong>
-        <br><span style="font-size:9px">Current: $${cur.toLocaleString(undefined,{maximumFractionDigits:4})} · ${Math.abs(pctAway)}% away</span>
-      </div>
-      <div class="alert-status ${a.triggered?'triggered':'active'}">${a.triggered?'⚡ HIT':'ACTIVE'}</div>
-      <button class="alert-del" onclick="removeAlert(${a.id})">×</button>
-    </div>`;
-  }).join('');
+
+  outEl.textContent = '…';
+  swapQuote = null;
+
+  try {
+    const inputMint  = TOKENS[fromSym]?.mint || 'So11111111111111111111111111111111111111112';
+    const outputMint = TOKENS[toSym]?.mint   || 'So11111111111111111111111111111111111111112';
+    const decimals   = TOKENS[fromSym]?.decimals ?? 9;
+    const amtLamports = Math.round(amt * Math.pow(10, decimals));
+
+    const url = `${JUPITER_QUOTE_API}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amtLamports}&slippageBps=50`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Quote fetch failed');
+    const quote = await res.json();
+    if (quote.error) throw new Error(quote.error);
+
+    swapQuote = quote;
+
+    const outDecimals = TOKENS[toSym]?.decimals ?? 6;
+    const outAmt      = quote.outAmount / Math.pow(10, outDecimals);
+    outEl.textContent = fmtAmt(outAmt, toSym) + ' ' + toSym;
+
+    // Rate
+    const rate = outAmt / amt;
+    document.getElementById('swapRateLabel').textContent =
+      `1 ${fromSym} ≈ ${fmtAmt(rate, toSym)} ${toSym}`;
+
+    // Price impact
+    const impact = parseFloat(quote.priceImpactPct || 0);
+    const impactEl = document.getElementById('swapImpact');
+    impactEl.textContent = `Impact: ${impact < 0.01 ? '<0.01' : impact.toFixed(2)}%`;
+    impactEl.className = 'swap-impact ' + (impact < 1 ? 'low' : impact < 3 ? 'mid' : 'high');
+    rateRow.style.display = '';
+
+    // Show fiat value of output
+    const outUSD = outAmt * (prices[toSym] || 0);
+    const toValEl = document.getElementById('swapToVal');
+    if (toValEl && outUSD > 0) toValEl.textContent = '≈ ' + fmtFiat(outUSD) + ' ' + displayCurrency;
+
+    // Route
+    const routeLabels = (quote.routePlan || []).map(r => r.swapInfo?.label || r.swapInfo?.ammKey?.slice(0,6) || '?');
+    const uniqueRoute = [...new Set(routeLabels)];
+    document.getElementById('swapRoutePath').textContent = fromSym + ' → ' + uniqueRoute.join(' → ') + ' → ' + toSym;
+    routeBox.style.display = '';
+
+  } catch(e) {
+    outEl.textContent = '—';
+    rateRow.style.display = 'none';
+    routeBox.style.display = 'none';
+    swapQuote = null;
+    console.warn('Quote error:', e.message);
+  }
 }
 
-function checkPriceAlerts() {
-  let anyTriggered = false;
-  priceAlerts.forEach(a => {
-    if (a.triggered) return;
-    const cur = prices[a.sym];
-    if (!cur) return;
-    const hit = (a.dir === 'above' && cur >= a.price) || (a.dir === 'below' && cur <= a.price);
-    if (hit) {
-      a.triggered = true;
-      anyTriggered = true;
-      showAlert('warn', `🔔 Price Alert: ${a.sym} is now $${cur.toLocaleString(undefined,{maximumFractionDigits:4})} (${a.dir} $${a.price})`);
-    }
-  });
-  if (anyTriggered) { saveAlerts(); renderAlerts(); }
+async function handleSwap() {
+  if (!walletPubkey) { await connectWallet(); return; }
+
+  const fromSym = document.getElementById('swapFromToken').value;
+  const amt     = parseFloat(document.getElementById('swapAmtIn').value);
+
+  if (!amt || amt <= 0) {
+    document.getElementById('swapFromBox').classList.add('error');
+    setTimeout(() => document.getElementById('swapFromBox').classList.remove('error'), 1200);
+    showAlert('err', '⚠️ Enter an amount to swap.');
+    return;
+  }
+
+  if (!swapQuote) {
+    showAlert('err', '⚠️ Getting quote… please wait a moment.');
+    fetchSwapQuote();
+    return;
+  }
+
+  const bal = balances[fromSym];
+  if (bal != null && amt > bal) {
+    showAlert('err', `⚠️ Insufficient balance. You have ${fmtAmt(bal, fromSym)} ${fromSym}.`);
+    return;
+  }
+
+  showModal('loading');
+
+  try {
+    // Get swap transaction from Jupiter
+    const swapRes = await fetch(JUPITER_SWAP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quoteResponse: swapQuote,
+        userPublicKey: walletPubkey,
+        wrapAndUnwrapSol: true,
+        dynamicComputeUnitLimit: true,
+        prioritizationFeeLamports: 'auto'
+      })
+    });
+
+    if (!swapRes.ok) throw new Error('Failed to get swap transaction');
+    const { swapTransaction } = await swapRes.json();
+    if (!swapTransaction) throw new Error('No swap transaction returned');
+
+    // Deserialise the versioned transaction
+    const W = web3();
+    const txBytes = Uint8Array.from(atob(swapTransaction), c => c.charCodeAt(0));
+    const versionedTx = W.VersionedTransaction.deserialize(txBytes);
+
+    // Sign + send via wallet
+    const provider = walletProvider || window.phantom?.solana || window.solflare || window.solana;
+    if (!provider) throw new Error('Wallet not connected');
+
+    const signedTx = await provider.signTransaction(versionedTx);
+    const conn = await getConnectionAsync();
+    const sig  = await conn.sendRawTransaction(signedTx.serialize(), { skipPreflight: false, maxRetries: 3 });
+    await conn.confirmTransaction(sig, 'confirmed');
+
+    showModal('success', sig, amt, null, true);
+    setTimeout(() => { fetchAllBalances(); }, 2500);
+
+  } catch(e) {
+    console.error(e);
+    let msg = e.message || 'Swap failed';
+    if (msg.includes('User rejected') || msg.includes('cancelled')) msg = 'Swap cancelled by user.';
+    showModal('error', null, null, msg);
+  }
 }
 
 // Auto-refresh prices every 60s
@@ -1881,7 +2201,6 @@ window.addEventListener('load', () => {
     showAlert('err', '❌ Solana library failed to load. Check your internet connection and refresh.');
   }
   updateTotal();
-  renderAlerts();
 
   // Auto-connect if wallet was previously connected
   const provider = window.phantom?.solana || window.solflare || window.solana;
