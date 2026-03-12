@@ -209,6 +209,17 @@
     <button class="net-btn" id="netDev" onclick="setNetwork('devnet')">◎ Devnet</button>
   </div>
 
+  <!-- Custom RPC -->
+  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;">
+    <div style="flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:8px;">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap;letter-spacing:1px;">RPC</span>
+      <input id="customRpcInput" type="text" placeholder="Custom RPC URL (optional — paste your Helius/QuickNode endpoint)"
+        style="flex:1;background:none;border:none;outline:none;font-family:var(--mono);font-size:11px;color:var(--text);"
+        onkeydown="if(event.key==='Enter')applyCustomRPC()">
+    </div>
+    <button onclick="applyCustomRPC()" style="background:rgba(79,156,249,.15);border:1px solid rgba(79,156,249,.3);border-radius:10px;padding:9px 14px;color:var(--accent);font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap;letter-spacing:.5px;">Apply</button>
+  </div>
+
   <!-- Alert box -->
   <div class="alert" id="alertBox"></div>
 
@@ -309,53 +320,56 @@
 // ═══════════════════════════════════════════════════════
 
 // ── Constants ──────────────────────────────────────────
+// Free public RPCs that work from browser without API keys
 const RPC_ENDPOINTS = {
   mainnet: [
-    'https://rpc.ankr.com/solana',
-    'https://solana-mainnet.rpc.extrnode.com',
+    'https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10',
     'https://api.mainnet-beta.solana.com',
   ],
   devnet: [
     'https://api.devnet.solana.com',
-    'https://rpc.ankr.com/solana_devnet',
   ]
 };
 
 let _rpcUrl = null;
+let _customRpc = null; // user-provided custom RPC
 
-// Direct JSON-RPC call — no web3.js Connection needed for simple balance queries
+function getActiveRPCList() {
+  if (_customRpc) return [_customRpc];
+  return RPC_ENDPOINTS[network];
+}
+
 async function rpcCall(method, params = []) {
-  const endpoints = RPC_ENDPOINTS[network];
+  const endpoints = getActiveRPCList();
   let lastErr;
   for (const url of endpoints) {
     try {
-      console.log('[rpcCall] trying', url, method);
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+        body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }),
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status + ' from ' + url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message + ' ('+url+')');
-      console.log('[rpcCall] success', url, method, data.result);
+      if (data.error) throw new Error(data.error.message);
       _rpcUrl = url;
       return data.result;
     } catch(e) {
-      console.warn('[rpcCall] failed', url, e.message);
       lastErr = e;
       continue;
     }
   }
-  throw lastErr || new Error('All RPC endpoints failed');
+  throw lastErr || new Error('All RPCs failed — try setting a custom RPC below');
 }
 
 async function getRPCUrl() {
-  if (!_rpcUrl) {
-    // Warm up by doing a cheap call
-    try { await rpcCall('getSlot'); } catch(e) {}
-  }
-  return _rpcUrl || RPC_ENDPOINTS[network][0];
+  return _rpcUrl || getActiveRPCList()[0];
+}
+
+function setCustomRPC(url) {
+  _customRpc = url || null;
+  _rpcUrl = null;
+  if (walletPubkey) fetchAllBalances();
 }
 
 const TOKEN_PROGRAM_ID       = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
@@ -484,25 +498,18 @@ async function disconnectWallet() {
 // ── Balances ───────────────────────────────────────────
 async function fetchAllBalances() {
   if (!walletPubkey) return;
-  showAlert('ok', '🔄 Fetching balances…');
   try {
-    await fetchSOLBalance();
+    await Promise.all([
+      fetchSOLBalance(),
+      fetchTokenBalance('USDC'),
+      fetchTokenBalance('EURC'),
+      fetchTokenBalance('USDT'),
+    ]);
     updateAllBalanceDisplays();
     updateHints();
-    showAlert('ok', '✅ SOL: ' + balances['SOL'] + ' — fetching tokens…');
   } catch(e) {
-    showAlert('err', '❌ SOL fetch failed: ' + e.message);
+    showAlert('err', '❌ Balance fetch failed: ' + e.message + '<br>Try pasting a custom RPC URL above.');
   }
-  for (const sym of ['USDC','EURC','USDT']) {
-    try {
-      await fetchTokenBalance(sym);
-      updateAllBalanceDisplays();
-    } catch(e) {
-      showAlert('err', '❌ ' + sym + ' failed: ' + e.message);
-    }
-  }
-  updateHints();
-  showAlert('ok', '✅ Balances loaded. SOL=' + balances['SOL'] + ' USDC=' + balances['USDC']);
 }
 
 async function fetchSOLBalance() {
@@ -894,8 +901,21 @@ function copyText(text, el) {
   });
 }
 
+// ── Custom RPC ────────────────────────────────────────
+function applyCustomRPC() {
+  const val = document.getElementById('customRpcInput').value.trim();
+  if (val && !val.startsWith('http')) {
+    showAlert('err', '⚠️ RPC URL must start with http:// or https://'); return;
+  }
+  setCustomRPC(val || null);
+  showAlert('ok', val ? '✅ Using custom RPC: ' + val : '✅ Reverted to public RPC');
+}
+
 // ── Bootstrap ──────────────────────────────────────────
 window.addEventListener('load', () => {
+  // Pre-fill custom RPC field with Helius key
+  const rpcInput = document.getElementById('customRpcInput');
+  if (rpcInput) rpcInput.value = 'https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10';
   // Check if web3 loaded
   if (!window.solanaWeb3) {
     showAlert('err', '❌ Solana library failed to load. Check your internet connection and refresh.');
