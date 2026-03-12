@@ -1095,6 +1095,14 @@ function updateAllBalanceDisplays() {
       ? fmtAmt(balances[sym], sym) + ' ' + sym
       : '—';
   });
+  // Keep balHint in sync with the currently selected token
+  const bh = document.getElementById('balHint');
+  if (bh) {
+    const bal = balances[selectedSym];
+    bh.textContent = walletPubkey && bal != null
+      ? 'Balance: ' + fmtAmt(bal, selectedSym) + ' ' + selectedSym
+      : 'Balance: —';
+  }
   const solBal = document.getElementById('walletBal');
   if (solBal && walletPubkey && balances['SOL'] != null) {
     solBal.textContent = fmtAmt(balances['SOL'], 'SOL') + ' SOL';
@@ -1128,6 +1136,12 @@ function selectToken(el, sym, icon, cls, mint, decimals) {
   el.classList.add('active');
   selectedSym = sym;
   document.getElementById('amountInput').value = '';
+  // Immediately update the balance hint to reflect the newly selected token
+  const bh = document.getElementById('balHint');
+  const bal = balances[sym];
+  bh.textContent = walletPubkey && bal != null
+    ? 'Balance: ' + fmtAmt(bal, sym) + ' ' + sym
+    : 'Balance: —';
   onAmountChange();
   updateHints();
 }
