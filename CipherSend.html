@@ -1136,12 +1136,15 @@ function selectToken(el, sym, icon, cls, mint, decimals) {
   el.classList.add('active');
   selectedSym = sym;
   document.getElementById('amountInput').value = '';
+  document.getElementById('amountInput').focus();
   // Immediately update the balance hint to reflect the newly selected token
   const bh = document.getElementById('balHint');
   const bal = balances[sym];
   bh.textContent = walletPubkey && bal != null
     ? 'Balance: ' + fmtAmt(bal, sym) + ' ' + sym
     : 'Balance: —';
+  // Reset You Send display to show correct token symbol
+  document.getElementById('totalDisplay').textContent = '0.00 —';
   onAmountChange();
   updateHints();
 }
@@ -1182,7 +1185,7 @@ function updateTotal() {
   const amt = parseFloat(document.getElementById('amountInput').value) || 0;
   document.getElementById('totalDisplay').textContent = amt > 0
     ? fmtAmt(amt, selectedSym) + ' ' + selectedSym
-    : '0.00 —';
+    : '0.00 ' + selectedSym;
 
   // ATA fee note
   const ata = document.getElementById('ataFee');
@@ -1251,20 +1254,21 @@ function createATAInstruction(payer, ata, owner, mint) {
       { pubkey: new W.PublicKey(SYSTEM_PROGRAM_ID),   isSigner: false, isWritable: false },
       { pubkey: new W.PublicKey(TOKEN_PROGRAM_ID),    isSigner: false, isWritable: false },
     ],
-    data: Buffer.alloc(0)
+    data: new Uint8Array(0)
   });
 }
 
 // ── Build SPL token transfer instruction ──────────────
 function createTransferInstruction(source, dest, owner, amountLamports) {
   const W = web3();
-  // transfer instruction = 3 (u8) + amount (u64 LE)
-  const data = Buffer.alloc(9);
-  data.writeUInt8(3, 0);
+  // transfer instruction = 3 (u8) + amount (u64 LE) — using Uint8Array (no Node Buffer needed)
+  const data = new Uint8Array(9);
+  const view = new DataView(data.buffer);
+  view.setUint8(0, 3);
   const hi = Math.floor(amountLamports / 0x100000000);
   const lo = amountLamports >>> 0;
-  data.writeUInt32LE(lo, 1);
-  data.writeUInt32LE(hi, 5);
+  view.setUint32(1, lo, true); // little-endian
+  view.setUint32(5, hi, true); // little-endian
   return new W.TransactionInstruction({
     programId: new W.PublicKey(TOKEN_PROGRAM_ID),
     keys: [
