@@ -329,16 +329,23 @@ async function rpcCall(method, params = []) {
   let lastErr;
   for (const url of endpoints) {
     try {
+      console.log('[rpcCall] trying', url, method);
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
       });
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' from ' + url);
       const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      _rpcUrl = url; // remember working endpoint
+      if (data.error) throw new Error(data.error.message + ' ('+url+')');
+      console.log('[rpcCall] success', url, method, data.result);
+      _rpcUrl = url;
       return data.result;
-    } catch(e) { lastErr = e; continue; }
+    } catch(e) {
+      console.warn('[rpcCall] failed', url, e.message);
+      lastErr = e;
+      continue;
+    }
   }
   throw lastErr || new Error('All RPC endpoints failed');
 }
@@ -477,16 +484,25 @@ async function disconnectWallet() {
 // ── Balances ───────────────────────────────────────────
 async function fetchAllBalances() {
   if (!walletPubkey) return;
+  showAlert('ok', '🔄 Fetching balances…');
   try {
-    await Promise.all([
-      fetchSOLBalance(),
-      fetchTokenBalance('USDC'),
-      fetchTokenBalance('EURC'),
-      fetchTokenBalance('USDT'),
-    ]);
+    await fetchSOLBalance();
     updateAllBalanceDisplays();
     updateHints();
-  } catch(e) { /* silent */ }
+    showAlert('ok', '✅ SOL: ' + balances['SOL'] + ' — fetching tokens…');
+  } catch(e) {
+    showAlert('err', '❌ SOL fetch failed: ' + e.message);
+  }
+  for (const sym of ['USDC','EURC','USDT']) {
+    try {
+      await fetchTokenBalance(sym);
+      updateAllBalanceDisplays();
+    } catch(e) {
+      showAlert('err', '❌ ' + sym + ' failed: ' + e.message);
+    }
+  }
+  updateHints();
+  showAlert('ok', '✅ Balances loaded. SOL=' + balances['SOL'] + ' USDC=' + balances['USDC']);
 }
 
 async function fetchSOLBalance() {
