@@ -14,7 +14,6 @@
 <!-- Apple Touch Icons (inline SVG-based via canvas) -->
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2307080f'/%3E%3Ccircle cx='90' cy='90' r='60' fill='none' stroke='%236c63ff' stroke-width='8'/%3E%3Ctext x='90' y='104' text-anchor='middle' font-size='48' font-family='Arial' fill='%236c63ff'%3E₿%3C/text%3E%3C/svg%3E">
 <title>LucidFolio</title>
-<script src="https://unpkg.com/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -3698,7 +3697,7 @@ function switchMainTab(tab) {
   document.getElementById('tab-budget').classList.toggle('active', tab === 'budget');
   document.getElementById('tab-cipher').classList.toggle('active', tab === 'cipher');
   if (tab === 'budget') renderBudget();
-  if (tab === 'cipher' && cWalletPubkey) { cFetchAllBalances(); cUpdatePortfolio(); }
+  if (tab === 'cipher') { if(window.cRefreshOnTabOpen) window.cRefreshOnTabOpen(); }
 }
 
 // ══════════════════════════════════════════
@@ -4849,442 +4848,401 @@ async function init(){
 init();
 </script>
 
-<script>
-// ═══════════════════════════════════════════════
-//  CIPHER — embedded in LucidFolio
-//  All variables/functions prefixed with c_ / c
-// ═══════════════════════════════════════════════
 
-const C_RPC = {
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CIPHER — Self-contained IIFE, zero global conflicts
+//  Loads Solana Web3.js dynamically when tab opens
+// ═══════════════════════════════════════════════════
+(function() {
+'use strict';
+
+const C_RPC_ENDPOINTS = {
   mainnet: [
     'https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10',
     'https://api.mainnet-beta.solana.com',
   ],
   devnet: ['https://api.devnet.solana.com']
 };
-const C_TOKEN_PROGRAM       = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
-const C_ASSOC_TOKEN_PROGRAM = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bxv';
-const C_SYSTEM_PROGRAM      = '11111111111111111111111111111111';
+const C_TOKEN_PROG  = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+const C_ASSOC_PROG  = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJe1bxv';
+const C_SYS_PROG    = '11111111111111111111111111111111';
 
 const C_TOKENS = {
-  SOL:  { sym:'SOL',  dec:9,  mint:null,  cgId:'solana' },
-  USDC: { sym:'USDC', dec:6,  mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', cgId:'usd-coin' },
-  EURC: { sym:'EURC', dec:6,  mint:'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr', cgId:'euro-coin' },
-  USDT: { sym:'USDT', dec:6,  mint:'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', cgId:'tether' },
-  BONK: { sym:'BONK', dec:5,  mint:'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', cgId:'bonk' },
-  JUP:  { sym:'JUP',  dec:6,  mint:'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',  cgId:'jupiter-exchange-solana' },
+  SOL:  { sym:'SOL',  dec:9, mint:null,  cgId:'solana' },
+  USDC: { sym:'USDC', dec:6, mint:'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', cgId:'usd-coin' },
+  EURC: { sym:'EURC', dec:6, mint:'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr', cgId:'euro-coin' },
+  USDT: { sym:'USDT', dec:6, mint:'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', cgId:'tether' },
+  BONK: { sym:'BONK', dec:5, mint:'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', cgId:'bonk' },
+  JUP:  { sym:'JUP',  dec:6, mint:'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN',  cgId:'jupiter-exchange-solana' },
 };
 
-let cNetwork      = 'mainnet';
-let cWalletPubkey = null;
-let cWalletProvider = null;
-let cSelectedSym  = 'SOL';
-let cSelectedMint = null;
-let cSelectedDec  = 9;
-let cBalances     = {};
-let cPrices       = { SOL:150, USDC:1, EURC:1.08, USDT:1, BONK:0.000025, JUP:0.8 };
-let cRpcUrl       = null;
-let cCustomRpc    = null;
+// Private state — no global leakage
+let _net     = 'mainnet';
+let _pubkey  = null;
+let _provider= null;
+let _sym     = 'SOL';
+let _mint    = null;
+let _dec     = 9;
+let _bals    = {};
+let _px      = { SOL:150, USDC:1, EURC:1.08, USDT:1, BONK:0.000025, JUP:0.8 };
+let _rpcUrl  = null;
+let _custRpc = null;
+let _w3      = null;
+let _w3Loaded= false;
 
-// ── RPC ────────────────────────────────────────
-function cGetRPCList() { return cCustomRpc ? [cCustomRpc] : C_RPC[cNetwork]; }
+// ── Load Solana Web3.js dynamically ──────────────────
+function cLoadWeb3(cb) {
+  if (window.solanaWeb3) { _w3=window.solanaWeb3; _w3Loaded=true; cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://unpkg.com/@solana/web3.js@1.98.4/lib/index.iife.min.js';
+  s.onload = () => { _w3=window.solanaWeb3; _w3Loaded=true; cb(); };
+  s.onerror = () => cAlert('err','❌ Failed to load Solana library. Check internet connection.');
+  document.head.appendChild(s);
+}
+
+// ── RPC ──────────────────────────────────────────────
+function cRPCList() { return _custRpc ? [_custRpc] : C_RPC_ENDPOINTS[_net]; }
 
 async function cRPC(method, params=[]) {
-  const endpoints = cGetRPCList();
+  const endpoints = cRPCList();
   let lastErr;
   for (const url of endpoints) {
     try {
       const res = await fetch(url, {
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify({jsonrpc:'2.0', id:Date.now(), method, params})
       });
       if (!res.ok) throw new Error('HTTP '+res.status);
       const d = await res.json();
       if (d.error) throw new Error(d.error.message);
-      cRpcUrl = url;
+      _rpcUrl = url;
       return d.result;
-    } catch(e) { lastErr=e; continue; }
+    } catch(e) { lastErr=e; }
   }
   throw lastErr || new Error('All RPCs failed');
 }
 
-function cW3() { return window.solanaWeb3; }
-
 function cConn() {
-  return new (cW3().Connection)(cRpcUrl || cGetRPCList()[0], 'confirmed');
+  return new _w3.Connection(_rpcUrl || cRPCList()[0], 'confirmed');
 }
 
-// ── Network ─────────────────────────────────────
-function cSetNetwork(net) {
-  cNetwork = net; cRpcUrl = null; cBalances = {};
-  document.getElementById('c-net-main').className = 'c-net-btn' + (net==='mainnet'?' active':'');
-  document.getElementById('c-net-dev').className  = 'c-net-btn' + (net==='devnet' ?' active':'');
-  cUpdateBalanceDisplays();
-  if (cWalletPubkey) cFetchAllBalances();
-}
+// ── Network ──────────────────────────────────────────
+window.cSetNetwork = function(net) {
+  _net=net; _rpcUrl=null; _bals={};
+  document.getElementById('c-net-main').className='c-net-btn'+(net==='mainnet'?' active':'');
+  document.getElementById('c-net-dev').className ='c-net-btn'+(net==='devnet' ?' active':'');
+  cRefreshBalDisplays();
+  if (_pubkey) cFetchAllBals();
+};
 
-function cApplyRPC() {
+window.cApplyRPC = function() {
   const val = document.getElementById('c-rpc-input').value.trim();
-  cCustomRpc = val || null; cRpcUrl = null;
-  cShowAlert('ok', val ? '✅ Custom RPC applied' : '✅ Using default RPC');
-  if (cWalletPubkey) cFetchAllBalances();
-}
+  if (val && !val.startsWith('http')) { cAlert('err','⚠️ URL must start with https://'); return; }
+  _custRpc = val||null; _rpcUrl=null;
+  cAlert('ok', val ? '✅ Custom RPC applied' : '✅ Using default Helius RPC');
+  if (_pubkey) cFetchAllBals();
+};
 
-// ── Wallet ──────────────────────────────────────
-async function cConnectWallet() {
-  if (cWalletPubkey) { cDisconnect(); return; }
-  const provider = window.phantom?.solana || window.solflare || window.solana;
-  if (!provider) { cShowAlert('warn','⚠️ Install Phantom or Solflare wallet'); return; }
-  const btn = document.getElementById('c-wallet-btn');
-  btn.textContent = 'Connecting…'; btn.disabled = true;
-  try {
-    const resp = await provider.connect();
-    cWalletPubkey  = resp.publicKey.toString();
-    cWalletProvider = provider;
-    cOnConnected();
-  } catch(e) {
-    cShowAlert('err','❌ '+(e.message||'Connection failed'));
-    btn.textContent='Connect'; btn.disabled=false;
-  }
-}
+// ── Wallet ───────────────────────────────────────────
+window.cConnectWallet = function() {
+  if (_pubkey) { cDisconnect(); return; }
+  cLoadWeb3(() => {
+    const provider = window.phantom?.solana || window.solflare || window.solana;
+    if (!provider) { cAlert('warn','⚠️ Install Phantom or Solflare wallet extension'); return; }
+    const btn = document.getElementById('c-wallet-btn');
+    btn.textContent='Connecting…'; btn.disabled=true;
+    provider.connect().then(resp => {
+      _pubkey   = resp.publicKey.toString();
+      _provider = provider;
+      cOnConnected();
+    }).catch(e => {
+      cAlert('err','❌ '+(e.message||'Connection failed'));
+      btn.textContent='Connect'; btn.disabled=false;
+    });
+  });
+};
 
 function cOnConnected() {
-  const short = cWalletPubkey.slice(0,5)+'…'+cWalletPubkey.slice(-5);
-  const h = cWalletPubkey.charCodeAt(0)*1.5;
-  document.getElementById('c-avatar').style.background = `linear-gradient(135deg,hsl(${h},65%,55%),hsl(${h+70},65%,40%))`;
-  document.getElementById('c-wlabel').textContent = 'Connected';
-  document.getElementById('c-waddr-display').textContent = short;
-  document.getElementById('c-wbal').style.display = 'block';
-  const btn = document.getElementById('c-wallet-btn');
+  const short = _pubkey.slice(0,5)+'…'+_pubkey.slice(-5);
+  const h = _pubkey.charCodeAt(0)*1.5;
+  document.getElementById('c-avatar').style.background=`linear-gradient(135deg,hsl(${h},65%,55%),hsl(${h+70},65%,40%))`;
+  document.getElementById('c-wlabel').textContent='Connected';
+  document.getElementById('c-waddr-display').textContent=short;
+  document.getElementById('c-wbal').style.display='block';
+  const btn=document.getElementById('c-wallet-btn');
   btn.textContent='Disconnect'; btn.className='c-btn-disconnect'; btn.disabled=false;
-  btn.onclick = cDisconnect;
-  cShowAlert('ok','✅ Connected: '+short);
-  cFetchAllBalances();
+  btn.onclick=cDisconnect;
+  cAlert('ok','✅ Connected: '+short);
+  cFetchAllBals();
   cFetchPrices();
 }
 
-async function cDisconnect() {
-  try {
-    const p = window.phantom?.solana || window.solflare || window.solana;
-    if (p?.disconnect) await p.disconnect();
-  } catch(e){}
-  cWalletPubkey=null; cWalletProvider=null; cBalances={};
+function cDisconnect() {
+  try { const p=window.phantom?.solana||window.solflare||window.solana; if(p?.disconnect) p.disconnect(); } catch(e){}
+  _pubkey=null; _provider=null; _bals={};
   document.getElementById('c-wlabel').textContent='Wallet';
   document.getElementById('c-waddr-display').textContent='Not connected';
   document.getElementById('c-wbal').style.display='none';
   document.getElementById('c-avatar').style.background='linear-gradient(135deg,#6c63ff,#a78bfa)';
   const btn=document.getElementById('c-wallet-btn');
-  btn.textContent='Connect'; btn.className='c-btn-connect'; btn.disabled=false; btn.onclick=cConnectWallet;
-  cUpdateBalanceDisplays();
+  btn.textContent='Connect'; btn.className='c-btn-connect'; btn.disabled=false; btn.onclick=window.cConnectWallet;
+  cRefreshBalDisplays();
 }
 
-// ── Balances ─────────────────────────────────────
-async function cFetchAllBalances() {
-  if (!cWalletPubkey) return;
-  await Promise.all([
-    cFetchSOL(),
-    ...['USDC','EURC','USDT','BONK','JUP'].map(s => cFetchToken(s))
-  ]);
-  cUpdateBalanceDisplays();
+// ── Balances ─────────────────────────────────────────
+async function cFetchAllBals() {
+  if (!_pubkey) return;
+  await Promise.all([cFetchSOL(), ...['USDC','EURC','USDT','BONK','JUP'].map(cFetchTok)]);
+  cRefreshBalDisplays();
   cUpdateHints();
   cUpdatePortfolio();
 }
 
 async function cFetchSOL() {
   try {
-    const r = await cRPC('getBalance',[cWalletPubkey,{commitment:'confirmed'}]);
-    cBalances['SOL'] = (r?.value ?? r ?? 0) / 1e9;
-  } catch(e){}
+    const r = await cRPC('getBalance',[_pubkey,{commitment:'confirmed'}]);
+    _bals.SOL = (r?.value ?? r ?? 0) / 1e9;
+  } catch(e) { console.warn('SOL bal failed:',e.message); }
 }
 
-async function cFetchToken(sym) {
-  const t = C_TOKENS[sym];
-  if (!t.mint) return;
+async function cFetchTok(sym) {
+  const t = C_TOKENS[sym]; if (!t.mint) return;
   try {
-    const r = await cRPC('getTokenAccountsByOwner',[
-      cWalletPubkey, {mint:t.mint}, {encoding:'jsonParsed',commitment:'confirmed'}
-    ]);
-    const accs = r?.value || [];
-    cBalances[sym] = accs.reduce((sum,a) => sum + parseFloat(a.account?.data?.parsed?.info?.tokenAmount?.uiAmount||0), 0);
-  } catch(e) { cBalances[sym]=0; }
+    const r = await cRPC('getTokenAccountsByOwner',[_pubkey,{mint:t.mint},{encoding:'jsonParsed',commitment:'confirmed'}]);
+    _bals[sym] = (r?.value||[]).reduce((s,a)=>s+parseFloat(a.account?.data?.parsed?.info?.tokenAmount?.uiAmount||0),0);
+  } catch(e) { _bals[sym]=0; }
 }
 
-function cUpdateBalanceDisplays() {
-  Object.keys(C_TOKENS).forEach(sym => {
-    const el = document.getElementById('c-bal-'+sym);
-    if (el) el.textContent = cWalletPubkey && cBalances[sym]!=null ? cFmt(cBalances[sym],sym)+' '+sym : '—';
+function cRefreshBalDisplays() {
+  Object.keys(C_TOKENS).forEach(sym=>{
+    const el=document.getElementById('c-bal-'+sym);
+    if(el) el.textContent=_pubkey&&_bals[sym]!=null?cFmt(_bals[sym],sym)+' '+sym:'—';
   });
-  const wb = document.getElementById('c-wbal');
-  if (wb && cWalletPubkey && cBalances['SOL']!=null) wb.textContent = cFmt(cBalances['SOL'],'SOL')+' SOL';
+  const wb=document.getElementById('c-wbal');
+  if(wb&&_pubkey&&_bals.SOL!=null) wb.textContent=cFmt(_bals.SOL,'SOL')+' SOL';
 }
 
-// ── Prices ───────────────────────────────────────
+// ── Prices ───────────────────────────────────────────
 async function cFetchPrices() {
   try {
-    const ids = Object.values(C_TOKENS).map(t=>t.cgId).join(',');
-    const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-    const d = await r.json();
-    Object.values(C_TOKENS).forEach(t => { if(t.cgId && d[t.cgId]?.usd) cPrices[t.sym]=d[t.cgId].usd; });
+    const ids=Object.values(C_TOKENS).map(t=>t.cgId).join(',');
+    const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+    const d=await r.json();
+    Object.values(C_TOKENS).forEach(t=>{ if(t.cgId&&d[t.cgId]?.usd) _px[t.sym]=d[t.cgId].usd; });
     cUpdateHints(); cUpdatePortfolio();
   } catch(e){}
 }
 setInterval(cFetchPrices, 60000);
 
-// ── Token select ─────────────────────────────────
-function cSelectToken(el, sym, mint, dec) {
+// ── Token select ──────────────────────────────────────
+window.cSelectToken = function(el,sym,mint,dec) {
   document.querySelectorAll('#view-cipher .c-token-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
-  cSelectedSym=sym; cSelectedMint=mint; cSelectedDec=dec;
+  _sym=sym; _mint=mint; _dec=dec;
   document.getElementById('c-amount').value='';
   cUpdateHints();
-}
+};
 
-function cSetMax() {
-  const bal = cBalances[cSelectedSym];
-  if (!bal || !cWalletPubkey) return;
-  const safe = cSelectedSym==='SOL' ? Math.max(0,bal-0.01) : bal;
-  document.getElementById('c-amount').value = +safe.toFixed(cSelectedDec);
+window.cSetMax = function() {
+  const b=_bals[_sym]; if(!b||!_pubkey) return;
+  document.getElementById('c-amount').value = +(((_sym==='SOL'?Math.max(0,b-0.01):b)).toFixed(_dec));
   cUpdateHints();
-}
+};
 
-// ── Hints ────────────────────────────────────────
 function cUpdateHints() {
-  const amt = parseFloat(document.getElementById('c-amount').value)||0;
-  const bal = cBalances[cSelectedSym];
-  document.getElementById('c-bal-hint').textContent = cWalletPubkey && bal!=null
-    ? 'Balance: '+cFmt(bal,cSelectedSym)+' '+cSelectedSym : 'Balance: —';
-  const uh = document.getElementById('c-usd-hint');
-  uh.textContent = amt>0 && cPrices[cSelectedSym]
-    ? '≈ $'+(amt*cPrices[cSelectedSym]).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USD' : '';
-  document.getElementById('c-total').textContent = amt>0 ? cFmt(amt,cSelectedSym)+' '+cSelectedSym : '0.00 —';
+  const amt=parseFloat(document.getElementById('c-amount').value)||0;
+  const b=_bals[_sym];
+  document.getElementById('c-bal-hint').textContent=_pubkey&&b!=null?'Balance: '+cFmt(b,_sym)+' '+_sym:'Balance: —';
+  const uh=document.getElementById('c-usd-hint');
+  uh.textContent=amt>0&&_px[_sym]?'≈ $'+(amt*_px[_sym]).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+' USD':'';
+  document.getElementById('c-total').textContent=amt>0?cFmt(amt,_sym)+' '+_sym:'0.00 —';
 }
 
-function cValidateAddr() {
-  const val = document.getElementById('c-recipient').value.trim();
-  const hint = document.getElementById('c-addr-hint');
-  if (!val) { hint.textContent=''; return false; }
-  const ok = val.length>=32 && val.length<=88 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(val);
-  hint.textContent = ok ? '✓ Valid address' : '✗ Invalid address';
-  hint.style.color = ok ? 'var(--green)' : 'var(--red)';
+window.cValidateAddr = function() {
+  const val=document.getElementById('c-recipient').value.trim();
+  const hint=document.getElementById('c-addr-hint');
+  if(!val){hint.textContent='';return false;}
+  const ok=val.length>=32&&val.length<=88&&/^[1-9A-HJ-NP-Za-km-z]+$/.test(val);
+  hint.textContent=ok?'✓ Valid address':'✗ Invalid address';
+  hint.style.color=ok?'var(--green)':'var(--red)';
   return ok;
-}
+};
 
-// ── ATA ──────────────────────────────────────────
+// ── ATA helpers ──────────────────────────────────────
 async function cGetATA(mintPk, ownerPk) {
-  const W = cW3();
-  const [addr] = await W.PublicKey.findProgramAddress(
-    [ownerPk.toBuffer(), new W.PublicKey(C_TOKEN_PROGRAM).toBuffer(), mintPk.toBuffer()],
-    new W.PublicKey(C_ASSOC_TOKEN_PROGRAM)
+  const [addr]=await _w3.PublicKey.findProgramAddress(
+    [ownerPk.toBuffer(),new _w3.PublicKey(C_TOKEN_PROG).toBuffer(),mintPk.toBuffer()],
+    new _w3.PublicKey(C_ASSOC_PROG)
   );
   return addr;
 }
-
-function cMakeATAIx(payer, ata, owner, mint) {
-  const W = cW3();
-  return new W.TransactionInstruction({
-    programId: new W.PublicKey(C_ASSOC_TOKEN_PROGRAM),
-    keys:[
-      {pubkey:payer,isSigner:true,isWritable:true},
-      {pubkey:ata,isSigner:false,isWritable:true},
-      {pubkey:owner,isSigner:false,isWritable:false},
-      {pubkey:mint,isSigner:false,isWritable:false},
-      {pubkey:new W.PublicKey(C_SYSTEM_PROGRAM),isSigner:false,isWritable:false},
-      {pubkey:new W.PublicKey(C_TOKEN_PROGRAM),isSigner:false,isWritable:false},
-    ], data:Buffer.alloc(0)
+function cMakeATAIx(payer,ata,owner,mint) {
+  return new _w3.TransactionInstruction({
+    programId:new _w3.PublicKey(C_ASSOC_PROG),
+    keys:[{pubkey:payer,isSigner:true,isWritable:true},{pubkey:ata,isSigner:false,isWritable:true},{pubkey:owner,isSigner:false,isWritable:false},{pubkey:mint,isSigner:false,isWritable:false},{pubkey:new _w3.PublicKey(C_SYS_PROG),isSigner:false,isWritable:false},{pubkey:new _w3.PublicKey(C_TOKEN_PROG),isSigner:false,isWritable:false}],
+    data:Buffer.alloc(0)
+  });
+}
+function cMakeTransferIx(src,dst,owner,lamps) {
+  const data=Buffer.alloc(9);
+  data.writeUInt8(3,0); data.writeUInt32LE(lamps>>>0,1); data.writeUInt32LE(Math.floor(lamps/0x100000000),5);
+  return new _w3.TransactionInstruction({
+    programId:new _w3.PublicKey(C_TOKEN_PROG),
+    keys:[{pubkey:src,isSigner:false,isWritable:true},{pubkey:dst,isSigner:false,isWritable:true},{pubkey:owner,isSigner:true,isWritable:false}],data
   });
 }
 
-function cMakeTransferIx(src, dst, owner, lamports) {
-  const W = cW3();
-  const data = Buffer.alloc(9);
-  data.writeUInt8(3,0);
-  data.writeUInt32LE(lamports>>>0,1);
-  data.writeUInt32LE(Math.floor(lamports/0x100000000),5);
-  return new W.TransactionInstruction({
-    programId:new W.PublicKey(C_TOKEN_PROGRAM),
-    keys:[{pubkey:src,isSigner:false,isWritable:true},{pubkey:dst,isSigner:false,isWritable:true},{pubkey:owner,isSigner:true,isWritable:false}],
-    data
-  });
-}
-
-// ── Send ─────────────────────────────────────────
-async function cHandleSend() {
-  if (!cWalletPubkey) { await cConnectWallet(); return; }
-  const amount = parseFloat(document.getElementById('c-amount').value);
-  const recipient = document.getElementById('c-recipient').value.trim();
-  if (!amount||amount<=0) { cShowAlert('err','⚠️ Enter a valid amount'); return; }
-  if (!cValidateAddr()) { cShowAlert('err','⚠️ Invalid recipient address'); return; }
-  if (recipient===cWalletPubkey) { cShowAlert('err','⚠️ Cannot send to yourself'); return; }
-
-  // Re-fetch balance
-  try { if(cSelectedSym==='SOL') await cFetchSOL(); else await cFetchToken(cSelectedSym); } catch(e){}
-  const bal = cBalances[cSelectedSym];
-  if (bal!=null && amount>bal) { cShowAlert('err',`⚠️ Insufficient balance. You have ${cFmt(bal,cSelectedSym)} ${cSelectedSym}`); return; }
-
-  const btn = document.getElementById('c-send-btn');
-  btn.textContent='⏳ Signing…'; btn.disabled=true;
-  cShowAlert('ok','🔐 Please approve in your wallet…');
-
-  try {
-    const W    = cW3();
-    const conn = cConn();
-    const from = new W.PublicKey(cWalletPubkey);
-    const to   = new W.PublicKey(recipient);
-    let tx = new W.Transaction();
-
-    if (cSelectedSym==='SOL') {
-      tx.add(W.SystemProgram.transfer({fromPubkey:from,toPubkey:to,lamports:Math.round(amount*1e9)}));
+// ── Send ─────────────────────────────────────────────
+window.cHandleSend = async function() {
+  if(!_pubkey){window.cConnectWallet();return;}
+  const amount=parseFloat(document.getElementById('c-amount').value);
+  const recip=document.getElementById('c-recipient').value.trim();
+  if(!amount||amount<=0){cAlert('err','⚠️ Enter a valid amount');return;}
+  if(!window.cValidateAddr()){cAlert('err','⚠️ Invalid recipient address');return;}
+  if(recip===_pubkey){cAlert('err','⚠️ Cannot send to yourself');return;}
+  try{if(_sym==='SOL')await cFetchSOL();else await cFetchTok(_sym);}catch(e){}
+  const b=_bals[_sym];
+  if(b!=null&&amount>b){cAlert('err',`⚠️ Insufficient. Have ${cFmt(b,_sym)} ${_sym}`);return;}
+  const btn=document.getElementById('c-send-btn');
+  btn.textContent='⏳ Signing…';btn.disabled=true;
+  cAlert('ok','🔐 Approve in your wallet…');
+  try{
+    const conn=cConn(), from=new _w3.PublicKey(_pubkey), to=new _w3.PublicKey(recip);
+    const tx=new _w3.Transaction();
+    if(_sym==='SOL'){
+      tx.add(_w3.SystemProgram.transfer({fromPubkey:from,toPubkey:to,lamports:Math.round(amount*1e9)}));
     } else {
-      const mint = new W.PublicKey(cSelectedMint);
-      const srcATA  = await cGetATA(mint, from);
-      const dstATA  = await cGetATA(mint, to);
-      const dstInfo = await conn.getAccountInfo(dstATA);
-      if (!dstInfo) tx.add(cMakeATAIx(from, dstATA, to, mint));
-      tx.add(cMakeTransferIx(srcATA, dstATA, from, Math.round(amount * Math.pow(10, cSelectedDec))));
+      const mint=new _w3.PublicKey(_mint);
+      const srcATA=await cGetATA(mint,from), dstATA=await cGetATA(mint,to);
+      if(!(await conn.getAccountInfo(dstATA))) tx.add(cMakeATAIx(from,dstATA,to,mint));
+      tx.add(cMakeTransferIx(srcATA,dstATA,from,Math.round(amount*Math.pow(10,_dec))));
     }
-
-    const {blockhash} = await conn.getLatestBlockhash('confirmed');
+    const {blockhash}=await conn.getLatestBlockhash('confirmed');
     tx.recentBlockhash=blockhash; tx.feePayer=from;
-
     let sig;
-    const prov = cWalletProvider;
-    if (prov.signAndSendTransaction) {
-      const res = await prov.signAndSendTransaction(tx);
-      sig = res.signature||res;
-    } else {
-      const signed = await prov.signTransaction(tx);
-      sig = await conn.sendRawTransaction(signed.serialize());
-    }
-
+    if(_provider.signAndSendTransaction){const r=await _provider.signAndSendTransaction(tx);sig=r.signature||r;}
+    else{const s=await _provider.signTransaction(tx);sig=await conn.sendRawTransaction(s.serialize());}
     await conn.confirmTransaction(sig,'confirmed');
-    const short = sig.slice(0,8)+'…'+sig.slice(-8);
-    const explorerBase = cNetwork==='mainnet' ? 'https://solscan.io/tx/' : 'https://solscan.io/tx/?cluster=devnet';
-    cShowAlert('ok',`✅ Sent ${cFmt(amount,cSelectedSym)} ${cSelectedSym}! <a href="${explorerBase}${sig}" target="_blank" style="color:var(--green);text-decoration:underline">View ↗</a>`);
+    const base=_net==='mainnet'?'https://solscan.io/tx/':'https://solscan.io/tx/?cluster=devnet';
+    cAlert('ok',`✅ Sent ${cFmt(amount,_sym)} ${_sym}! <a href="${base}${sig}" target="_blank" style="color:var(--green);text-decoration:underline">View ↗</a>`);
     document.getElementById('c-amount').value='';
-    setTimeout(()=>{ cFetchAllBalances(); cFetchHistory(); }, 2500);
-  } catch(e) {
-    let msg = e.message||'Transaction failed';
-    if (msg.includes('reject')||msg.includes('cancel')) msg='Cancelled by user';
-    cShowAlert('err','❌ '+msg);
+    setTimeout(()=>{cFetchAllBals();cFetchHistory();},2500);
+  }catch(e){
+    let m=e.message||'Failed';
+    if(m.includes('reject')||m.includes('cancel'))m='Cancelled';
+    cAlert('err','❌ '+m);
   }
-  btn.textContent='Send'; btn.disabled=false;
-}
+  btn.textContent='Send';btn.disabled=false;
+};
 
-// ── Portfolio ─────────────────────────────────────
+// ── Portfolio ─────────────────────────────────────────
 function cUpdatePortfolio() {
-  if (!cWalletPubkey) return;
-  const grid  = document.getElementById('c-portfolio-grid');
-  const total = document.getElementById('c-portfolio-total');
-  const count = document.getElementById('c-portfolio-count');
-
-  let totalUSD=0, items=[];
+  if(!_pubkey)return;
+  let total=0,items=[];
   Object.keys(C_TOKENS).forEach(sym=>{
-    const bal=cBalances[sym]||0, px=cPrices[sym]||0, usd=bal*px;
-    totalUSD+=usd;
-    if(bal>0||sym==='SOL') items.push({sym,bal,px,usd});
+    const b=_bals[sym]||0,p=_px[sym]||0,u=b*p;
+    total+=u; if(b>0||sym==='SOL')items.push({sym,b,p,u});
   });
-  items.sort((a,b)=>b.usd-a.usd);
-
-  total.textContent = '$'+totalUSD.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
-  count.textContent = items.filter(i=>i.bal>0).length+' tokens';
-
+  items.sort((a,x)=>x.u-a.u);
+  document.getElementById('c-portfolio-total').textContent='$'+total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('c-portfolio-count').textContent=items.filter(i=>i.b>0).length+' tokens';
   const icons={SOL:'◎',USDC:'$',EURC:'€',USDT:'₮',BONK:'🐶',JUP:'⚡'};
   const bgs={SOL:'linear-gradient(135deg,#9945ff,#14f195)',USDC:'#2775ca',EURC:'#0052b4',USDT:'#26a17b',BONK:'#f97316',JUP:'#16a34a'};
-
-  grid.innerHTML = items.map(({sym,bal,px,usd})=>`
+  document.getElementById('c-portfolio-grid').innerHTML=items.map(({sym,b,p,u})=>`
     <div class="c-pi" onclick="cQuickSelect('${sym}')">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-        <div style="width:20px;height:20px;border-radius:50%;background:${bgs[sym]||'#333'};display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">${icons[sym]||'?'}</div>
-        <div class="c-pi-sym">${sym}</div>
-        <div class="c-pi-px" style="margin-left:auto">$${px>=1?px.toLocaleString(undefined,{maximumFractionDigits:2}):px.toFixed(6)}</div>
+        <div style="width:20px;height:20px;border-radius:50%;background:${bgs[sym]||'#444'};display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">${icons[sym]||'?'}</div>
+        <span style="font-size:12px;font-weight:700">${sym}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto">$${p>=1?p.toLocaleString(undefined,{maximumFractionDigits:2}):p.toFixed(6)}</span>
       </div>
-      <div class="c-pi-bal">${cFmt(bal,sym)}</div>
-      <div class="c-pi-usd">${usd>0.001?'$'+usd.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'< $0.001'}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px">${cFmt(b,sym)}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--green);margin-top:2px">${u>0.001?'$'+u.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'< $0.001'}</div>
     </div>`).join('');
 }
 
-function cQuickSelect(sym) {
-  const btn = document.querySelector(`#view-cipher .c-token-btn[onclick*="'${sym}'"]`);
-  if (btn) { btn.click(); cSwitchTab('send'); }
-}
+window.cQuickSelect = function(sym) {
+  const btn=document.querySelector(`#view-cipher .c-token-btn[onclick*="'${sym}'"]`);
+  if(btn){btn.click();cSwitchInnerTab('send');}
+};
 
-// ── History ───────────────────────────────────────
+// ── History ───────────────────────────────────────────
 async function cFetchHistory() {
-  if (!cWalletPubkey) return;
-  const list = document.getElementById('c-tx-list');
-  list.innerHTML = '<div style="text-align:center;padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">Loading…</div>';
-  try {
-    const sigs = await cRPC('getSignaturesForAddress',[cWalletPubkey,{limit:15,commitment:'confirmed'}]);
-    if (!sigs||!sigs.length) { list.innerHTML='<div style="text-align:center;padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">No transactions</div>'; return; }
-    const txs = await Promise.all(sigs.slice(0,10).map(s=>
-      cRPC('getTransaction',[s.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]).catch(()=>null)
-    ));
-    const explorerBase = cNetwork==='mainnet'?'https://solscan.io/tx/':'https://solscan.io/tx/?cluster=devnet';
-    list.innerHTML = sigs.slice(0,txs.filter(Boolean).length).map((sigInfo,i)=>{
-      const tx=txs[i]; if(!tx) return '';
-      const sig=sigInfo.signature;
-      const time=sigInfo.blockTime?new Date(sigInfo.blockTime*1000):null;
-      const timeStr=time?time.toLocaleDateString()+' '+time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+  if(!_pubkey)return;
+  const list=document.getElementById('c-tx-list');
+  list.innerHTML='<div style="text-align:center;padding:20px;font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted)">Loading…</div>';
+  try{
+    const sigs=await cRPC('getSignaturesForAddress',[_pubkey,{limit:15,commitment:'confirmed'}]);
+    if(!sigs?.length){list.innerHTML='<div style="text-align:center;padding:20px;font-family:\'DM Mono\',monospace;font-size:11px;color:var(--muted)">No transactions</div>';return;}
+    const txs=await Promise.all(sigs.slice(0,10).map(s=>cRPC('getTransaction',[s.signature,{encoding:'jsonParsed',maxSupportedTransactionVersion:0}]).catch(()=>null)));
+    const base=_net==='mainnet'?'https://solscan.io/tx/':'https://solscan.io/tx/?cluster=devnet';
+    list.innerHTML=sigs.slice(0,txs.filter(Boolean).length).map((si,i)=>{
+      const tx=txs[i];if(!tx)return'';
+      const sig=si.signature,time=si.blockTime?new Date(si.blockTime*1000):null;
+      const ts=time?time.toLocaleDateString()+' '+time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
       const keys=tx.transaction?.message?.accountKeys||[];
-      const myIdx=keys.findIndex(k=>(k.pubkey||k)===cWalletPubkey);
-      const solDiff=((tx.meta?.postBalances?.[myIdx]||0)-(tx.meta?.preBalances?.[myIdx]||0))/1e9;
-      const postTk=tx.meta?.postTokenBalances||[], preTk=tx.meta?.preTokenBalances||[];
-      let tkChange=null;
-      for(const p of postTk){ if(p.owner===cWalletPubkey){const pr=preTk.find(x=>x.accountIndex===p.accountIndex); const diff=(p.uiTokenAmount?.uiAmount||0)-(pr?.uiTokenAmount?.uiAmount||0); if(Math.abs(diff)>0.000001){tkChange={mint:p.mint,diff};break;}}}
-      let label,amtStr,dir;
-      if(tx.meta?.err){label='❌ Failed';amtStr='—';dir='sent';}
-      else if(tkChange){const s=Object.entries(C_TOKENS).find(([,t])=>t.mint===tkChange.mint)?.[0]||tkChange.mint.slice(0,4);dir=tkChange.diff>=0?'recv':'sent';label=tkChange.diff>=0?'↙ Recv':'↗ Sent';amtStr=(tkChange.diff>=0?'+':'')+cFmt(Math.abs(tkChange.diff),s)+' '+s;}
-      else if(Math.abs(solDiff)>0.000001){dir=solDiff>=0?'recv':'sent';label=solDiff>=0?'↙ Recv':'↗ Sent';amtStr=(solDiff>=0?'+':'')+cFmt(Math.abs(solDiff),'SOL')+' SOL';}
-      else{label='⚙ Contract';amtStr='—';dir='sent';}
-      const other=keys.filter(k=>(k.pubkey||k)!==cWalletPubkey)[0];
-      const otherShort=other?((k=>k.slice(0,4)+'…'+k.slice(-4))(other.pubkey||other)):'—';
-      return `<div class="c-tx-item" onclick="window.open('${explorerBase}${sig}','_blank')">
+      const mi=keys.findIndex(k=>(k.pubkey||k)===_pubkey);
+      const sdiff=((tx.meta?.postBalances?.[mi]||0)-(tx.meta?.preBalances?.[mi]||0))/1e9;
+      const pTk=tx.meta?.postTokenBalances||[],prTk=tx.meta?.preTokenBalances||[];
+      let tkc=null;
+      for(const p of pTk){if(p.owner===_pubkey){const pr=prTk.find(x=>x.accountIndex===p.accountIndex);const d=(p.uiTokenAmount?.uiAmount||0)-(pr?.uiTokenAmount?.uiAmount||0);if(Math.abs(d)>0.000001){tkc={mint:p.mint,d};break;}}}
+      let lbl,amt,dir;
+      if(tx.meta?.err){lbl='❌ Failed';amt='—';dir='sent';}
+      else if(tkc){const s=Object.entries(C_TOKENS).find(([,t])=>t.mint===tkc.mint)?.[0]||tkc.mint.slice(0,4);dir=tkc.d>=0?'recv':'sent';lbl=tkc.d>=0?'↙ Recv':'↗ Sent';amt=(tkc.d>=0?'+':'')+cFmt(Math.abs(tkc.d),s)+' '+s;}
+      else if(Math.abs(sdiff)>0.000001){dir=sdiff>=0?'recv':'sent';lbl=sdiff>=0?'↙ Recv':'↗ Sent';amt=(sdiff>=0?'+':'')+cFmt(Math.abs(sdiff),'SOL')+' SOL';}
+      else{lbl='⚙ Contract';amt='—';dir='sent';}
+      const oth=keys.filter(k=>(k.pubkey||k)!==_pubkey)[0];
+      const os=oth?((k=>k.slice(0,4)+'…'+k.slice(-4))(oth.pubkey||oth)):'—';
+      return`<div class="c-tx-item" onclick="window.open('${base}${sig}','_blank')">
         <div class="c-tx-icon ${dir}">${dir==='recv'?'↙':'↗'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:700">${label}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${otherShort}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0">
-          <div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:${dir==='recv'?'var(--green)':'var(--red)'}">${amtStr}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${timeStr}</div>
-        </div>
+        <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700">${lbl}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${os}</div></div>
+        <div style="text-align:right;flex-shrink:0"><div style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:${dir==='recv'?'var(--green)':'var(--red)'}">${amt}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${ts}</div></div>
       </div>`;
     }).join('');
-  } catch(e) { list.innerHTML=`<div style="text-align:center;padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">Error: ${e.message}</div>`; }
+  }catch(e){list.innerHTML=`<div style="text-align:center;padding:20px;font-family:'DM Mono',monospace;font-size:11px;color:var(--red)">Error: ${e.message}</div>`;}
 }
 
-// ── Tab switching ─────────────────────────────────
-function cSwitchTab(name) {
+// ── Inner tab switch ──────────────────────────────────
+function cSwitchInnerTab(name) {
   ['send','portfolio','history'].forEach(t=>{
     document.getElementById('c-tab-'+t).classList.toggle('active',t===name);
     document.getElementById('c-pane-'+t).style.display=t===name?'':'none';
   });
-  if (name==='history' && cWalletPubkey) cFetchHistory();
-  if (name==='portfolio') cUpdatePortfolio();
+  if(name==='history'&&_pubkey)cFetchHistory();
+  if(name==='portfolio')cUpdatePortfolio();
+}
+window.cSwitchTab = cSwitchInnerTab;
+
+// ── Alert ─────────────────────────────────────────────
+function cAlert(type,html) {
+  const el=document.getElementById('c-alert');
+  el.className='c-alert '+type; el.innerHTML=html; el.style.display='block';
+  clearTimeout(el._t); el._t=setTimeout(()=>{el.style.display='none';},7000);
 }
 
-// ── Alert ─────────────────────────────────────────
-function cShowAlert(type, html) {
-  const el = document.getElementById('c-alert');
-  el.className='c-alert '+type;
-  el.innerHTML=html; el.style.display='block';
-  clearTimeout(el._t);
-  el._t=setTimeout(()=>{el.style.display='none';},6000);
+// ── Utils ─────────────────────────────────────────────
+function cFmt(n,sym) {
+  const dec=sym==='SOL'?4:sym==='BONK'?0:2;
+  return(+n).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:dec});
 }
 
-// ── Utils ─────────────────────────────────────────
-function cFmt(n, sym) {
-  const dec = sym==='SOL'?4:sym==='BONK'?0:2;
-  return (+n).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:dec});
-}
+// ── Expose refresh for switchMainTab ─────────────────
+window.cRefreshOnTabOpen = function() {
+  if(_pubkey){cFetchAllBals();cUpdatePortfolio();}
+  // Pre-fill RPC
+  const el=document.getElementById('c-rpc-input');
+  if(el&&!el.value) el.value='https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10';
+};
 
-// ── Auto-connect ──────────────────────────────────
-window.addEventListener('load', ()=>{
-  const rpcEl = document.getElementById('c-rpc-input');
-  if (rpcEl) rpcEl.value = 'https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10';
-  const p = window.phantom?.solana||window.solflare||window.solana;
-  if (p?.isConnected && p?.publicKey) { cWalletPubkey=p.publicKey.toString(); cWalletProvider=p; cOnConnected(); }
+// ── Auto-connect if wallet already connected ──────────
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('c-rpc-input');
+  if(el) el.value='https://mainnet.helius-rpc.com/?api-key=050ba9da-5d7a-4615-a5b2-f69852b51a10';
 });
+
+})(); // end IIFE
 </script>
 
 </body>
