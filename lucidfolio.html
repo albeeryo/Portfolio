@@ -2246,7 +2246,7 @@ async function fetchPrices() {
   $('last-upd').textContent='Updated '+now();
   renderHoldings(false);
   renderWL();
-  // Always refresh live price display so P&L/stats stay current
+  // Always update price display so stats/P&L stay live on every auto-refresh
   updatePtfPriceDisplay();
 }
 
@@ -2295,21 +2295,17 @@ function rebuildTicker() {
   track.style.animation=`ticker-scroll ${Math.max(40,all.length*3.5)}s linear infinite`;
 }
 async function manualRefresh(){
-  const btns = [
-    document.getElementById('action-refresh'),
-    document.getElementById('btn-refresh')
-  ].filter(Boolean);
-  btns.forEach(b => { b.disabled = true; b.classList.add('spinning'); });
-  try {
-    await Promise.all([fetchPrices(), fetchTicker()]);
-    // Always update live price display and stats bar
+  // action-refresh = portfolio action bar button, btn-refresh = side menu button
+  const btns = ['action-refresh','btn-refresh'].map(id=>document.getElementById(id)).filter(Boolean);
+  btns.forEach(b=>{ b.disabled=true; b.classList.add('spinning'); });
+  try{
+    await Promise.all([fetchPrices(),fetchTicker()]);
+    // Force update stats bar + chart price label right now
     updatePtfPriceDisplay();
-    // If on portfolio tab, also reload the chart with fresh candle data
-    if (window._currentTab === 'portfolio' && _ptfActiveCoin) {
-      loadPtfChartData();
-    }
-  } finally {
-    btns.forEach(b => { b.disabled = false; b.classList.remove('spinning'); });
+    // Reload chart candles so graph reflects latest prices
+    if(_ptfActiveCoin) loadPtfChartData();
+  } finally{
+    btns.forEach(b=>{ b.disabled=false; b.classList.remove('spinning'); });
   }
 }
 
@@ -3676,7 +3672,7 @@ function switchMainTab(tab) {
   if (ptfSec) {
     if (tab === 'portfolio' && S.holdings && S.holdings.length) {
       ptfSec.style.display = '';
-      // Immediately show live price from cache BEFORE chart finishes loading
+      // Show live price from cache instantly, then load chart history
       updatePtfPriceDisplay();
       setTimeout(() => renderPtfChart(), 50);
     } else {
@@ -5796,7 +5792,7 @@ async function init(){
   await fetchPrices();
   renderHoldings(false);
   renderWL();
-  // Pre-warm active coin so live price shows instantly when portfolio tab is opened
+  // Pre-set active coin so live price shows instantly on first portfolio tab open
   if (!_ptfActiveCoin && S.holdings && S.holdings.length) {
     _ptfActiveCoin = S.holdings[0].coinId;
   }
