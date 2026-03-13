@@ -5171,19 +5171,33 @@ async function loadPtfChartData() {
   const holding = S.holdings.find(h => h.coinId === _ptfActiveCoin);
   if (!holding) return;
   const coin = COIN_BY_ID[_ptfActiveCoin];
-  const lp = priceOf(holding);
 
-  const nameEl = document.getElementById('ptf-chart-name');
-  const priceEl = document.getElementById('ptf-chart-price');
+  const nameEl   = document.getElementById('ptf-chart-name');
+  const priceEl  = document.getElementById('ptf-chart-price');
   const changeEl = document.getElementById('ptf-chart-change');
-  if (nameEl) nameEl.textContent = (coin?.n || holding.name) + ' (' + holding.symbol + ')';
-  if (priceEl && lp) priceEl.textContent = fmtPrice(lp.usd);
-  if (changeEl && lp) {
-    const chg = lp.change24 || 0;
-    changeEl.textContent = (chg >= 0 ? '↑ ' : '↓ ') + Math.abs(chg).toFixed(2) + '% (24h)';
-    changeEl.className = 'ptf-chart-change ' + (chg >= 0 ? 'up' : 'down');
+  const bar      = document.getElementById('ptf-crosshair-bar');
+  const chP      = document.getElementById('ptf-ch-price');
+  const chD      = document.getElementById('ptf-ch-date');
+
+  if (nameEl) nameEl.textContent = (coin?.n || holding.name || holding.symbol) + ' (' + holding.symbol + ')';
+
+  // Helper — update both the big price and the crosshair bar
+  function showPrice(usdVal, chg24) {
+    if (!usdVal) return;
+    if (priceEl)  priceEl.textContent  = fmtPrice(usdVal);
+    if (chP)      chP.textContent      = fmtPrice(usdVal);
+    if (changeEl && chg24 !== undefined) {
+      changeEl.textContent = (chg24 >= 0 ? '↑ ' : '↓ ') + Math.abs(chg24).toFixed(2) + '% (24h)';
+      changeEl.className   = 'ptf-chart-change ' + (chg24 >= 0 ? 'up' : 'down');
+    }
+    if (bar) bar.style.display = 'flex';
   }
 
+  // Use live price cache immediately if available
+  const lp = priceOf(holding);
+  if (lp?.usd) showPrice(lp.usd, lp.change24 || 0);
+
+  // Fetch chart candles
   const daysMap = { '1D':'1','1W':'7','1M':'30','1Y':'365' };
   const days = daysMap[_ptfRange] || '7';
   const loadEl = document.getElementById('ptf-chart-loading');
@@ -5194,31 +5208,40 @@ async function loadPtfChartData() {
     const data = await cgFetch(`/coins/${_ptfActiveCoin}/market_chart?vs_currency=usd&days=${days}`);
     _ptfChartData = (data.prices || []).map(p => ({ t: p[0], v: p[1] }));
   } catch(e) {
-    const p = lp?.usd || 100;
-    const n = _ptfRange === '1D' ? 24 : _ptfRange === '1W' ? 7*24 : _ptfRange === '1M' ? 30 : 365;
+    const fallback = lp?.usd || holding.buyPrice || 1;
+    const n = _ptfRange === '1D' ? 24 : _ptfRange === '1W' ? 168 : _ptfRange === '1M' ? 30 : 365;
     _ptfChartData = Array.from({length: n}, (_, i) => ({
       t: Date.now() - (n - i) * 3600000,
-      v: p * (0.85 + Math.random() * 0.3)
+      v: fallback * (0.88 + Math.random() * 0.24)
     }));
   }
   if (loadEl) loadEl.style.display = 'none';
+
+  // Always update price from latest candle (most accurate/current value)
+  if (_ptfChartData.length) {
+    const last  = _ptfChartData[_ptfChartData.length - 1];
+    const first = _ptfChartData[0];
+    const candleChg = first.v ? ((last.v - first.v) / first.v) * 100 : 0;
+    // Prefer live price for the header but always use candle for crosshair bar date
+    showPrice(lp?.usd || last.v, lp?.change24 ?? candleChg);
+    if (chD) {
+      const dt = new Date(last.t);
+      chD.textContent = _ptfRange === '1D'
+        ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+    }
+  }
+
   _ptfHoveredMarker = null;
   drawPtfChart();
   _attachPtfEvents();
-  // Pre-fill crosshair bar with latest price
-  const _bar = document.getElementById('ptf-crosshair-bar');
-  const _chP = document.getElementById('ptf-ch-price');
-  const _chD = document.getElementById('ptf-ch-date');
-  if (_bar && _ptfChartData.length) {
-    const _last = _ptfChartData[_ptfChartData.length - 1];
-    if (_chP) _chP.textContent = fmtPrice(_last.v);
-    if (_chD) {
-      const _dt = new Date(_last.t);
-      _chD.textContent = _ptfRange === '1D'
-        ? _dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        : _dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
-    }
-    _bar.style.display = 'flex';
+
+  // If prices weren't cached yet, retry after prices likely loaded
+  if (!lp?.usd) {
+    setTimeout(() => {
+      const lp2 = priceOf(holding);
+      if (lp2?.usd) showPrice(lp2.usd, lp2.change24 || 0);
+    }, 2500);
   }
 }
 
