@@ -130,12 +130,15 @@ body{
 
 /* ── WATCHLIST PANEL ── */
 .wl-panel{
-  position:fixed;bottom:calc(var(--ticker-h) + 64px + env(safe-area-inset-bottom,0px));right:0;width:210px;
+  position:fixed;bottom:calc(var(--ticker-h) + 64px + env(safe-area-inset-bottom,0px));right:0;width:200px;
   background:var(--surface);border:1px solid var(--border);
   border-bottom:none;border-right:none;border-radius:14px 0 0 0;
   z-index:150;overflow:hidden;transition:transform .3s cubic-bezier(.4,0,.2,1);
   box-shadow:var(--card-shadow);
+  /* Always starts collapsed — tap header to expand */
+  transform:translateY(calc(100% - 36px));
 }
+.wl-panel.open{transform:translateY(0);}
 .wl-panel.collapsed{transform:translateY(calc(100% - 36px));}
 .wl-head{display:flex;align-items:center;justify-content:space-between;padding:0 14px;height:36px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
 .wl-title{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
@@ -365,13 +368,13 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
    STATS ROW — slim cards
 ───────────────────────────────── */
 .stats-bar{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-  margin-bottom:20px;animation:fadeUp .4s ease both;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+  margin-bottom:24px;animation:fadeUp .4s ease both;
 }
 @media(max-width:580px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
-.stat-card{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--card-shadow);}
-.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px;font-weight:500;}
-.stat-val{font-size:clamp(15px,2vw,20px);font-weight:700;color:var(--text);letter-spacing:-.5px;font-variant-numeric:tabular-nums;}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--card-shadow);}
+.stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;font-weight:600;}
+.stat-val{font-size:clamp(16px,2.5vw,22px);font-weight:700;color:var(--text);letter-spacing:-.5px;font-variant-numeric:tabular-nums;line-height:1.1;}
 .stat-val.green{color:var(--green);}
 .stat-val.red{color:var(--red);}
 @keyframes flash{0%,100%{opacity:1}40%{opacity:.2}}
@@ -438,7 +441,7 @@ td.td-c{text-align:center;}
 /* ── DONUT CHART ── */
 .chart-sec{margin-top:14px;animation:fadeUp .4s .2s ease both;}
 .chart-wrap{background:var(--surface);border-radius:var(--radius);padding:22px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow);}
-.legend{display:flex;flex-direction:column;gap:9px;flex:1;min-width:120px;}
+.legend{display:flex;flex-direction:column;gap:12px;flex:1;min-width:120px;}
 .leg-item{display:flex;align-items:center;gap:8px;}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .leg-name{font-size:13px;font-weight:500;}
@@ -547,29 +550,49 @@ td.td-c{text-align:center;}
 .auth-link:hover{color:var(--text);}
 
 /* ─────────────────────────────────
-   BUDGET — same wallet-app cards
+   BUDGET — hero + section layout
 ───────────────────────────────── */
 .bgt-summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;animation:fadeUp .4s ease both;}
 @media(max-width:900px){.bgt-summary-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:560px){.bgt-summary-grid{grid-template-columns:repeat(2,1fr);}}
-.bgt-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--card-shadow);}
+.bgt-card{background:var(--surface);border-radius:var(--radius);padding:20px 20px;display:flex;align-items:center;gap:12px;box-shadow:var(--card-shadow);}
 .bgt-card::before,.bgt-card::after{display:none;}
-.bgt-card-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.bgt-card-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .bgt-card-income .bgt-card-icon{background:rgba(26,122,74,.1);color:var(--green);}
 .bgt-card-expense .bgt-card-icon{background:rgba(192,57,43,.1);color:var(--red);}
 .bgt-card-balance .bgt-card-icon{background:var(--surface2);color:var(--text2);}
 .bgt-card-savings .bgt-card-icon{background:rgba(160,96,16,.1);color:var(--amber);}
 .bgt-card-pot .bgt-card-icon{background:var(--surface2);color:var(--text2);}
-.bgt-card-lbl{font-size:10px;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;font-weight:500;}
-.bgt-card-val{font-size:clamp(13px,2vw,16px);font-weight:700;letter-spacing:-.3px;font-variant-numeric:tabular-nums;}
+.bgt-card-lbl{font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.bgt-card-val{font-size:clamp(16px,2.5vw,20px);font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums;}
+
+/* Budget hero income/expense row */
+.bgt-hero-row{
+  display:flex;align-items:stretch;background:var(--surface);border-radius:var(--radius);
+  box-shadow:var(--card-shadow);margin-bottom:24px;overflow:hidden;
+  animation:fadeUp .3s ease both;
+}
+.bgt-hero-card{flex:1;padding:28px 24px;text-align:center;}
+.bgt-hero-divider{width:1px;background:var(--border);flex-shrink:0;margin:20px 0;}
+.bgt-hero-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+.bgt-hero-val{font-size:clamp(24px,5vw,36px);font-weight:700;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;line-height:1;}
+.bgt-hero-val.green{color:var(--green);}
+.bgt-hero-val.red{color:var(--red);}
+
+/* Budget sections with card style */
+.bgt-section{
+  background:var(--surface);border-radius:var(--radius);padding:24px;
+  margin-bottom:20px;box-shadow:var(--card-shadow);
+  animation:fadeUp .35s ease both;
+}
 
 /* budget charts */
-.bgt-savings-section{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:16px;animation:fadeUp .4s .2s ease both;box-shadow:var(--card-shadow);}
-.bgt-savings-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;padding:14px;background:var(--surface2);border-radius:14px;}
+.bgt-savings-section{background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:20px;animation:fadeUp .4s .2s ease both;box-shadow:var(--card-shadow);}
+.bgt-savings-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;padding:18px;background:var(--surface2);border-radius:14px;}
 @media(max-width:640px){.bgt-savings-overview{grid-template-columns:1fr 1fr;}}
 .bgt-savings-big{font-size:clamp(14px,2vw,19px);font-weight:700;color:var(--text);margin-top:4px;letter-spacing:-.3px;font-variant-numeric:tabular-nums;}
 .bgt-tx-amount.savings{color:var(--text);}
-.bgt-charts-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;animation:fadeUp .4s .05s ease both;}
+.bgt-charts-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;animation:fadeUp .4s .05s ease both;} /* legacy */
 .bgt-chart-box{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--card-shadow);}
 .bgt-cat-section{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:16px;animation:fadeUp .4s .1s ease both;box-shadow:var(--card-shadow);}
 .bgt-goals-list{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
@@ -584,7 +607,7 @@ td.td-c{text-align:center;}
 .btn-del-goal{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:2px 5px;transition:color .15s;border-radius:50%;min-height:unset;}
 .btn-del-goal:hover{color:var(--red);}
 
-.bgt-bottom-row{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;animation:fadeUp .4s .15s ease both;}
+.bgt-bottom-row{display:grid;grid-template-columns:1fr 1.5fr;gap:10px;animation:fadeUp .4s .15s ease both;} /* legacy */
 @media(max-width:700px){.bgt-bottom-row{grid-template-columns:1fr;}}
 .bgt-add-panel{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--card-shadow);}
 .bgt-recent-panel{background:var(--surface);border-radius:var(--radius);padding:20px;box-shadow:var(--card-shadow);}
@@ -604,9 +627,9 @@ td.td-c{text-align:center;}
 .bgt-cat-btn.active{background:var(--text);color:var(--bg);}
 
 /* transaction rows */
-.bgt-tx-list{display:flex;flex-direction:column;gap:5px;max-height:480px;overflow-y:auto;}
+.bgt-tx-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;}
 .bgt-tx-empty{font-size:13px;color:var(--muted);padding:28px;text-align:center;line-height:1.8;}
-.bgt-tx-item{display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--surface2);border-radius:14px;transition:background .1s;}
+.bgt-tx-item{display:flex;align-items:center;gap:14px;padding:15px 18px;background:var(--surface2);border-radius:14px;transition:background .1s;}
 .bgt-tx-item:hover{background:var(--surface3);}
 .bgt-tx-icon{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:var(--surface);}
 .bgt-tx-info{flex:1;min-width:0;}
@@ -765,7 +788,7 @@ html, body { position: relative; }
 </div>
 
 <!-- WATCHLIST PANEL -->
-<div class="wl-panel" id="wl-panel" style="display:none">
+<div class="wl-panel collapsed" id="wl-panel" style="display:none">
   <div class="wl-head" onclick="toggleWL()">
     <span class="wl-title">Watchlist</span>
     <span class="wl-arrow" id="wl-arrow">▼</span>
@@ -972,6 +995,49 @@ html, body { position: relative; }
   </div>
 </div>
 
+
+<!-- ══ ADD BUDGET ENTRY MODAL ══ -->
+<div class="overlay hidden" id="bgt-entry-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-hd">
+      <span class="modal-title" id="bgt-entry-modal-title">Add Income</span>
+      <button class="modal-x" onclick="closeBgtModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="f-group" style="margin-bottom:16px">
+        <label class="f-label">Amount (€)</label>
+        <input class="f-input" id="bgt-amount" type="number" step="0.01" min="0" placeholder="0.00">
+      </div>
+      <div class="f-group" style="margin-bottom:16px">
+        <label class="f-label">Description</label>
+        <input class="f-input" id="bgt-desc" type="text" placeholder="e.g. Monthly salary, Groceries…">
+      </div>
+      <div class="f-group" style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <label class="f-label" style="margin-bottom:0">Category</label>
+          <button onclick="openCatEditor()" style="background:none;border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:600;cursor:pointer;">Edit</button>
+        </div>
+        <div class="bgt-cat-grid" id="bgt-cat-grid"></div>
+      </div>
+      <div class="f-group" style="margin-bottom:4px">
+        <label class="f-label">Date</label>
+        <input class="f-input" id="bgt-date" type="date">
+      </div>
+      <!-- hidden type indicator -->
+      <input type="hidden" id="bgt-type-hidden" value="income">
+      <!-- Keep legacy hidden elements for JS compat -->
+      <div style="display:none">
+        <button id="bgt-type-income"></button>
+        <button id="bgt-type-expense"></button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeBgtModal()">Cancel</button>
+      <button class="btn-primary" id="bgt-entry-confirm-btn" onclick="addBgtEntry()">Add Income</button>
+    </div>
+  </div>
+</div>
+
 <div id="donut-tooltip">
   <div class="dt-header" id="dt-header"></div>
   <div class="dt-row"><span>Amount</span><span class="dt-val" id="dt-amount"></span></div>
@@ -1068,22 +1134,21 @@ html, body { position: relative; }
     </button>
   </div>
   <div class="action-row" id="action-row-budget">
-    <button class="action-btn" onclick="setBgtType('income');document.getElementById('bgt-amount').focus()">
+    <button class="action-btn" onclick="openBgtModal('income')">
       <div class="action-icon" style="background:rgba(26,122,74,.1)">
-        <svg viewBox="0 0 24 24" stroke="var(--green)"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg viewBox="0 0 24 24" stroke="var(--green)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
       <span class="action-label">Income</span>
     </button>
-    <button class="action-btn" onclick="setBgtType('expense');document.getElementById('bgt-amount').focus()">
+    <button class="action-btn" onclick="openBgtModal('expense')">
       <div class="action-icon" style="background:rgba(192,57,43,.1)">
-        <svg viewBox="0 0 24 24" stroke="var(--red)"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg viewBox="0 0 24 24" stroke="var(--red)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
       <span class="action-label">Expense</span>
     </button>
-
     <button class="action-btn" onclick="openAuthModal()">
       <div class="action-icon">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
       <span class="action-label">Account</span>
     </button>
@@ -1214,143 +1279,87 @@ html, body { position: relative; }
   <!-- ══════════ BUDGET VIEW ══════════ -->
   <div id="view-budget">
 
-    <!-- Budget Summary Cards -->
-    <div class="bgt-summary-grid">
-      <div class="bgt-card bgt-card-income">
-        <div class="bgt-card-icon"></div>
-        <div>
-          <div class="bgt-card-lbl">Total Income</div>
-          <div class="bgt-card-val" id="bgt-total-income">€0.00</div>
-        </div>
-      </div>
-      <div class="bgt-card bgt-card-expense">
-        <div class="bgt-card-icon"></div>
-        <div>
-          <div class="bgt-card-lbl">Total Expenses</div>
-          <div class="bgt-card-val" id="bgt-total-expense">€0.00</div>
-        </div>
-      </div>
-      <span id="bgt-balance" style="display:none">€0.00</span>
-      <span id="bgt-invest-total" style="display:none">€0.00</span>
-      <span id="bgt-pot-total" style="display:none">€0.00</span>
-    </div>
+    <!-- Hidden inputs for JS compat (used by addBgtEntry) -->
+    <span id="bgt-balance" style="display:none">€0.00</span>
+    <span id="bgt-invest-total" style="display:none">€0.00</span>
+    <span id="bgt-pot-total" style="display:none">€0.00</span>
 
-    <!-- Charts Row -->
-    <div class="bgt-charts-row">
-      <!-- Donut chart with income/expense toggle -->
-      <div class="bgt-chart-box" style="flex:1;min-width:260px">
-        <div class="sec-hdr" style="margin-bottom:14px">
-          <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
-          <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-            <button class="dca-range-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')">Month</button>
-            <button class="dca-range-btn" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
-            <button class="dca-range-btn" onclick="openCatEditor()" style="border-color:var(--accent2);color:var(--accent2)">✎ Cats</button>
-          </div>
-        </div>
-        <!-- Donut type toggle -->
-        <div style="display:flex;gap:6px;margin-bottom:14px">
-          <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:6px 10px;font-size:10px">↓ Expenses</button>
-          <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:6px 10px;font-size:10px">↑ Income</button>
-        </div>
-        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-          <svg id="bgt-donut" width="130" height="130" viewBox="0 0 130 130" style="cursor:pointer"></svg>
-          <div class="legend" id="bgt-legend" style="max-height:200px;overflow-y:auto"></div>
-        </div>
+    <!-- ── INCOME / EXPENSE HERO ── -->
+    <div class="bgt-hero-row">
+      <div class="bgt-hero-card bgt-hero-income">
+        <div class="bgt-hero-lbl">Total Income</div>
+        <div class="bgt-hero-val green" id="bgt-total-income">€0.00</div>
       </div>
-
-      <!-- Bar chart income vs expenses by month -->
-      <div class="bgt-chart-box" style="flex:1.4;min-width:260px">
-        <div class="sec-hdr" style="margin-bottom:14px">
-          <div class="sec-title">Monthly Overview</div>
-        </div>
-        <canvas id="bgt-bar-canvas" style="width:100%;height:200px"></canvas>
+      <div class="bgt-hero-divider"></div>
+      <div class="bgt-hero-card bgt-hero-expense">
+        <div class="bgt-hero-lbl">Total Expenses</div>
+        <div class="bgt-hero-val red" id="bgt-total-expense">€0.00</div>
       </div>
     </div>
 
-    <!-- Category progress bars REMOVED -->
-
-    <!-- Add transaction & recent transactions -->
-    <div class="bgt-bottom-row">
-      <!-- Add Entry -->
-      <div class="bgt-add-panel">
-        <div class="sec-hdr" style="margin-bottom:14px">
-          <div class="sec-title">Add Entry</div>
-          <div class="bgt-type-toggle">
-            <button class="bgt-type-btn active" id="bgt-type-income" onclick="setBgtType('income')">Income</button>
-            <button class="bgt-type-btn" id="bgt-type-expense" onclick="setBgtType('expense')">Expense</button>
-          </div>
-        </div>
-
-        <div class="f-group" style="margin-bottom:10px">
-          <label class="f-label">Amount (€)</label>
-          <input class="f-input" id="bgt-amount" type="number" step="0.01" min="0" placeholder="0.00">
-        </div>
-
-        <div class="f-group" style="margin-bottom:10px">
-          <label class="f-label">Description</label>
-          <input class="f-input" id="bgt-desc" type="text" placeholder="e.g. Monthly salary, Groceries…">
-        </div>
-
-        <div class="f-group" style="margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-            <label class="f-label" style="margin-bottom:0">Category</label>
-            <button onclick="openCatEditor()" style="background:none;border:1px solid var(--accent2);color:var(--accent2);border-radius:6px;padding:2px 8px;font-size:9px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.5px" onmouseover="this.style.background='rgba(56,189,248,.1)'" onmouseout="this.style.background='none'">Edit</button>
-          </div>
-          <div class="bgt-cat-grid" id="bgt-cat-grid"></div>
-        </div>
-
-        <div class="f-group" style="margin-bottom:14px">
-          <label class="f-label">Date</label>
-          <input class="f-input" id="bgt-date" type="date">
-        </div>
-
-        <button class="btn-primary" style="width:100%;padding:11px" onclick="addBgtEntry()">Add Entry</button>
-      </div>
-
-      <!-- Recent Transactions -->
-      <div class="bgt-recent-panel">
-        <div class="sec-hdr" style="margin-bottom:8px">
-          <div class="sec-title">Recent Transactions</div>
-          <button class="btn-clear-all" onclick="clearBgtData()" style="font-size:9px">Clear All</button>
-        </div>
-        <!-- Filter tabs -->
-        <div style="display:flex;gap:4px;margin-bottom:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px">
-          <button class="bgt-type-btn active" id="tx-filter-all"        onclick="setTxFilter('all')"        style="flex:1;padding:5px 6px;font-size:9px;border-radius:7px">All</button>
-          <button class="bgt-type-btn"        id="tx-filter-income"     onclick="setTxFilter('income')"     style="flex:1;padding:5px 6px;font-size:9px;border-radius:7px">Income</button>
-          <button class="bgt-type-btn"        id="tx-filter-expense"    onclick="setTxFilter('expense')"    style="flex:1;padding:5px 6px;font-size:9px;border-radius:7px">Expense</button>
-        </div>
-        <div id="bgt-transactions-list" class="bgt-tx-list">
-          <div class="bgt-tx-empty">No transactions yet. Add your first income or expense above.</div>
+    <!-- ── EXPENSE BREAKDOWN (donut) ── -->
+    <div class="bgt-section">
+      <div class="sec-hdr" style="margin-bottom:20px">
+        <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <button class="dca-range-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')">Month</button>
+          <button class="dca-range-btn" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
+          <button class="dca-range-btn" onclick="openCatEditor()" style="border-color:var(--accent2);color:var(--accent2)">Categories</button>
         </div>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Expenses</button>
+        <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Income</button>
+      </div>
+      <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        <svg id="bgt-donut" width="140" height="140" viewBox="0 0 130 130" style="cursor:pointer;flex-shrink:0"></svg>
+        <div class="legend" id="bgt-legend" style="flex:1;max-height:220px;overflow-y:auto"></div>
+      </div>
+    </div>
+
+    <!-- ── RECENT TRANSACTIONS ── -->
+    <div class="bgt-section">
+      <div class="sec-hdr" style="margin-bottom:16px">
+        <div class="sec-title">Recent Transactions</div>
+        <button class="btn-clear-all" onclick="clearBgtData()" style="font-size:9px">Clear All</button>
+      </div>
+      <div style="display:flex;gap:4px;margin-bottom:14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:3px">
+        <button class="bgt-type-btn active" id="tx-filter-all"     onclick="setTxFilter('all')"     style="flex:1;padding:7px 6px;font-size:10px;border-radius:9px">All</button>
+        <button class="bgt-type-btn"        id="tx-filter-income"  onclick="setTxFilter('income')"  style="flex:1;padding:7px 6px;font-size:10px;border-radius:9px">Income</button>
+        <button class="bgt-type-btn"        id="tx-filter-expense" onclick="setTxFilter('expense')" style="flex:1;padding:7px 6px;font-size:10px;border-radius:9px">Expense</button>
+      </div>
+      <div id="bgt-transactions-list" class="bgt-tx-list">
+        <div class="bgt-tx-empty">No transactions yet. Use the Income or Expense buttons above to add one.</div>
+      </div>
+    </div>
+
+    <!-- ── MONTHLY OVERVIEW (bar chart) ── -->
+    <div class="bgt-section" style="margin-bottom:24px">
+      <div class="sec-hdr" style="margin-bottom:20px">
+        <div class="sec-title">Monthly Overview</div>
+      </div>
+      <canvas id="bgt-bar-canvas" style="width:100%;height:220px"></canvas>
     </div>
 
   </div><!-- end view-budget -->
 
 <!-- ══════════ INVEST & SAVINGS VIEW ══════════ -->
 <div id="view-invest" style="display:none">
-  <!-- Summary cards -->
-  <div class="bgt-summary-grid" style="grid-template-columns:repeat(3,1fr)">
-    <div class="bgt-card bgt-card-savings">
-      <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-      <div>
-        <div class="bgt-card-lbl">Total Invested</div>
-        <div class="bgt-card-val" id="inv-invest-total" style="color:var(--amber)">€0.00</div>
-      </div>
+  <!-- Summary hero row -->
+  <div class="bgt-hero-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Total Invested</div>
+      <div class="bgt-hero-val" id="inv-invest-total" style="color:var(--amber)">€0.00</div>
     </div>
-    <div class="bgt-card bgt-card-pot">
-      <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-      <div>
-        <div class="bgt-card-lbl">Savings Pot</div>
-        <div class="bgt-card-val" id="inv-sav-total" style="color:var(--accent2)">€0.00</div>
-      </div>
+    <div class="bgt-hero-divider"></div>
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Savings Pot</div>
+      <div class="bgt-hero-val" id="inv-sav-total" style="color:var(--accent2)">€0.00</div>
     </div>
-    <div class="bgt-card">
-      <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-      <div>
-        <div class="bgt-card-lbl">Combined Total</div>
-        <div class="bgt-card-val" id="inv-combined-total" style="color:var(--green)">€0.00</div>
-      </div>
+    <div class="bgt-hero-divider"></div>
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Combined Total</div>
+      <div class="bgt-hero-val green" id="inv-combined-total">€0.00</div>
     </div>
   </div>
 
@@ -1429,9 +1438,9 @@ html, body { position: relative; }
     </div>
 
     <!-- ══ INVESTMENT GROWTH CHART ══ -->
-    <div class="bgt-savings-section" style="animation:fadeUp .5s .3s ease both">
+    <div class="bgt-savings-section" style="animation:fadeUp .5s .3s ease both;margin-bottom:24px">
       <div class="sec-hdr" style="margin-bottom:14px">
-        <div class="sec-title">📈 Investment Growth</div>
+        <div class="sec-title">Investment Growth</div>
         <div style="display:flex;gap:5px;align-items:center">
           <button class="dca-range-btn active" id="inv-chart-month" onclick="setInvChartMode('month')">Month</button>
           <button class="dca-range-btn" id="inv-chart-all" onclick="setInvChartMode('all')">All Time</button>
@@ -1448,7 +1457,7 @@ html, body { position: relative; }
 <div class="overlay hidden" id="invest-modal">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd">
-      <span class="modal-title">📈 Add Investment</span>
+      <span class="modal-title">Add Investment</span>
       <button class="modal-x" onclick="closeInvestModal()">✕</button>
     </div>
     <div class="modal-bd">
@@ -1463,11 +1472,11 @@ html, body { position: relative; }
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="invest-type-grid">
-          <button class="bgt-cat-btn active" data-itype="stocks" style="border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,.1)" onclick="selectInvestType(this,'stocks')">📊 Stocks</button>
-          <button class="bgt-cat-btn" data-itype="etf" onclick="selectInvestType(this,'etf')">🗂 ETF</button>
-          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectInvestType(this,'crypto')">₿ Crypto</button>
-          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectInvestType(this,'bonds')">🏛 Bonds</button>
-          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectInvestType(this,'realestate')">🏠 Real Estate</button>
+          <button class="bgt-cat-btn active" data-itype="stocks" style="border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,.1)" onclick="selectInvestType(this,'stocks')">Stocks</button>
+          <button class="bgt-cat-btn" data-itype="etf" onclick="selectInvestType(this,'etf')">ETF</button>
+          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectInvestType(this,'crypto')">Crypto</button>
+          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectInvestType(this,'bonds')">Bonds</button>
+          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectInvestType(this,'realestate')">Real Estate</button>
           <button class="bgt-cat-btn" data-itype="other" onclick="selectInvestType(this,'other')">◦ Other</button>
         </div>
       </div>
@@ -1487,7 +1496,7 @@ html, body { position: relative; }
 <div class="overlay hidden" id="edit-invest-modal">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd">
-      <span class="modal-title">✏ Edit Investment</span>
+      <span class="modal-title">Edit Investment</span>
       <button class="modal-x" onclick="closeEditInvestModal()">✕</button>
     </div>
     <div class="modal-bd">
@@ -1502,11 +1511,11 @@ html, body { position: relative; }
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="einvest-type-grid">
-          <button class="bgt-cat-btn" data-itype="stocks" onclick="selectEditInvestType(this,'stocks')">📊 Stocks</button>
-          <button class="bgt-cat-btn" data-itype="etf" onclick="selectEditInvestType(this,'etf')">🗂 ETF</button>
-          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectEditInvestType(this,'crypto')">₿ Crypto</button>
-          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectEditInvestType(this,'bonds')">🏛 Bonds</button>
-          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectEditInvestType(this,'realestate')">🏠 Real Estate</button>
+          <button class="bgt-cat-btn" data-itype="stocks" onclick="selectEditInvestType(this,'stocks')">Stocks</button>
+          <button class="bgt-cat-btn" data-itype="etf" onclick="selectEditInvestType(this,'etf')">ETF</button>
+          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectEditInvestType(this,'crypto')">Crypto</button>
+          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectEditInvestType(this,'bonds')">Bonds</button>
+          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectEditInvestType(this,'realestate')">Real Estate</button>
           <button class="bgt-cat-btn" data-itype="other" onclick="selectEditInvestType(this,'other')">◦ Other</button>
         </div>
       </div>
@@ -1967,7 +1976,7 @@ let prices      = {};
 let eurRate     = 0.92;
 let tickerCache = [];
 let wlDraft     = [];
-let wlCollapsed = false;
+let wlCollapsed = true;
 let pendingCoin = null;
 let editingHoldingId = null;
 let activeDcaCoin = null;
@@ -2303,7 +2312,17 @@ function saveBuyPrices(){
 // ══════════════════════════════════════════
 // WATCHLIST
 // ══════════════════════════════════════════
-function toggleWL(){ wlCollapsed=!wlCollapsed; $('wl-panel').classList.toggle('collapsed',wlCollapsed); }
+function toggleWL(){
+  wlCollapsed = !wlCollapsed;
+  const panel = $('wl-panel');
+  if (wlCollapsed) {
+    panel.classList.add('collapsed');
+    panel.classList.remove('open');
+  } else {
+    panel.classList.remove('collapsed');
+    panel.classList.add('open');
+  }
+}
 function renderWL(){
   const body=$('wl-body');
   if(!S.watchlist.length){ body.innerHTML='<div class="wl-empty">No coins selected.</div>'; return; }
@@ -2964,20 +2983,44 @@ async function drawDCAChart(coinId) {
   const toX = ts  => pad.l + ((ts  - tsMin) / (tsMax - tsMin)) * iW;
   const toY = val => pad.t + iH - ((val - pMin) / (pMax - pMin)) * iH;
 
+  // ── Determine trend based on 24h change (last price vs price 24h ago) ──
+  const lastPrice  = filtered[filtered.length - 1][1];
+  const now24Ms    = filtered[filtered.length - 1][0];
+  const target24Ms = now24Ms - 86400000; // exactly 24h back
+  // Find closest data point to 24h ago
+  let price24hAgo = filtered[0][1];
+  let minDiff24 = Infinity;
+  for (const [ts, p] of filtered) {
+    const diff = Math.abs(ts - target24Ms);
+    if (diff < minDiff24) { minDiff24 = diff; price24hAgo = p; }
+  }
+  const isUp = lastPrice >= price24hAgo;
+  const lineColor  = isUp ? '#27ae6e' : '#e05555';
+  const gradTop    = isUp ? 'rgba(39,174,110,0.22)' : 'rgba(224,85,85,0.22)';
+  const gradBot    = isUp ? 'rgba(39,174,110,0.0)'  : 'rgba(224,85,85,0.0)';
+  const isDark     = document.documentElement.getAttribute('data-theme') === 'dark';
+  const gridCol    = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+  const labelCol   = isDark ? '#606070' : '#aaaabc';
+
   // ── Grid ──
-  ctx.strokeStyle = 'rgba(30,34,53,0.7)';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
     const y   = pad.t + iH * (1 - i / 4);
     const val = pMin + (pMax - pMin) * (i / 4);
+    ctx.strokeStyle = gridCol;
+    ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
-    ctx.fillStyle = '#5a6080'; ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'right';
-    ctx.fillText(fmtPrice(val), pad.l - 5, y + 3);
+    ctx.fillStyle = labelCol;
+    ctx.font = '600 9px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(fmtPrice(val), pad.l - 6, y + 3.5);
   }
 
   // X-axis date labels
   const numXLabels = Math.min(6, Math.floor(iW / 70));
-  ctx.fillStyle = '#5a6080'; ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'center';
+  ctx.fillStyle = labelCol;
+  ctx.font = '500 9px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
   for (let i = 0; i <= numXLabels; i++) {
     const ts  = tsMin + (tsMax - tsMin) * (i / numXLabels);
     const x   = toX(ts);
@@ -2990,10 +3033,10 @@ async function drawDCAChart(coinId) {
     ctx.fillText(lbl, x, H - 6);
   }
 
-  // ── Gradient fill under price line ──
+  // ── Gradient fill under price line (green=up, red=down) ──
   const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
-  grad.addColorStop(0, 'rgba(244,63,94,0.18)');
-  grad.addColorStop(1, 'rgba(244,63,94,0.0)');
+  grad.addColorStop(0, gradTop);
+  grad.addColorStop(1, gradBot);
   ctx.beginPath();
   ctx.moveTo(toX(filtered[0][0]), pad.t + iH);
   filtered.forEach(([ts, p]) => ctx.lineTo(toX(ts), toY(p)));
@@ -3002,11 +3045,12 @@ async function drawDCAChart(coinId) {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // ── Price line ──
+  // ── Price line (green=up, red=down) ──
   ctx.beginPath();
-  ctx.strokeStyle = '#f43f5e';
-  ctx.lineWidth   = 1.8;
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth   = 2;
   ctx.lineJoin    = 'round';
+  ctx.lineCap     = 'round';
   filtered.forEach(([ts, p], i) => {
     if (i === 0) ctx.moveTo(toX(ts), toY(p));
     else          ctx.lineTo(toX(ts), toY(p));
@@ -3021,12 +3065,12 @@ async function drawDCAChart(coinId) {
     const ay = toY(avgBuy);
     ctx.save();
     ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = 'rgba(34,211,160,0.45)';
+    ctx.strokeStyle = isDark ? 'rgba(180,180,200,0.35)' : 'rgba(100,100,120,0.4)';
     ctx.lineWidth   = 1.2;
     ctx.beginPath(); ctx.moveTo(pad.l, ay); ctx.lineTo(pad.l + iW, ay); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = 'rgba(34,211,160,0.6)';
-    ctx.font = '9px Outfit,sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = isDark ? 'rgba(180,180,200,0.7)' : 'rgba(100,100,120,0.7)';
+    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'left';
     ctx.fillText('AVG ' + fmtPrice(avgBuy), pad.l + 4, ay - 4);
     ctx.restore();
   }
@@ -3154,7 +3198,7 @@ function attachTooltip(canvas, purchases, coinId, toX, toY, filtered, bounds) {
     if (avgBuy2 && avgBuy2 >= pMin && avgBuy2 <= pMax) {
       const ay = toY(avgBuy2);
       ctx.save(); ctx.setLineDash([5, 4]);
-      ctx.strokeStyle = 'rgba(34,211,160,0.45)'; ctx.lineWidth = 1.2;
+      ctx.strokeStyle = isDark ? 'rgba(180,180,200,0.35)' : 'rgba(100,100,120,0.4)'; ctx.lineWidth = 1.2;
       ctx.beginPath(); ctx.moveTo(pad.l, ay); ctx.lineTo(pad.l + iW, ay); ctx.stroke();
       ctx.setLineDash([]); ctx.restore();
       ctx.fillStyle = 'rgba(34,211,160,0.6)';
@@ -3376,11 +3420,11 @@ function drawFallbackChart(ctx, purchases, holding, W, H, pad, iW, iH) {
   if (avgBuy) {
     const ay = toY(avgBuy);
     ctx.save(); ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = 'rgba(34,211,160,0.45)'; ctx.lineWidth = 1.2;
+    ctx.strokeStyle = isDark ? 'rgba(180,180,200,0.35)' : 'rgba(100,100,120,0.4)'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(pad.l, ay); ctx.lineTo(pad.l + iW, ay); ctx.stroke();
     ctx.setLineDash([]); ctx.restore();
-    ctx.fillStyle = 'rgba(34,211,160,0.6)';
-    ctx.font = '9px Outfit,sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = isDark ? 'rgba(180,180,200,0.7)' : 'rgba(100,100,120,0.7)';
+    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'left';
     ctx.fillText('AVG ' + fmtPrice(avgBuy), pad.l + 4, ay - 4);
   }
 
@@ -3405,7 +3449,7 @@ function drawFallbackChart(ctx, purchases, holding, W, H, pad, iW, iH) {
     p._mx = x; p._my = y; p._col = col;
   });
 }
-['add-modal','bp-modal','wl-modal','edit-modal','purchase-modal','auth-modal','edit-tx-modal'].forEach(id=>{
+['add-modal','bp-modal','wl-modal','edit-modal','purchase-modal','auth-modal','edit-tx-modal','bgt-entry-modal'].forEach(id=>{
   $(id).addEventListener('click',e=>{
     if(e.target===$(id)){
       if(id==='add-modal')closeAddModal();
@@ -3419,7 +3463,7 @@ function drawFallbackChart(ctx, purchases, holding, W, H, pad, iW, iH) {
   });
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){ closeAddModal(); closeBP(); closeWLModal(); closeEditModal(); closePurchaseModal(); closeAuthModal(); closeEditTxModal(); closeInvestModal(); closeEditInvestModal(); }
+  if(e.key==='Escape'){ closeAddModal(); closeBP(); closeWLModal(); closeEditModal(); closePurchaseModal(); closeAuthModal(); closeEditTxModal(); closeInvestModal(); closeEditInvestModal(); closeBgtModal(); }
   if(e.key==='Enter'&&document.activeElement?.id==='coin-search-inp'){
     const first=$('coin-results')?.querySelector('.coin-result');
     if(first) first.click();
@@ -3523,15 +3567,37 @@ function bgtGoalsSave(g) { localStorage.setItem('bgt_goals', JSON.stringify(g));
 
 function setBgtType(t) {
   bgtType = t; bgtCat = null;
-  document.getElementById('bgt-type-income').classList.toggle('active', t === 'income');
-  document.getElementById('bgt-type-expense').classList.toggle('active', t === 'expense');
-  const _btiEl = document.getElementById('bgt-type-investment'); if(_btiEl) _btiEl.classList.toggle('active', t === 'investment');
+  // Update hidden type input if modal is open
+  const hiddenInp = document.getElementById('bgt-type-hidden');
+  if (hiddenInp) hiddenInp.value = t;
   if (t === 'investment') {
-    document.getElementById('bgt-cat-grid').innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 2px">Investment will be logged automatically 📈</div>';
+    const g = document.getElementById('bgt-cat-grid');
+    if(g) g.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 2px">Investment will be logged automatically</div>';
     bgtCat = 'investment-auto';
   } else {
     renderCatGrid('bgt-cat-grid', t === 'income' ? INCOME_CATS : EXPENSE_CATS, 'bgtCat', null, null);
   }
+}
+
+function openBgtModal(type) {
+  bgtType = type;
+  bgtCat = null;
+  const modal = document.getElementById('bgt-entry-modal');
+  const title = document.getElementById('bgt-entry-modal-title');
+  const confirmBtn = document.getElementById('bgt-entry-confirm-btn');
+  const hiddenInp = document.getElementById('bgt-type-hidden');
+  if (title) title.textContent = type === 'income' ? 'Add Income' : 'Add Expense';
+  if (confirmBtn) confirmBtn.textContent = type === 'income' ? 'Add Income' : 'Add Expense';
+  if (hiddenInp) hiddenInp.value = type;
+  document.getElementById('bgt-amount').value = '';
+  document.getElementById('bgt-desc').value = '';
+  document.getElementById('bgt-date').value = new Date().toISOString().split('T')[0];
+  renderCatGrid('bgt-cat-grid', type === 'income' ? INCOME_CATS : EXPENSE_CATS, 'bgtCat', null, null);
+  modal.classList.remove('hidden');
+  setTimeout(() => { const a = document.getElementById('bgt-amount'); if(a) a.focus(); }, 200);
+}
+function closeBgtModal() {
+  document.getElementById('bgt-entry-modal').classList.add('hidden');
 }
 
 function renderCatGrid(gridId, cats, varName, onSelect, activeCat) {
@@ -3541,7 +3607,7 @@ function renderCatGrid(gridId, cats, varName, onSelect, activeCat) {
   cats.forEach(c => {
     const btn = document.createElement('button');
     btn.className = 'bgt-cat-btn' + (activeCat === c.id ? ' active' : '');
-    btn.innerHTML = `<span>${c.icon}</span>${c.label}`;
+    btn.innerHTML = c.label;
     if (activeCat === c.id) btn.style.cssText = `border-color:${c.color};color:${c.color};background:${c.color}22`;
     btn.onclick = () => {
       if (varName === 'bgtCat') bgtCat = c.id; else bgtGoalCat = c.id;
@@ -3562,16 +3628,13 @@ function addBgtEntry() {
   if (bgtType === 'investment') {
     entries.push({ id: Date.now(), type: 'investment', amount: amt, desc: desc || 'Investment', cat: 'investment-auto', itype: 'other', date });
     bgtSave(entries);
-    document.getElementById('bgt-amount').value = '';
-    document.getElementById('bgt-desc').value = '';
     showToast('Investment logged ✓');
   } else {
     entries.push({ id: Date.now(), type: bgtType, amount: amt, desc: desc || bgtCat, cat: bgtCat, date });
     bgtSave(entries);
-    document.getElementById('bgt-amount').value = '';
-    document.getElementById('bgt-desc').value = '';
-    showToast('Entry added ✓');
+    showToast(bgtType === 'income' ? 'Income added ✓' : 'Expense added ✓');
   }
+  closeBgtModal();
   renderBudget();
 }
 
@@ -3796,7 +3859,7 @@ function renderBgtDonut(entries, mode) {
 
     const li = document.createElement('div');
     li.className = 'leg-item';
-    li.innerHTML = `<div class="leg-dot" style="background:${cat.color}"></div><span class="leg-name">${cat.icon} ${cat.label}</span><span class="leg-val">€${val.toFixed(0)} <span style="color:var(--muted)">${Math.round(pct*100)}%</span></span>`;
+    li.innerHTML = `<div class="leg-dot" style="background:${cat.color}"></div><span class="leg-name">${cat.label}</span><span class="leg-val">€${val.toFixed(0)} <span style="color:var(--muted)">${Math.round(pct*100)}%</span></span>`;
     legend.appendChild(li);
   });
 
@@ -3833,11 +3896,13 @@ let _barMonths = [], _barPad = {}, _barGroupW = 0, _barIH = 0, _barMaxVal = 1;
 function renderBgtBar(allEntries) {
   const canvas = document.getElementById('bgt-bar-canvas');
   if (!canvas || !canvas.offsetWidth) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth, H = 200;
+  const W = canvas.offsetWidth, H = 220;
   canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
   canvas.style.height = H + 'px';
   ctx.scale(devicePixelRatio, devicePixelRatio);
+
   const months = [];
   const now = new Date();
   for (let i = 5; i >= 0; i--) {
@@ -3851,45 +3916,100 @@ function renderBgtBar(allEntries) {
     else if (e.type==='expense') m.expense+=e.amount;
     else if (e.type==='savings') m.savings+=e.amount;
   });
+
   const maxVal = Math.max(...months.flatMap(m=>[m.income,m.expense,m.savings]),1);
-  const pad={t:16,b:28,l:40,r:14};
-  const iW=W-pad.l-pad.r, iH=H-pad.t-pad.b;
-  const barW=(iW/months.length)*0.25, groupW=iW/months.length;
+  const pad = {t:24, b:36, l:44, r:16};
+  const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
+  const groupW = iW / months.length;
+  const barW = Math.min(14, groupW * 0.22);
 
   // Store for tooltip
   _barMonths=months; _barPad=pad; _barGroupW=groupW; _barIH=iH; _barMaxVal=maxVal;
   canvas._W=W; canvas._H=H; canvas._barW=barW;
 
-  ctx.clearRect(0,0,W,H);
-  for(let i=0;i<=4;i++){
-    const y=pad.t+iH*(1-i/4);
-    ctx.strokeStyle='rgba(30,34,53,0.8)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iW,y);ctx.stroke();
-    const val=(maxVal*i/4);
-    ctx.fillStyle='#5a6080';ctx.font='8px DM Mono,monospace';ctx.textAlign='right';
-    ctx.fillText(val>=1000?(val/1000).toFixed(1)+'k':val.toFixed(0),pad.l-4,y+3);
-  }
-  months.forEach((m,i)=>{
-    const gx=pad.l+i*groupW+groupW/2;
-    const ih=(m.income/maxVal)*iH, eh=(m.expense/maxVal)*iH, sh=(m.savings/maxVal)*iH;
-    // Income (left)
-    ctx.fillStyle='rgba(34,211,160,0.75)';
-    if(ih>0){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(gx-barW*1.6,pad.t+iH-ih,barW,ih,[3,3,0,0]);else ctx.rect(gx-barW*1.6,pad.t+iH-ih,barW,ih);ctx.fill();}
-    // Expense (center)
-    ctx.fillStyle='rgba(244,63,94,0.75)';
-    if(eh>0){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(gx-barW/2,pad.t+iH-eh,barW,eh,[3,3,0,0]);else ctx.rect(gx-barW/2,pad.t+iH-eh,barW,eh);ctx.fill();}
-    // Savings (right)
-    ctx.fillStyle='rgba(245,197,66,0.75)';
-    if(sh>0){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(gx+barW*0.6,pad.t+iH-sh,barW,sh,[3,3,0,0]);else ctx.rect(gx+barW*0.6,pad.t+iH-sh,barW,sh);ctx.fill();}
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#606070' : '#aaaabc';
+  const textColor = isDark ? '#a0a0b0' : '#666680';
 
-    ctx.fillStyle='#5a6080';ctx.font='9px Outfit,sans-serif';ctx.textAlign='center';
-    ctx.fillText(m.label,gx,pad.t+iH+16);
+  ctx.clearRect(0, 0, W, H);
+
+  // Horizontal grid lines — very subtle
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + iH * (1 - i / 4);
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
+    const val = maxVal * i / 4;
+    ctx.fillStyle = labelColor;
+    ctx.font = `600 9px -apple-system,sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
+  }
+
+  // Draw bars for each month
+  months.forEach((m, i) => {
+    const gx = pad.l + i * groupW + groupW / 2;
+    const ih = (m.income / maxVal) * iH;
+    const eh = (m.expense / maxVal) * iH;
+    const sh = (m.savings / maxVal) * iH;
+    const baseY = pad.t + iH;
+    const r = 4;
+
+    // Income bar — left
+    if (ih > 1) {
+      const x = gx - barW * 1.7;
+      ctx.fillStyle = isDark ? 'rgba(39,174,110,0.85)' : 'rgba(39,174,110,0.9)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, baseY - ih, barW, ih, [r,r,0,0]);
+      else ctx.rect(x, baseY - ih, barW, ih);
+      ctx.fill();
+    }
+    // Expense bar — center
+    if (eh > 1) {
+      const x = gx - barW / 2;
+      ctx.fillStyle = isDark ? 'rgba(224,85,85,0.85)' : 'rgba(224,85,85,0.9)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, baseY - eh, barW, eh, [r,r,0,0]);
+      else ctx.rect(x, baseY - eh, barW, eh);
+      ctx.fill();
+    }
+    // Savings bar — right
+    if (sh > 1) {
+      const x = gx + barW * 0.7;
+      ctx.fillStyle = isDark ? 'rgba(99,148,245,0.85)' : 'rgba(99,148,245,0.9)';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, baseY - sh, barW, sh, [r,r,0,0]);
+      else ctx.rect(x, baseY - sh, barW, sh);
+      ctx.fill();
+    }
+
+    // Month label
+    ctx.fillStyle = labelColor;
+    ctx.font = `500 10px -apple-system,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(m.label, gx, baseY + 20);
   });
-  // Legend
-  ctx.fillStyle='rgba(34,211,160,0.8)';ctx.fillRect(pad.l,4,8,8);
-  ctx.fillStyle='#e2e5f0';ctx.font='9px Outfit,sans-serif';ctx.textAlign='left';ctx.fillText('Income',pad.l+11,12);
-  ctx.fillStyle='rgba(244,63,94,0.8)';ctx.fillRect(pad.l+62,4,8,8);ctx.fillText('Expense',pad.l+74,12);
-  ctx.fillStyle='rgba(245,197,66,0.8)';ctx.fillRect(pad.l+138,4,8,8);ctx.fillText('Savings',pad.l+150,12);
+
+  // Legend — top right
+  const legendItems = [
+    { label: 'Income',  color: isDark ? 'rgba(39,174,110,0.85)' : 'rgba(39,174,110,0.9)' },
+    { label: 'Expense', color: isDark ? 'rgba(224,85,85,0.85)'  : 'rgba(224,85,85,0.9)' },
+    { label: 'Savings', color: isDark ? 'rgba(99,148,245,0.85)' : 'rgba(99,148,245,0.9)' },
+  ];
+  let lx = W - pad.r;
+  legendItems.reverse().forEach(item => {
+    ctx.font = '500 9px -apple-system,sans-serif';
+    ctx.textAlign = 'right';
+    const tw = ctx.measureText(item.label).width;
+    ctx.fillStyle = textColor;
+    ctx.fillText(item.label, lx, 14);
+    lx -= tw + 6;
+    ctx.fillStyle = item.color;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(lx - 9, 5, 7, 7, 2); else ctx.fillRect(lx - 9, 5, 7, 7);
+    ctx.fill();
+    lx -= 18;
+  });
 }
 
 // Bar chart tooltip
@@ -3959,7 +4079,7 @@ function renderBgtGoals(entries) {
     const overBudget = spent > limit;
     const div = document.createElement('div');
     div.className = 'bgt-goal-item';
-    div.innerHTML = `<div class="bgt-goal-header"><div class="bgt-goal-name"><span>${cat.icon}</span>${cat.label}</div><div style="display:flex;align-items:center;gap:8px"><div class="bgt-goal-vals"><span class="bgt-spent" style="color:${color}">€${spent.toFixed(0)}</span> / €${limit}</div><button class="btn-del-goal" onclick="delBgtGoal('${catId}')">✕</button></div></div><div class="bgt-progress-bg"><div class="bgt-progress-fill" style="width:${pct}%;background:${color}"></div></div>${overBudget?`<div style="font-size:9px;color:var(--red);margin-top:4px">⚠ Over budget by €${(spent-limit).toFixed(0)}</div>`:`<div style="font-size:9px;color:var(--muted);margin-top:4px">${pct}% used · €${(limit-spent).toFixed(0)} remaining</div>`}`;
+    div.innerHTML = `<div class="bgt-goal-header"><div class="bgt-goal-name">${cat.label}</div><div style="display:flex;align-items:center;gap:8px"><div class="bgt-goal-vals"><span class="bgt-spent" style="color:${color}">€${spent.toFixed(0)}</span> / €${limit}</div><button class="btn-del-goal" onclick="delBgtGoal('${catId}')">✕</button></div></div><div class="bgt-progress-bg"><div class="bgt-progress-fill" style="width:${pct}%;background:${color}"></div></div>${overBudget?`<div style="font-size:9px;color:var(--red);margin-top:4px">Over budget by €${(spent-limit).toFixed(0)}</div>`:`<div style="font-size:9px;color:var(--muted);margin-top:4px">${pct}% used · €${(limit-spent).toFixed(0)} remaining</div>`}`;
     list.appendChild(div);
   });
 }
@@ -4005,7 +4125,7 @@ function renderBgtTransactions(entries, filter) {
     }
     const item = document.createElement('div');
     item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="${iconStyle}">${cat.icon}</div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc||cat.label}</div><div class="bgt-tx-meta">${cat.label} · ${e.date}</div></div><div class="bgt-tx-amount ${amtClass}" style="${e.type==='investment'?'color:var(--amber)':''}">${amtPrefix}€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="${e.type==='investment'?'openEditInvestModal':'openEditTxModal'}(${e.id})" title="Edit">✏</button><button class="btn-tx-del" onclick="${e.type==='investment'?'delInvestEntry':'delBgtEntry'}(${e.id})" title="Delete">✕</button></div>`;
+    item.innerHTML = `<div class="bgt-tx-icon" style="${iconStyle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc||cat.label}</div><div class="bgt-tx-meta">${cat.label} · ${e.date}</div></div><div class="bgt-tx-amount ${amtClass}" style="${e.type==='investment'?'color:var(--amber)':''}">${amtPrefix}€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="${e.type==='investment'?'openEditInvestModal':'openEditTxModal'}(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="${e.type==='investment'?'delInvestEntry':'delBgtEntry'}(${e.id})" title="Delete">✕</button></div>`;
     list.appendChild(item);
   });
 }
@@ -4027,7 +4147,7 @@ function renderSavings(allEntries) {
     const pct = Math.min(100, Math.round((total / goal) * 100));
     document.getElementById('sav-goal-display').textContent = fmt(goal);
     const remaining = goal - total;
-    document.getElementById('sav-remaining').textContent = remaining > 0 ? fmt(remaining) : '🎉 Goal reached!';
+    document.getElementById('sav-remaining').textContent = remaining > 0 ? fmt(remaining) : 'Goal reached!';
     document.getElementById('sav-remaining').style.color = remaining <= 0 ? 'var(--accent)' : 'var(--muted)';
     document.getElementById('sav-progress-fill').style.width = pct + '%';
     document.getElementById('sav-progress-pct').textContent = pct + '% of goal';
@@ -4051,7 +4171,7 @@ function renderSavings(allEntries) {
   sorted.forEach(e => {
     const item = document.createElement('div');
     item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="background:rgba(56,189,248,.15);color:var(--accent2)">🏦</div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || 'Savings deposit'}</div><div class="bgt-tx-meta">${e.date} · Running total: €${runMap[e.id].toFixed(2)}</div></div><div class="bgt-tx-amount savings">+€${e.amount.toFixed(2)}</div><button class="btn-tx-del" onclick="delSavingsEntry(${e.id})">✕</button>`;
+    item.innerHTML = `<div class="bgt-tx-icon" style="background:rgba(56,189,248,.15);color:var(--accent2)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || 'Savings deposit'}</div><div class="bgt-tx-meta">${e.date} · Running total: €${runMap[e.id].toFixed(2)}</div></div><div class="bgt-tx-amount savings">+€${e.amount.toFixed(2)}</div><button class="btn-tx-del" onclick="delSavingsEntry(${e.id})">✕</button>`;
     list.appendChild(item);
   });
 }
@@ -4244,7 +4364,7 @@ function renderInvestments(allEntries) {
     const t = INVEST_TYPES[e.itype] || INVEST_TYPES.other;
     const item = document.createElement('div');
     item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color}">${t.icon}</div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || t.label}</div><div class="bgt-tx-meta">${t.label} · ${e.date}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit">✏</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
+    item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || t.label}</div><div class="bgt-tx-meta">${t.label} · ${e.date}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
     list.appendChild(item);
   });
 }
@@ -4262,8 +4382,9 @@ function setInvChartMode(mode) {
 function renderInvestChart(allEntries, mode) {
   const canvas = document.getElementById('invest-chart-canvas');
   if (!canvas || !canvas.offsetWidth) return;
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth, H = 180;
+  const W = canvas.offsetWidth, H = 220;
   canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
   canvas.style.height = H + 'px';
   ctx.scale(devicePixelRatio, devicePixelRatio);
@@ -4285,7 +4406,6 @@ function renderInvestChart(allEntries, mode) {
       b.byType[itype] = (b.byType[itype] || 0) + e.amount;
     });
   } else {
-    // group by year
     const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].sort();
     if (!years.length) years.push(String(now.getFullYear()));
     years.forEach(y => buckets.push({ key: y, label: y, byType: {} }));
@@ -4299,62 +4419,79 @@ function renderInvestChart(allEntries, mode) {
   }
 
   const allItypes = [...new Set(invEntries.map(e => e.itype || 'other'))];
-  const INVEST_COLORS = { stocks:'#6c63ff', etf:'#38bdf8', crypto:'#fbbf24', bonds:'#34d399', realestate:'#f472b6', other:'#a78bfa' };
+  // Cleaner color palette matching the budget chart aesthetic
+  const INVEST_COLORS = {
+    stocks:     isDark ? 'rgba(99,148,245,0.85)'  : 'rgba(79,128,225,0.9)',
+    etf:        isDark ? 'rgba(39,174,110,0.85)'  : 'rgba(39,174,110,0.9)',
+    crypto:     isDark ? 'rgba(245,190,80,0.85)'  : 'rgba(230,170,50,0.9)',
+    bonds:      isDark ? 'rgba(100,210,170,0.85)' : 'rgba(70,190,150,0.9)',
+    realestate: isDark ? 'rgba(220,130,180,0.85)' : 'rgba(200,100,160,0.9)',
+    other:      isDark ? 'rgba(160,140,220,0.85)' : 'rgba(140,120,200,0.9)',
+  };
 
-  // compute cumulative totals per bucket
   const bucketTotals = buckets.map(b => Object.values(b.byType).reduce((s,v)=>s+v,0));
-  // running cumulative
   let cumulative = 0;
   const cumulativeVals = bucketTotals.map(v => { cumulative += v; return cumulative; });
 
   const maxVal = Math.max(...cumulativeVals, 1);
-  const pad = { t: 18, b: 30, l: 48, r: 14 };
+  const pad = { t: 24, b: 36, l: 48, r: 16 };
   const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
-  const barW = Math.min(24, (iW / buckets.length) * 0.55);
   const groupW = iW / buckets.length;
+  const barW = Math.min(16, groupW * 0.4);
+
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const labelColor = isDark ? '#606070' : '#aaaabc';
+  const textColor  = isDark ? '#a0a0b0' : '#666680';
 
   ctx.clearRect(0, 0, W, H);
 
-  // Grid lines
+  // Subtle horizontal grid lines
   for (let i = 0; i <= 4; i++) {
     const y = pad.t + iH * (1 - i / 4);
-    ctx.strokeStyle = 'rgba(30,34,53,0.8)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
     const val = maxVal * i / 4;
-    ctx.fillStyle = '#5a6080'; ctx.font = '8px DM Mono,monospace'; ctx.textAlign = 'right';
-    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 4, y + 3);
+    ctx.fillStyle = labelColor;
+    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
   }
 
-  // Stacked bars per bucket
+  // Stacked bars — rounded tops, clean
   buckets.forEach((b, i) => {
     const gx = pad.l + i * groupW + groupW / 2;
-    let stackY = pad.t + iH; // start from bottom
+    let stackY = pad.t + iH;
     allItypes.forEach(itype => {
       const val = b.byType[itype] || 0;
       if (!val) return;
       const bh = (val / maxVal) * iH;
-      const col = INVEST_COLORS[itype] || '#a78bfa';
-      ctx.fillStyle = col + 'cc';
+      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
+      const isTop = stackY - bh <= pad.t + 4;
+      ctx.fillStyle = col;
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(gx - barW/2, stackY - bh, barW, bh, stackY - bh <= pad.t + 2 ? [3,3,0,0] : 0);
+      if (ctx.roundRect) ctx.roundRect(gx - barW/2, stackY - bh, barW, bh, isTop ? [4,4,0,0] : 0);
       else ctx.rect(gx - barW/2, stackY - bh, barW, bh);
       ctx.fill();
       stackY -= bh;
     });
-    ctx.fillStyle = '#5a6080'; ctx.font = '9px Outfit,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(b.label, gx, pad.t + iH + 16);
+    // Month label
+    ctx.fillStyle = labelColor;
+    ctx.font = '500 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(b.label, gx, pad.t + iH + 20);
   });
 
-  // Cumulative line
+  // Cumulative growth line — clean, matches budget bar style
   if (cumulativeVals.some(v => v > 0)) {
     const pts = cumulativeVals.map((v, i) => ({
       x: pad.l + i * groupW + groupW / 2,
       y: pad.t + iH * (1 - v / maxVal)
     }));
-    // gradient fill under line
+
+    // Smooth gradient fill under line
+    const lineColor = isDark ? 'rgba(99,148,245,1)' : 'rgba(79,128,225,1)';
+    const gradTop   = isDark ? 'rgba(99,148,245,0.15)' : 'rgba(79,128,225,0.12)';
     const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
-    grad.addColorStop(0, 'rgba(251,191,36,0.18)');
-    grad.addColorStop(1, 'rgba(251,191,36,0.0)');
+    grad.addColorStop(0, gradTop);
+    grad.addColorStop(1, 'rgba(99,148,245,0)');
     ctx.beginPath();
     ctx.moveTo(pts[0].x, pad.t + iH);
     pts.forEach(p => ctx.lineTo(p.x, p.y));
@@ -4362,29 +4499,32 @@ function renderInvestChart(allEntries, mode) {
     ctx.closePath();
     ctx.fillStyle = grad; ctx.fill();
 
-    // line
+    // Line
     ctx.beginPath();
-    ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
     pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
     ctx.stroke();
 
-    // dots
+    // Clean dots
     pts.forEach(p => {
       ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = '#fbbf24'; ctx.fill();
-      ctx.strokeStyle = '#07080f'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.fillStyle = lineColor; ctx.fill();
+      const bgColor = isDark ? '#111' : '#fff';
+      ctx.strokeStyle = bgColor; ctx.lineWidth = 1.5; ctx.stroke();
     });
   }
 
-  // Legend
+  // Legend — inline below canvas (top-right style matching budget bar)
   const legendEl = document.getElementById('invest-chart-legend');
   if (legendEl) {
+    const INVEST_LABELS = { stocks:'Stocks', etf:'ETF', crypto:'Crypto', bonds:'Bonds', realestate:'Real Estate', other:'Other' };
     legendEl.innerHTML = allItypes.map(itype => {
-      const col = INVEST_COLORS[itype] || '#a78bfa';
-      const info = (typeof INVEST_TYPES !== 'undefined' && INVEST_TYPES[itype]) || { icon: '◦', label: itype };
+      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
+      const label = INVEST_LABELS[itype] || itype;
       const total = invEntries.filter(e => (e.itype||'other') === itype).reduce((s,e)=>s+e.amount,0);
-      return `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:10px;height:10px;border-radius:3px;background:${col};flex-shrink:0"></div>${info.icon} ${info.label} <span style="color:${col};font-weight:700">€${total.toFixed(0)}</span></div>`;
-    }).join('') + `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:10px;height:2px;background:#fbbf24;flex-shrink:0"></div>Cumulative <span style="color:#fbbf24;font-weight:700">€${cumulativeVals[cumulativeVals.length-1]?.toFixed(0)||0}</span></div>`;
+      return `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0"></div>${label} <span style="font-weight:700;color:var(--text)">€${total.toFixed(0)}</span></div>`;
+    }).join('') + (cumulativeVals.some(v=>v>0) ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:18px;height:2px;border-radius:1px;background:${isDark?'rgba(99,148,245,1)':'rgba(79,128,225,1)'};flex-shrink:0"></div>Total Growth <span style="font-weight:700;color:var(--text)">€${(cumulativeVals[cumulativeVals.length-1]||0).toFixed(0)}</span></div>` : '');
   }
 }
 
