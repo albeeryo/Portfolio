@@ -11,8 +11,24 @@
 <meta name="application-name" content="LucidFolio">
 <meta name="description" content="Your crypto portfolio & budget tracker">
 <link rel="manifest" href="#" id="pwa-manifest">
-<!-- Apple Touch Icons (inline SVG-based via canvas) -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%2307080f'/%3E%3Ccircle cx='90' cy='90' r='60' fill='none' stroke='%236c63ff' stroke-width='8'/%3E%3Ctext x='90' y='104' text-anchor='middle' font-size='48' font-family='Arial' fill='%236c63ff'%3E₿%3C/text%3E%3C/svg%3E">
+<!-- Favicon & Apple Touch Icon -->
+<link rel="icon" type="image/svg+xml" id="favicon-link" href="">
+<link rel="apple-touch-icon" id="apple-touch-icon-link" href="">
+<script>
+(function(){
+  // Logo SVG as favicon (the "L" heart shape mark)
+  const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+    <rect width="180" height="180" rx="40" fill="#111111"/>
+    <g transform="translate(28,28) scale(1.36)">
+      <path d="M 8 72 Q 8 90 26 90 L 80 90 Q 90 90 90 80 L 90 68 Q 90 60 82 60 L 68 60 L 68 8 Q 68 0 60 0 L 16 0 Q 8 0 8 8 Z" fill="#ffffff"/>
+      <path d="M 68 8 Q 68 0 76 0 Q 90 0 90 14 L 90 54 Q 90 62 82 62 L 68 60 Z" fill="#888888"/>
+    </g>
+  </svg>`;
+  const encoded = 'data:image/svg+xml,' + encodeURIComponent(logoSvg);
+  document.getElementById('favicon-link').href = encoded;
+  document.getElementById('apple-touch-icon-link').href = encoded;
+})();
+</script>
 <title>LucidFolio</title>
 <!-- system fonts -->
 
@@ -611,7 +627,7 @@ body { overscroll-behavior: none; }
 .main-tabs, .bgt-tx-item, .coin-result, .modal {
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
-  will-change: transform;
+  will-change: auto;
 }
 /* Remove 300ms tap delay on iOS */
 a, button, input, select, textarea { touch-action: manipulation; }
@@ -621,20 +637,26 @@ a, button, input, select, textarea { touch-action: manipulation; }
 .bgt-tx-item, .coin-result, .stat-card, tbody tr { -webkit-transition: background .12s ease; transition: background .12s ease; }
 /* Safe area bottom padding on home-screen install */
 .container { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-
-
 /* Prevent input zoom on iOS (font-size must be >= 16px for inputs) */
 input, select, textarea { font-size: 16px !important; }
 .f-label, .bp-lbl, .f-hint { font-size: 11px; }
 /* Smooth page transitions */
-#view-portfolio, #view-budget { animation: fadeUp .25s ease both; }
+#view-portfolio, #view-budget, #view-invest { animation: fadeUp .22s ease both; }
 /* Bottom action row spacing on iPhone X+ */
 .action-row { padding-bottom: env(safe-area-inset-bottom, 0px); }
 /* Tab bar at bottom safe area */
 .ticker-wrap { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
 /* Prevent horizontal overflow on mobile */
-body { max-width: 100vw; }
+body { max-width: 100vw; overflow-x: hidden; }
 table { table-layout: auto; }
+/* Crisp rendering on retina */
+canvas { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+/* No rubber-band bounce that causes layout jitter */
+html, body { position: relative; }
+/* Smooth font rendering everywhere */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+/* Fix potential edge jitter from border-radius on scroll */
+.bgt-card, .stat-card, .tbl-wrap, .modal, .wl-panel { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 
 /* ── ANIMATIONS ── */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
@@ -703,13 +725,13 @@ table { table-layout: auto; }
 </div>
 
 <!-- TICKER -->
-<div class="ticker-wrap">
+<div class="ticker-wrap" style="display:none">
   <div class="ticker-label">LIVE</div>
   <div class="ticker-track" id="ticker-track"><span style="color:var(--muted);font-size:11px;padding:0 18px">Loading market data…</span></div>
 </div>
 
 <!-- WATCHLIST PANEL -->
-<div class="wl-panel" id="wl-panel">
+<div class="wl-panel" id="wl-panel" style="display:none">
   <div class="wl-head" onclick="toggleWL()">
     <span class="wl-title">Watchlist</span>
     <span class="wl-arrow" id="wl-arrow">▼</span>
@@ -941,6 +963,10 @@ table { table-layout: auto; }
           <button class="cur-btn" id="btn-usd" onclick="setCur('USD')">USD</button>
           <button class="cur-btn" id="btn-eur" onclick="setCur('EUR')">EUR</button>
         </div>
+        <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
+          <span id="theme-icon-sun">☀️</span>
+          <span id="theme-icon-moon" style="display:none">🌙</span>
+        </button>
         <button class="btn-refresh" id="btn-refresh" onclick="manualRefresh()">
           <i class="ri">↻</i>
         </button>
@@ -961,7 +987,7 @@ table { table-layout: auto; }
   </div>
 
   <!-- ACTION BUTTONS — switches per tab -->
-  <div class="action-row" id="action-row-portfolio">
+  <div class="action-row" id="action-row-portfolio" style="display:none">
     <button class="action-btn" onclick="openAddModal()">
       <div class="action-icon">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1007,7 +1033,7 @@ table { table-layout: auto; }
       <span class="action-label">Account</span>
     </button>
   </div>
-  <div class="action-row" id="action-row-budget" style="display:none">
+  <div class="action-row" id="action-row-budget">
     <button class="action-btn" onclick="setBgtType('income');document.getElementById('bgt-amount').focus()">
       <div class="action-icon" style="background:rgba(26,122,74,.1)">
         <svg viewBox="0 0 24 24" stroke="var(--green)"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1029,15 +1055,15 @@ table { table-layout: auto; }
     </button>
   </div>
 
-  <!-- NAV TABS -->
+  <!-- NAV TABS - order: Budget, Invest, Portfolio -->
   <div class="main-tabs">
-    <button class="main-tab active" id="tab-portfolio" onclick="switchMainTab('portfolio')">Portfolio</button>
-    <button class="main-tab" id="tab-budget" onclick="switchMainTab('budget')">Budget</button>
+    <button class="main-tab active" id="tab-budget" onclick="switchMainTab('budget')">Budget</button>
     <button class="main-tab" id="tab-invest" onclick="switchMainTab('invest')">Savings & Invest</button>
+    <button class="main-tab" id="tab-portfolio" onclick="switchMainTab('portfolio')">Portfolio</button>
   </div>
 
   <!-- ══════════ PORTFOLIO VIEW ══════════ -->
-  <div id="view-portfolio">
+  <div id="view-portfolio" style="display:none">
 
   <!-- STATS -->
   <div class="stats-bar">
@@ -1152,7 +1178,7 @@ table { table-layout: auto; }
   </div><!-- end view-portfolio -->
 
   <!-- ══════════ BUDGET VIEW ══════════ -->
-  <div id="view-budget" style="display:none">
+  <div id="view-budget">
 
     <!-- Budget Summary Cards -->
     <div class="bgt-summary-grid">
@@ -3386,6 +3412,17 @@ function switchMainTab(tab) {
   if (arb) arb.style.display = tab === 'budget' ? '' : 'none';
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
+
+  // Show watchlist + ticker ONLY on portfolio tab
+  const wlPanel = document.getElementById('wl-panel');
+  const tickerWrap = document.querySelector('.ticker-wrap');
+  if (wlPanel) wlPanel.style.display = tab === 'portfolio' ? '' : 'none';
+  if (tickerWrap) {
+    tickerWrap.style.display = tab === 'portfolio' ? '' : 'none';
+    // adjust body padding
+    document.body.style.paddingBottom = tab === 'portfolio' ? 'calc(var(--ticker-h) + 8px)' : '8px';
+  }
+
   updateHero();
 }
 
@@ -4010,8 +4047,10 @@ function confirmAddSavings() {
   renderBudget();
 }
 function delSavingsEntry(id) {
-  bgtSave(bgtLoad().filter(e => e.id !== id));
+  // Also remove the linked expense entry (id+1)
+  bgtSave(bgtLoad().filter(e => e.id !== id && !(e.linkedSaving && e.id === id+1)));
   renderBudget();
+  showToast('Savings entry removed ✓');
 }
 
 // ══════════════════════════════════════════
@@ -4125,7 +4164,12 @@ function saveEditInvest() {
   showToast('Investment updated ✓');
 }
 
-function delInvestEntry(id) { bgtSave(bgtLoad().filter(e => e.id !== id)); renderBudget(); }
+function delInvestEntry(id) {
+  // Also remove the linked expense entry (id+1)
+  bgtSave(bgtLoad().filter(e => e.id !== id && !(e.linkedInvest && e.id === id+1)));
+  renderBudget();
+  showToast('Investment entry removed ✓');
+}
 
 function renderInvestments(allEntries) {
   const invEntries = (allEntries || bgtLoad()).filter(e => e.type === 'investment');
@@ -4627,7 +4671,7 @@ function updateHero() {
   }
 }
 (function(){
-  window._currentTab = 'portfolio';
+  window._currentTab = 'budget';
   try {
     const saved = localStorage.getItem('theme_pref') || 'light';
     if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
@@ -4646,6 +4690,20 @@ function updateHero() {
   } catch(e) {}
 })();
 
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme_pref', next);
+  const sun = document.getElementById('theme-icon-sun');
+  const moon = document.getElementById('theme-icon-moon');
+  if (sun) sun.style.display = next === 'dark' ? 'none' : '';
+  if (moon) moon.style.display = next === 'dark' ? '' : 'none';
+  // Update theme-color meta for mobile browser chrome
+  const meta = document.getElementById('theme-color-meta');
+  if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
+}
+
 async function init(){
   $('btn-usd').classList.toggle('active',S.currency!=='USD'?false:true);
   $('btn-eur').classList.toggle('active',S.currency==='EUR');
@@ -4656,6 +4714,8 @@ async function init(){
   await fetchPrices();
   renderHoldings(false);
   renderWL();
+  // Start on budget tab - hide ticker/watchlist
+  switchMainTab('budget');
   // Redraw DCA chart on resize
   window.addEventListener('resize',()=>{ if(activeDcaCoin) drawDCAChart(activeDcaCoin); renderInvestChart(bgtLoad(), invChartMode); });
   setInterval(async()=>{ await fetchPrices(); await fetchTicker(); }, REFRESH_MS);
@@ -4667,15 +4727,16 @@ init();
 </html>
 <script>
 (function(){
+  const logoSvgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#111111"/><g transform="translate(80,80) scale(3.89)"><path d="M 8 72 Q 8 90 26 90 L 80 90 Q 90 90 90 80 L 90 68 Q 90 60 82 60 L 68 60 L 68 8 Q 68 0 60 0 L 16 0 Q 8 0 8 8 Z" fill="#ffffff"/><path d="M 68 8 Q 68 0 76 0 Q 90 0 90 14 L 90 54 Q 90 62 82 62 L 68 60 Z" fill="#888888"/></g></svg>`;
   const manifest = {
     name:"LucidFolio",short_name:"LucidFolio",
     description:"Crypto portfolio & budget tracker",
     start_url:"./",display:"standalone",
     orientation:"portrait-primary",
-    background_color:"#efede8",theme_color:"#efede8",
+    background_color:"#111111",theme_color:"#111111",
     categories:["finance"],
     icons:[{
-      src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#07080f"/><circle cx="256" cy="256" r="175" fill="none" stroke="#6c63ff" stroke-width="22"/><text x="256" y="308" text-anchor="middle" font-size="140" font-family="Arial,sans-serif" fill="#6c63ff">₿</text></svg>'),
+      src:"data:image/svg+xml,"+encodeURIComponent(logoSvgIcon),
       sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"
     }]
   };
