@@ -281,8 +281,8 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
   animation:fadeUp .45s ease both;
 }
 .hero-label{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.3px;margin-bottom:8px;}
-.hero-amount{font-size:clamp(38px,8vw,58px);font-weight:700;letter-spacing:-2px;color:var(--text);line-height:1;}
-.hero-amount .hero-cents{font-size:clamp(22px,4vw,34px);font-weight:400;opacity:.7;}
+.hero-amount{font-size:clamp(28px,6.5vw,52px);font-weight:700;letter-spacing:-1.5px;color:var(--text);line-height:1;}
+.hero-amount .hero-cents{font-size:clamp(16px,3.5vw,30px);font-weight:400;opacity:.7;}
 .hero-sub{margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
 .hero-pnl{font-size:13px;font-weight:600;padding:3px 10px;border-radius:20px;}
 .hero-pnl.pos{color:var(--green);background:rgba(26,122,74,.08);}
@@ -293,7 +293,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 ───────────────────────────────── */
 .action-row{
   display:flex;justify-content:center;gap:32px;
-  padding:0 20px 28px;
+  padding:20px 20px 36px;
   animation:fadeUp .4s .05s ease both;
 }
 .action-btn{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:none;cursor:pointer;transition:transform .15s;}
@@ -551,10 +551,10 @@ td.td-c{text-align:center;}
   box-shadow:var(--card-shadow);margin-bottom:24px;overflow:hidden;
   animation:fadeUp .3s ease both;
 }
-.bgt-hero-card{flex:1;padding:28px 24px;text-align:center;}
+.bgt-hero-card{flex:1;padding:24px 12px;text-align:center;min-width:0;overflow:hidden;}
 .bgt-hero-divider{width:1px;background:var(--border);flex-shrink:0;margin:20px 0;}
 .bgt-hero-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:10px;}
-.bgt-hero-val{font-size:clamp(24px,5vw,36px);font-weight:700;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;line-height:1;}
+.bgt-hero-val{font-size:clamp(18px,4vw,32px);font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;line-height:1;word-break:break-all;}
 .bgt-hero-val.green{color:var(--green);}
 .bgt-hero-val.red{color:var(--red);}
 
@@ -654,7 +654,7 @@ td.td-c{text-align:center;}
 /* ── iOS PERFORMANCE & SMOOTH SCROLL ── */
 html { -webkit-overflow-scrolling: touch; }
 * { -webkit-tap-highlight-color: transparent; }
-body { overscroll-behavior: none; }
+body { overscroll-behavior-y: auto; overscroll-behavior-x: none; }
 .modal, .bgt-tx-list, .coin-results, .wl-body, .tbl-wrap, .purchase-log-wrap {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -683,12 +683,14 @@ input, select, textarea { font-size: 16px !important; }
 .action-row { padding-bottom: env(safe-area-inset-bottom, 0px); }
 /* Ticker sits above bottom nav - positioning handled in main ticker CSS */
 /* Prevent horizontal overflow on mobile */
-body { max-width: 100vw; overflow-x: hidden; }
+html { overflow-x: hidden; max-width: 100%; }
+body { max-width: 100vw; overflow-x: hidden; width: 100%; }
 table { table-layout: auto; }
+.container { overflow-x: hidden; }
 /* Crisp rendering on retina */
 canvas { image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
 /* No rubber-band bounce that causes layout jitter */
-html, body { position: relative; }
+html { position: relative; overscroll-behavior-x: none; } body { position: relative; overscroll-behavior-x: none; overflow-y: auto; }
 /* Smooth font rendering everywhere */
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 /* Fix potential edge jitter from border-radius on scroll */
@@ -697,6 +699,113 @@ html, body { position: relative; }
 /* ── ANIMATIONS ── */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PORTFOLIO PRICE CHART ── */
+.ptf-chart-sec{animation:fadeUp .35s ease both;margin-top:4px;}
+.ptf-coin-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.ptf-coin-pill{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid transparent;border-radius:22px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);transition:all .15s;box-shadow:var(--card-shadow);}
+.ptf-coin-pill:hover{background:var(--surface2);}
+.ptf-coin-pill.active{border-color:var(--text);color:var(--text);background:var(--surface);}
+.ptf-coin-pill img{width:18px;height:18px;border-radius:50%;object-fit:cover;}
+.ptf-coin-pill-fb{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;flex-shrink:0;}
+
+.ptf-chart-card{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--card-shadow);}
+.ptf-chart-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 20px 0;flex-wrap:wrap;gap:10px;}
+.ptf-chart-coin-name{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px;}
+.ptf-chart-price{font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-1.5px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
+.ptf-chart-change{font-size:13px;font-weight:600;margin-top:5px;}
+.ptf-chart-change.up{color:var(--green);}
+.ptf-chart-change.down{color:var(--red);}
+
+.ptf-range-btns{display:flex;gap:2px;background:var(--surface2);border-radius:20px;padding:3px;flex-shrink:0;}
+.ptf-range-btn{background:none;border:none;color:var(--muted);border-radius:16px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.ptf-range-btn:hover{color:var(--text);}
+.ptf-range-btn.active{background:var(--text);color:var(--bg);}
+
+.ptf-canvas-wrap{position:relative;height:220px;padding:16px 0 0;}
+#ptf-chart-canvas{width:100%;height:100%;cursor:crosshair;display:block;}
+.ptf-chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+
+.ptf-action-bar{display:flex;align-items:center;justify-content:space-around;padding:16px 10px;border-top:1px solid var(--border);margin-top:10px;}
+.ptf-action-btn{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;color:var(--text2);font-size:11px;font-weight:500;min-height:unset;transition:all .15s;}
+.ptf-action-btn:hover{color:var(--text);}
+.ptf-action-btn:active{transform:scale(.92);}
+.ptf-ab-icon{width:44px;height:44px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center;}
+.ptf-ab-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── HEADER DROPDOWN MENU ── */
+.hdr-menu-wrap{position:relative;}
+.hdr-menu-btn{
+  position:relative;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--surface2);border:1.5px solid var(--border);
+  color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.hdr-menu-btn:hover{background:var(--surface3);color:var(--text);}
+.hdr-dropdown{
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:16px;padding:6px;
+  min-width:195px;z-index:500;
+  box-shadow:0 12px 40px rgba(0,0,0,.18);
+  animation:modalIn .15s ease;
+}
+[data-theme="dark"] .hdr-dropdown{box-shadow:0 12px 40px rgba(0,0,0,.5);}
+.hdr-dropdown.hidden{display:none;}
+.hdr-drop-section{padding:4px 2px;}
+.hdr-drop-label{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);padding:2px 10px 4px;}
+.hdr-drop-item{
+  display:flex;align-items:center;gap:9px;
+  width:100%;background:none;border:none;cursor:pointer;
+  padding:8px 10px;border-radius:10px;
+  font-size:12px;font-weight:500;color:var(--text2);
+  transition:background .1s;text-align:left;
+}
+.hdr-drop-item:hover{background:var(--surface2);color:var(--text);}
+.hdr-drop-cur{display:flex;background:var(--surface2);border-radius:16px;padding:2px;gap:2px;margin:2px 4px 4px;}
+.hdr-drop-divider{height:1px;background:var(--border);margin:4px 6px;}
+
+/* Crosshair info bar */
+.ptf-crosshair-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:30px;}
+.ptf-ch-price{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+.ptf-ch-date{font-size:11px;color:var(--muted);}
+
+/* Buy/sell marker tooltip */
+.ptf-marker-tip{
+  position:absolute;z-index:100;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:14px;padding:12px 14px;
+  pointer-events:none;min-width:160px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+  animation:modalIn .15s ease;
+}
+[data-theme="dark"] .ptf-marker-tip{box-shadow:0 8px 32px rgba(0,0,0,.5);}
+.ptf-mt-type{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;padding:3px 8px;border-radius:6px;display:inline-block;}
+.ptf-mt-type.buy{background:rgba(26,122,74,.12);color:var(--green);}
+.ptf-mt-type.sell{background:rgba(192,57,43,.12);color:var(--red);}
+.ptf-mt-row{display:flex;justify-content:space-between;gap:12px;margin-top:4px;font-size:11px;}
+.ptf-mt-lbl{color:var(--muted);}
+.ptf-mt-val{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+.ptf-mt-date{font-size:10px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
+
+/* Purchase History Modal rows */
+.ph-row{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);transition:background .1s;}
+.ph-row:last-child{border-bottom:none;}
+.ph-row:hover{background:var(--surface2);}
+.ph-row-icon{width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;}
+.ph-row-info{flex:1;min-width:0;}
+.ph-row-sym{font-size:13px;font-weight:700;}
+.ph-row-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.ph-row-right{text-align:right;flex-shrink:0;}
+.ph-row-total{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;}
+.ph-row-total.buy{color:var(--red);}
+.ph-row-total.sell{color:var(--green);}
+.ph-row-price{font-size:10px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums;}
+.ph-type-badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-right:5px;}
+.ph-type-badge.buy{background:rgba(26,122,74,.1);color:var(--green);}
+.ph-type-badge.sell{background:rgba(192,57,43,.1);color:var(--red);}
 </style>
 
 </head>
@@ -1025,25 +1134,43 @@ html, body { position: relative; }
       <div class="subtitle">Live Portfolio Tracker</div>
     </div>
     <div class="hdr-right">
-      <div class="hdr-controls">
-        <button class="auth-btn" id="auth-header-btn" onclick="openAuthModal()">
-          <div class="sync-dot offline" id="sync-indicator"></div>
-          <span id="auth-header-label">Sign In</span>
+      <div class="live-badge" style="margin-right:4px"><div class="live-dot"></div>LIVE</div>
+      <div class="hdr-menu-wrap" id="hdr-menu-wrap">
+        <button class="hdr-menu-btn" id="hdr-menu-btn" onclick="toggleHdrMenu()" aria-label="Menu">
+          <div class="sync-dot offline" id="sync-indicator" style="position:absolute;top:6px;right:6px"></div>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg>
         </button>
-        <div class="cur-toggle">
-          <button class="cur-btn" id="btn-usd" onclick="setCur('USD')">USD</button>
-          <button class="cur-btn" id="btn-eur" onclick="setCur('EUR')">EUR</button>
+        <div class="hdr-dropdown hidden" id="hdr-dropdown">
+          <div class="hdr-drop-section">
+            <div class="hdr-drop-label">Account</div>
+            <button class="hdr-drop-item" onclick="openAuthModal();closeHdrMenu()">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span id="auth-header-label">Sign In</span>
+            </button>
+          </div>
+          <div class="hdr-drop-divider"></div>
+          <div class="hdr-drop-section">
+            <div class="hdr-drop-label">Currency</div>
+            <div class="hdr-drop-cur">
+              <button class="cur-btn" id="btn-usd" onclick="setCur('USD')">USD</button>
+              <button class="cur-btn" id="btn-eur" onclick="setCur('EUR')">EUR</button>
+            </div>
+          </div>
+          <div class="hdr-drop-divider"></div>
+          <div class="hdr-drop-section">
+            <div class="hdr-drop-label">Display</div>
+            <button class="hdr-drop-item" id="btn-theme" onclick="toggleTheme()">
+              <span id="theme-icon-sun">☀️</span>
+              <span id="theme-icon-moon" style="display:none">🌙</span>
+              <span id="theme-label">Light Mode</span>
+            </button>
+            <button class="hdr-drop-item" id="btn-refresh" onclick="manualRefresh();closeHdrMenu()">
+              <i class="ri" style="font-style:normal;font-size:15px">↻</i>
+              <span>Refresh Prices</span>
+            </button>
+          </div>
         </div>
-        <button class="btn-theme" id="btn-theme" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle theme">
-          <span id="theme-icon-sun">☀️</span>
-          <span id="theme-icon-moon" style="display:none">🌙</span>
-        </button>
-        <button class="btn-refresh" id="btn-refresh" onclick="manualRefresh()">
-          <i class="ri">↻</i>
-        </button>
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
       </div>
-      <div class="last-upd" id="last-upd">Connecting…</div>
     </div>
   </header>
 
@@ -1135,8 +1262,75 @@ html, body { position: relative; }
   <!-- ══════════ PORTFOLIO VIEW ══════════ -->
   <div id="view-portfolio" style="display:none">
 
+  <!-- hidden elements kept for JS compat -->
+  <div id="chart-sec" style="display:none"><svg id="donut" width="1" height="1" viewBox="0 0 140 140"></svg><div id="legend"></div></div>
+  <div id="dca-sec" style="display:none"><div id="dca-stats-grid"></div><div id="dca-coin-tabs"></div><div id="dca-canvas-wrap"><canvas id="dca-canvas"></canvas><div id="dca-chart-loading"></div></div><span id="dca-chart-title"></span><tbody id="purchase-log-body-hidden"></tbody></div>
+  <div id="wl-inline-sec" style="display:none"><div id="wl-inline-body"></div></div>
+  <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
+
+  <!-- ══════ PRICE CHART SECTION (TOP) ══════ -->
+  <div class="ptf-chart-sec" id="ptf-chart-sec" style="display:none">
+    <div class="ptf-coin-pills" id="ptf-coin-pills"></div>
+    <div class="ptf-chart-card">
+      <div class="ptf-chart-header">
+        <div>
+          <div class="ptf-chart-coin-name" id="ptf-chart-name">—</div>
+          <div class="ptf-chart-price" id="ptf-chart-price">—</div>
+          <div class="ptf-chart-change" id="ptf-chart-change"></div>
+        </div>
+        <div class="ptf-range-btns">
+          <button class="ptf-range-btn" onclick="setPtfRange('1D')" id="ptf-range-1D">1D</button>
+          <button class="ptf-range-btn active" onclick="setPtfRange('1W')" id="ptf-range-1W">1W</button>
+          <button class="ptf-range-btn" onclick="setPtfRange('1M')" id="ptf-range-1M">1M</button>
+          <button class="ptf-range-btn" onclick="setPtfRange('1Y')" id="ptf-range-1Y">1Y</button>
+        </div>
+      </div>
+      <!-- Crosshair price tooltip bar -->
+      <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:none">
+        <span class="ptf-ch-price" id="ptf-ch-price">—</span>
+        <span class="ptf-ch-date" id="ptf-ch-date">—</span>
+      </div>
+      <div class="ptf-canvas-wrap">
+        <canvas id="ptf-chart-canvas"></canvas>
+        <div class="ptf-chart-loading" id="ptf-chart-loading" style="display:none"><div class="spin"></div></div>
+        <!-- Floating buy/sell tooltip -->
+        <div class="ptf-marker-tip" id="ptf-marker-tip" style="display:none">
+          <div class="ptf-mt-type" id="ptf-mt-type"></div>
+          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Coin</span><span class="ptf-mt-val" id="ptf-mt-coin"></span></div>
+          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Amount</span><span class="ptf-mt-val" id="ptf-mt-amount"></span></div>
+          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Price</span><span class="ptf-mt-val" id="ptf-mt-price"></span></div>
+          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Total</span><span class="ptf-mt-val" id="ptf-mt-total"></span></div>
+          <div class="ptf-mt-row" id="ptf-mt-note-row"><span class="ptf-mt-lbl">Note</span><span class="ptf-mt-val" id="ptf-mt-note"></span></div>
+          <div class="ptf-mt-date" id="ptf-mt-date"></div>
+        </div>
+      </div>
+      <div class="ptf-action-bar">
+        <button class="ptf-action-btn" onclick="showToast('Send coming soon')">
+          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
+          <span>Send</span>
+        </button>
+        <button class="ptf-action-btn" onclick="showToast('Receive coming soon')">
+          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
+          <span>Receive</span>
+        </button>
+        <button class="ptf-action-btn" onclick="openPurchaseModal()">
+          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+          <span>Buy</span>
+        </button>
+        <button class="ptf-action-btn" onclick="showToast('Swap coming soon')">
+          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <span>Swap</span>
+        </button>
+        <button class="ptf-action-btn" onclick="showToast('Earn coming soon')">
+          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <span>Earn</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- STATS -->
-  <div class="stats-bar">
+  <div class="stats-bar" style="margin-top:16px">
     <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
     <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
     <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="spnl">—</div></div>
@@ -1150,6 +1344,7 @@ html, body { position: relative; }
       <div class="sec-actions">
         <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
         <button class="btn-add-holding" onclick="openAddModal()">+ Add Holding</button>
+        <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
         <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
       </div>
     </div>
@@ -1169,90 +1364,6 @@ html, body { position: relative; }
         </thead>
         <tbody id="holdings-body"></tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- CHART -->
-  <div class="chart-sec" id="chart-sec" style="display:none">
-    <div class="sec-hdr"><div class="sec-title">Allocation</div></div>
-    <div class="chart-wrap">
-      <svg id="donut" width="140" height="140" viewBox="0 0 140 140"></svg>
-      <div class="legend" id="legend"></div>
-    </div>
-  </div>
-
-  <!-- ══════ DCA / PURCHASE TRACKER ══════ -->
-  <div class="dca-sec" id="dca-sec" style="display:none">
-    <div class="sec-hdr">
-      <div class="sec-title">Purchase History</div>
-      <div class="sec-actions">
-        <button class="btn-add-holding" onclick="openPurchaseModal()" style="background:var(--text),var(--accent))">+ Log Purchase</button>
-      </div>
-    </div>
-
-    <!-- DCA summary stats -->
-    <div class="dca-top-grid" id="dca-stats-grid"></div>
-
-    <!-- Coin selector tabs -->
-    <div class="dca-coin-tabs" id="dca-coin-tabs"></div>
-
-    <!-- Price chart -->
-    <div class="dca-chart-wrap">
-      <div class="dca-chart-hdr">
-        <span class="dca-chart-title" id="dca-chart-title">Purchase History</span>
-        <div class="dca-chart-controls">
-          <div class="dca-range-btns">
-            <button class="dca-range-btn" onclick="setChartRange('7')" id="range-7">7D</button>
-            <button class="dca-range-btn active" onclick="setChartRange('30')" id="range-30">1M</button>
-            <button class="dca-range-btn" onclick="setChartRange('90')" id="range-90">3M</button>
-            <button class="dca-range-btn" onclick="setChartRange('180')" id="range-180">6M</button>
-            <button class="dca-range-btn" onclick="setChartRange('365')" id="range-365">1Y</button>
-            <button class="dca-range-btn" onclick="setChartRange('max')" id="range-max">All</button>
-          </div>
-          <div class="dca-chart-legend">
-            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--green)"></div>Buy</div>
-            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--red)"></div>Sell</div>
-            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--muted)"></div>Avg</div>
-          </div>
-        </div>
-      </div>
-      <div id="dca-canvas-wrap">
-        <canvas id="dca-canvas"></canvas>
-        <div class="dca-chart-loading" id="dca-chart-loading" style="display:none">
-          <div class="spin"></div>
-          <span>Loading price history…</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Purchase log table -->
-    <div class="purchase-log-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Coin</th>
-            <th>Type</th>
-            <th class="th-r">Amount</th>
-            <th class="th-r">Price</th>
-            <th class="th-r">Total</th>
-            <th>Date</th>
-            <th>Note</th>
-            <th class="th-c">Del</th>
-          </tr>
-        </thead>
-        <tbody id="purchase-log-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ══════ WATCHLIST ══════ -->
-  <div class="dca-sec" id="wl-inline-sec" style="margin-top:20px">
-    <div class="sec-hdr" style="margin-bottom:16px">
-      <div class="sec-title">Watchlist</div>
-      <button class="btn-add-holding" onclick="openWLModal()" style="font-size:11px;padding:7px 16px">+ Edit</button>
-    </div>
-    <div id="wl-inline-body" style="display:flex;flex-direction:column;gap:10px">
-      <div class="wl-empty">No coins added. Tap Edit to build your watchlist.</div>
     </div>
   </div>
 
@@ -1281,21 +1392,25 @@ html, body { position: relative; }
 
     <!-- ── EXPENSE BREAKDOWN (donut) ── -->
     <div class="bgt-section">
-      <div class="sec-hdr" style="margin-bottom:20px">
-        <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <button class="dca-range-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')">Month</button>
-          <button class="dca-range-btn" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
-          <button class="dca-range-btn" onclick="openCatEditor()" style="border-color:var(--accent2);color:var(--accent2)">Categories</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap">
+        <div class="sec-title" id="bgt-donut-title">Breakdown</div>
+        <div style="display:flex;gap:4px;align-items:center">
+          <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
+            <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="padding:5px 11px;font-size:10px;border-radius:16px">Expenses</button>
+            <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="padding:5px 11px;font-size:10px;border-radius:16px">Income</button>
+          </div>
+          <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
+            <button class="bgt-type-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')" style="padding:5px 10px;font-size:10px;border-radius:16px">Month</button>
+            <button class="bgt-type-btn" id="bgt-period-all" onclick="setBgtPeriod('all')" style="padding:5px 10px;font-size:10px;border-radius:16px">All</button>
+          </div>
+          <button onclick="openCatEditor()" style="width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1.5px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center" title="Edit Categories">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Expenses</button>
-        <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Income</button>
-      </div>
       <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
-        <svg id="bgt-donut" width="140" height="140" viewBox="0 0 130 130" style="cursor:pointer;flex-shrink:0"></svg>
-        <div class="legend" id="bgt-legend" style="flex:1;max-height:220px;overflow-y:auto"></div>
+        <svg id="bgt-donut" width="130" height="130" viewBox="0 0 130 130" style="cursor:pointer;flex-shrink:0"></svg>
+        <div class="legend" id="bgt-legend" style="flex:1;max-height:200px;overflow-y:auto"></div>
       </div>
     </div>
 
@@ -1317,8 +1432,17 @@ html, body { position: relative; }
 
     <!-- ── MONTHLY OVERVIEW (bar chart) ── -->
     <div class="bgt-section" style="margin-bottom:24px">
-      <div class="sec-hdr" style="margin-bottom:20px">
-        <div class="sec-title">Monthly Overview</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div class="sec-title">Monthly Overview</div>
+          <div id="bgt-bar-month-label" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)">
+            <div style="width:8px;height:8px;border-radius:2px;background:#27ae6e"></div>Income
+            <div style="width:8px;height:8px;border-radius:2px;background:#e05555;margin-left:4px"></div>Expense
+          </div>
+        </div>
       </div>
       <canvas id="bgt-bar-canvas" style="width:100%;height:220px"></canvas>
     </div>
@@ -1345,7 +1469,38 @@ html, body { position: relative; }
     </div>
   </div>
 
-<!-- ══ SAVINGS POT ══ -->
+<!-- ══ INVESTMENTS ══ -->
+    <div class="bgt-savings-section" id="invest-section">
+      <div class="sec-hdr" style="margin-bottom:14px">
+        <div class="sec-title">Investments</div>
+        <button class="btn-add-holding" onclick="openInvestModal()" style="font-size:10px;padding:6px 12px">+ Add Investment</button>
+      </div>
+
+      <!-- Investments overview -->
+      <div class="bgt-savings-overview">
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">Total Invested</div>
+          <div class="bgt-savings-big" id="invest-total" style="color:var(--amber)">€0.00</div>
+        </div>
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">No. of Entries</div>
+          <div class="bgt-savings-big" id="invest-count" style="color:var(--amber)">0</div>
+        </div>
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">Largest</div>
+          <div class="bgt-savings-big" id="invest-largest" style="color:var(--amber)">—</div>
+        </div>
+        <div>
+          <div class="bgt-card-lbl" style="margin-bottom:6px">This Month</div>
+          <div class="bgt-savings-big" id="invest-month" style="color:var(--accent2)">€0.00</div>
+        </div>
+      </div>
+
+      <!-- Investment transactions -->
+      <div id="invest-tx-list" class="bgt-tx-list" style="max-height:280px"></div>
+    </div>
+
+    <!-- ══ SAVINGS POT ══ -->
     <div class="bgt-savings-section">
       <div class="sec-hdr" style="margin-bottom:14px">
         <div class="sec-title">Savings Pot</div>
@@ -1386,37 +1541,6 @@ html, body { position: relative; }
 
       <!-- Savings transactions -->
       <div id="sav-tx-list" class="bgt-tx-list" style="max-height:260px"></div>
-    </div>
-
-    <!-- ══ INVESTMENTS ══ -->
-    <div class="bgt-savings-section" id="invest-section">
-      <div class="sec-hdr" style="margin-bottom:14px">
-        <div class="sec-title">Investments</div>
-        <button class="btn-add-holding" onclick="openInvestModal()" style="font-size:10px;padding:6px 12px">+ Add Investment</button>
-      </div>
-
-      <!-- Investments overview -->
-      <div class="bgt-savings-overview">
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Total Invested</div>
-          <div class="bgt-savings-big" id="invest-total" style="color:var(--amber)">€0.00</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">No. of Entries</div>
-          <div class="bgt-savings-big" id="invest-count" style="color:var(--amber)">0</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Largest</div>
-          <div class="bgt-savings-big" id="invest-largest" style="color:var(--amber)">—</div>
-        </div>
-        <div>
-          <div class="bgt-card-lbl" style="margin-bottom:6px">This Month</div>
-          <div class="bgt-savings-big" id="invest-month" style="color:var(--accent2)">€0.00</div>
-        </div>
-      </div>
-
-      <!-- Investment transactions -->
-      <div id="invest-tx-list" class="bgt-tx-list" style="max-height:280px"></div>
     </div>
 
     <!-- ══ INVESTMENT GROWTH CHART ══ -->
@@ -2398,9 +2522,14 @@ function renderHoldings(changed){
       <button class="empty-cta" onclick="openAddModal()">+ Add Holding</button>
     </div></td></tr>`;
     $('chart-sec').style.display='none';
+    const ptfSec = document.getElementById('ptf-chart-sec');
+    if (ptfSec) ptfSec.style.display = 'none';
     return;
   }
-  $('chart-sec').style.display='block';
+  $('chart-sec').style.display='none'; // hide old donut, use new chart
+  // Show new price chart section
+  const ptfSec = document.getElementById('ptf-chart-sec');
+  if (ptfSec) { ptfSec.style.display = ''; renderPtfChart(); }
 
   tbody.innerHTML=S.holdings.map((h,i)=>{
     const lp=priceOf(h);
@@ -2450,9 +2579,8 @@ function renderHoldings(changed){
   }).join('');
 
   renderDonut(tv);
-  // Show DCA section whenever there are holdings
-  $('dca-sec').style.display = S.holdings.length ? 'block' : 'none';
-  renderDCA();
+  // DCA section hidden (replaced by new chart)
+  $('dca-sec').style.display = 'none';
   // Refresh budget investments card with latest portfolio value
   if (document.getElementById('view-budget') && document.getElementById('view-budget').style.display !== 'none') {
     renderBudget();
@@ -3487,9 +3615,20 @@ function switchMainTab(tab) {
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
 
-  // Show inline watchlist section only on portfolio
+  // Show inline watchlist section only on portfolio (hidden — replaced by new chart)
   const wlSec = document.getElementById('wl-inline-sec');
-  if (wlSec) wlSec.style.display = tab === 'portfolio' ? '' : 'none';
+  if (wlSec) wlSec.style.display = 'none';
+
+  // Show new portfolio chart section
+  const ptfSec = document.getElementById('ptf-chart-sec');
+  if (ptfSec) {
+    if (tab === 'portfolio' && S.holdings && S.holdings.length) {
+      ptfSec.style.display = '';
+      setTimeout(() => renderPtfChart(), 50);
+    } else {
+      ptfSec.style.display = 'none';
+    }
+  }
 
   updateHero();
 }
@@ -3880,7 +4019,7 @@ function renderBgtBar(allEntries) {
   if (!canvas || !canvas.offsetWidth) return;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth, H = 220;
+  const W = canvas.offsetWidth, H = 240;
   canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
   canvas.style.height = H + 'px';
   ctx.scale(devicePixelRatio, devicePixelRatio);
@@ -3889,7 +4028,10 @@ function renderBgtBar(allEntries) {
   const now = new Date();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push({ key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label:d.toLocaleDateString('en',{month:'short'}), income:0, expense:0, savings:0 });
+    months.push({ key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,
+      label: d.toLocaleDateString('en',{month:'short'}),
+      fullLabel: d.toLocaleDateString('en',{month:'long', year:'numeric'}),
+      income:0, expense:0, savings:0 });
   }
   allEntries.forEach(e => {
     const m = months.find(m => e.date && e.date.startsWith(m.key));
@@ -3899,98 +4041,92 @@ function renderBgtBar(allEntries) {
     else if (e.type==='savings') m.savings+=e.amount;
   });
 
-  const maxVal = Math.max(...months.flatMap(m=>[m.income,m.expense,m.savings]),1);
-  const pad = {t:24, b:36, l:44, r:16};
+  // Update month label display
+  const lbl = document.getElementById('bgt-bar-month-label');
+  if (lbl) lbl.textContent = months[months.length-1].fullLabel;
+
+  const maxVal = Math.max(...months.flatMap(m=>[m.income,m.expense]),1);
+  const pad = {t:16, b:36, l:44, r:16};
   const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
   const groupW = iW / months.length;
-  const barW = Math.min(14, groupW * 0.22);
+  // Wider, more prominent bars — like the reference screenshot
+  const gap = 3;
+  const totalBarW = Math.min(groupW * 0.72, 52);
+  const barW = (totalBarW - gap) / 2;
 
   // Store for tooltip
   _barMonths=months; _barPad=pad; _barGroupW=groupW; _barIH=iH; _barMaxVal=maxVal;
   canvas._W=W; canvas._H=H; canvas._barW=barW;
 
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const labelColor = isDark ? '#606070' : '#aaaabc';
-  const textColor = isDark ? '#a0a0b0' : '#666680';
+  const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const labelColor = isDark ? '#505060' : '#aaaabc';
+  const incomeColor = '#27ae6e';
+  const expenseColor = '#e05555';
+  const incomeFill = isDark ? 'rgba(39,174,110,0.2)' : 'rgba(39,174,110,0.12)';
+  const expenseFill = isDark ? 'rgba(224,85,85,0.2)' : 'rgba(224,85,85,0.12)';
 
   ctx.clearRect(0, 0, W, H);
 
-  // Horizontal grid lines — very subtle
+  // Subtle horizontal grid lines
   for (let i = 0; i <= 4; i++) {
     const y = pad.t + iH * (1 - i / 4);
-    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
-    ctx.setLineDash([]);
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.setLineDash([]);
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
     const val = maxVal * i / 4;
     ctx.fillStyle = labelColor;
-    ctx.font = `600 9px -apple-system,sans-serif`;
-    ctx.textAlign = 'right';
-    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
+    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 5, y + 3.5);
   }
 
-  // Draw bars for each month
+  // ── Draw paired bars (income left, expense right) — like reference ──
+  const r = 6; // corner radius — more rounded, like reference
   months.forEach((m, i) => {
     const gx = pad.l + i * groupW + groupW / 2;
-    const ih = (m.income / maxVal) * iH;
-    const eh = (m.expense / maxVal) * iH;
-    const sh = (m.savings / maxVal) * iH;
     const baseY = pad.t + iH;
-    const r = 4;
 
-    // Income bar — left
-    if (ih > 1) {
-      const x = gx - barW * 1.7;
-      ctx.fillStyle = isDark ? 'rgba(39,174,110,0.85)' : 'rgba(39,174,110,0.9)';
+    const ih = Math.max((m.income / maxVal) * iH, m.income > 0 ? 4 : 0);
+    const eh = Math.max((m.expense / maxVal) * iH, m.expense > 0 ? 4 : 0);
+
+    // Income bar (left of pair) — green with lighter background filler
+    const ix = gx - barW - gap / 2;
+    if (ih > 0) {
+      // Light background fill (full height, very subtle)
+      ctx.fillStyle = incomeFill;
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, baseY - ih, barW, ih, [r,r,0,0]);
-      else ctx.rect(x, baseY - ih, barW, ih);
+      if (ctx.roundRect) ctx.roundRect(ix, pad.t, barW, iH, r);
+      else ctx.rect(ix, pad.t, barW, iH);
       ctx.fill();
-    }
-    // Expense bar — center
-    if (eh > 1) {
-      const x = gx - barW / 2;
-      ctx.fillStyle = isDark ? 'rgba(224,85,85,0.85)' : 'rgba(224,85,85,0.9)';
+      // Solid colored bar
+      ctx.fillStyle = incomeColor;
       ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, baseY - eh, barW, eh, [r,r,0,0]);
-      else ctx.rect(x, baseY - eh, barW, eh);
-      ctx.fill();
-    }
-    // Savings bar — right
-    if (sh > 1) {
-      const x = gx + barW * 0.7;
-      ctx.fillStyle = isDark ? 'rgba(99,148,245,0.85)' : 'rgba(99,148,245,0.9)';
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, baseY - sh, barW, sh, [r,r,0,0]);
-      else ctx.rect(x, baseY - sh, barW, sh);
+      if (ctx.roundRect) ctx.roundRect(ix, baseY - ih, barW, ih, [r,r,2,2]);
+      else ctx.rect(ix, baseY - ih, barW, ih);
       ctx.fill();
     }
 
-    // Month label
-    ctx.fillStyle = labelColor;
-    ctx.font = `500 10px -apple-system,sans-serif`;
+    // Expense bar (right of pair) — red
+    const ex = gx + gap / 2;
+    if (eh > 0) {
+      // Light background fill
+      ctx.fillStyle = expenseFill;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(ex, pad.t, barW, iH, r);
+      else ctx.rect(ex, pad.t, barW, iH);
+      ctx.fill();
+      // Solid colored bar
+      ctx.fillStyle = expenseColor;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(ex, baseY - eh, barW, eh, [r,r,2,2]);
+      else ctx.rect(ex, baseY - eh, barW, eh);
+      ctx.fill();
+    }
+
+    // Month label — bold for current month
+    const isCurrent = i === months.length - 1;
+    ctx.fillStyle = isCurrent ? (isDark ? '#e0e0ee' : '#333344') : labelColor;
+    ctx.font = `${isCurrent ? '700' : '500'} 10px -apple-system,sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText(m.label, gx, baseY + 20);
-  });
-
-  // Legend — top right
-  const legendItems = [
-    { label: 'Income',  color: isDark ? 'rgba(39,174,110,0.85)' : 'rgba(39,174,110,0.9)' },
-    { label: 'Expense', color: isDark ? 'rgba(224,85,85,0.85)'  : 'rgba(224,85,85,0.9)' },
-    { label: 'Savings', color: isDark ? 'rgba(99,148,245,0.85)' : 'rgba(99,148,245,0.9)' },
-  ];
-  let lx = W - pad.r;
-  legendItems.reverse().forEach(item => {
-    ctx.font = '500 9px -apple-system,sans-serif';
-    ctx.textAlign = 'right';
-    const tw = ctx.measureText(item.label).width;
-    ctx.fillStyle = textColor;
-    ctx.fillText(item.label, lx, 14);
-    lx -= tw + 6;
-    ctx.fillStyle = item.color;
-    ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(lx - 9, 5, 7, 7, 2); else ctx.fillRect(lx - 9, 5, 7, 7);
-    ctx.fill();
-    lx -= 18;
   });
 }
 
@@ -4372,147 +4508,204 @@ function renderInvestChart(allEntries, mode) {
   ctx.scale(devicePixelRatio, devicePixelRatio);
 
   const invEntries = allEntries.filter(e => e.type === 'investment');
-
-  // Build period buckets
-  let buckets = [];
   const now = new Date();
+
+  // Build time-ordered cumulative points
+  let points = [];
   if (mode === 'month') {
-    for (let i = 5; i >= 0; i--) {
+    for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      buckets.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('en',{month:'short'}), byType: {} });
+      points.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`,
+        label: d.toLocaleDateString('en', {month:'short'}), total: 0 });
     }
     invEntries.forEach(e => {
-      const b = buckets.find(b => e.date && e.date.startsWith(b.key));
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      const b = points.find(p => e.date && e.date.startsWith(p.key));
+      if (b) b.total += e.amount;
     });
   } else {
-    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].sort();
+    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].filter(Boolean).sort();
     if (!years.length) years.push(String(now.getFullYear()));
-    years.forEach(y => buckets.push({ key: y, label: y, byType: {} }));
+    years.forEach(y => points.push({ key: y, label: y, total: 0 }));
     invEntries.forEach(e => {
       const y = (e.date||'').slice(0,4);
-      const b = buckets.find(b => b.key === y);
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      const b = points.find(p => p.key === y);
+      if (b) b.total += e.amount;
     });
   }
 
-  const allItypes = [...new Set(invEntries.map(e => e.itype || 'other'))];
-  // Cleaner color palette matching the budget chart aesthetic
-  const INVEST_COLORS = {
-    stocks:     isDark ? 'rgba(99,148,245,0.85)'  : 'rgba(79,128,225,0.9)',
-    etf:        isDark ? 'rgba(39,174,110,0.85)'  : 'rgba(39,174,110,0.9)',
-    crypto:     isDark ? 'rgba(245,190,80,0.85)'  : 'rgba(230,170,50,0.9)',
-    bonds:      isDark ? 'rgba(100,210,170,0.85)' : 'rgba(70,190,150,0.9)',
-    realestate: isDark ? 'rgba(220,130,180,0.85)' : 'rgba(200,100,160,0.9)',
-    other:      isDark ? 'rgba(160,140,220,0.85)' : 'rgba(140,120,200,0.9)',
-  };
+  // Convert to cumulative
+  let cum = 0;
+  points = points.map(p => { cum += p.total; return { ...p, cum }; });
+  // Remove leading zeros for cleaner look
+  const firstNonZero = points.findIndex(p => p.cum > 0);
+  const visPoints = firstNonZero > 0 ? points.slice(Math.max(0, firstNonZero - 1)) : points;
 
-  const bucketTotals = buckets.map(b => Object.values(b.byType).reduce((s,v)=>s+v,0));
-  let cumulative = 0;
-  const cumulativeVals = bucketTotals.map(v => { cumulative += v; return cumulative; });
-
-  const maxVal = Math.max(...cumulativeVals, 1);
-  const pad = { t: 24, b: 36, l: 48, r: 16 };
+  const maxVal = Math.max(...visPoints.map(p => p.cum), 1);
+  const pad = { t: 28, b: 40, l: 50, r: 20 };
   const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
-  const groupW = iW / buckets.length;
-  const barW = Math.min(16, groupW * 0.4);
+  const n = visPoints.length;
 
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const labelColor = isDark ? '#606070' : '#aaaabc';
-  const textColor  = isDark ? '#a0a0b0' : '#666680';
+  const isDarkMode = isDark;
+  const lineColor = '#27ae6e';
+  const gridColor = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const labelColor = isDarkMode ? '#555566' : '#aaaabc';
+  const textColor  = isDarkMode ? '#c0c0d0' : '#444455';
+
+  // Store for interactive crosshair
+  canvas._icPoints = visPoints;
+  canvas._icPad = pad;
+  canvas._icMaxVal = maxVal;
+  canvas._icIW = iW;
+  canvas._icIH = iH;
+  canvas._icH = H;
+
+  const xOf = i => pad.l + (n <= 1 ? iW/2 : (i / (n-1)) * iW);
+  const yOf = v => pad.t + iH - (v / maxVal) * iH;
 
   ctx.clearRect(0, 0, W, H);
 
-  // Subtle horizontal grid lines
+  // Horizontal grid lines + y-axis labels
   for (let i = 0; i <= 4; i++) {
     const y = pad.t + iH * (1 - i / 4);
-    ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
     const val = maxVal * i / 4;
     ctx.fillStyle = labelColor;
     ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
+    ctx.fillText(val >= 1000 ? '€'+(val/1000).toFixed(1)+'k' : '€'+val.toFixed(0), pad.l - 5, y + 3.5);
   }
 
-  // Stacked bars — rounded tops, clean
-  buckets.forEach((b, i) => {
-    const gx = pad.l + i * groupW + groupW / 2;
-    let stackY = pad.t + iH;
-    allItypes.forEach(itype => {
-      const val = b.byType[itype] || 0;
-      if (!val) return;
-      const bh = (val / maxVal) * iH;
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const isTop = stackY - bh <= pad.t + 4;
-      ctx.fillStyle = col;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(gx - barW/2, stackY - bh, barW, bh, isTop ? [4,4,0,0] : 0);
-      else ctx.rect(gx - barW/2, stackY - bh, barW, bh);
-      ctx.fill();
-      stackY -= bh;
-    });
-    // Month label
+  if (n < 2 || maxVal === 1) {
     ctx.fillStyle = labelColor;
-    ctx.font = '500 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(b.label, gx, pad.t + iH + 20);
+    ctx.font = '500 12px -apple-system,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('No investment data yet', W/2, H/2);
+    return;
+  }
+
+  // Smooth gradient fill under the line
+  const fillGrad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
+  fillGrad.addColorStop(0, isDarkMode ? 'rgba(39,174,110,0.22)' : 'rgba(39,174,110,0.15)');
+  fillGrad.addColorStop(0.7, isDarkMode ? 'rgba(39,174,110,0.05)' : 'rgba(39,174,110,0.03)');
+  fillGrad.addColorStop(1, 'transparent');
+
+  // Smooth bezier path
+  function smoothPath(pts) {
+    ctx.beginPath();
+    ctx.moveTo(xOf(0), yOf(pts[0].cum));
+    for (let i = 1; i < pts.length; i++) {
+      const x0 = xOf(i-1), y0 = yOf(pts[i-1].cum);
+      const x1 = xOf(i), y1 = yOf(pts[i].cum);
+      const cpx = (x0 + x1) / 2;
+      ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+    }
+  }
+
+  // Fill
+  smoothPath(visPoints);
+  ctx.lineTo(xOf(n-1), pad.t + iH);
+  ctx.lineTo(xOf(0), pad.t + iH);
+  ctx.closePath();
+  ctx.fillStyle = fillGrad;
+  ctx.fill();
+
+  // Line
+  smoothPath(visPoints);
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.setLineDash([]);
+  ctx.stroke();
+
+  // Dot at last point
+  const lastX = xOf(n-1), lastY = yOf(visPoints[n-1].cum);
+  ctx.beginPath(); ctx.arc(lastX, lastY, 5, 0, Math.PI*2);
+  ctx.fillStyle = '#ffffff'; ctx.fill();
+  ctx.beginPath(); ctx.arc(lastX, lastY, 3.5, 0, Math.PI*2);
+  ctx.fillStyle = lineColor; ctx.fill();
+
+  // X-axis labels — sparse so they don't overlap
+  const step = Math.max(1, Math.ceil(n / 6));
+  ctx.fillStyle = labelColor;
+  ctx.font = '500 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
+  visPoints.forEach((p, i) => {
+    if (i % step !== 0 && i !== n-1) return;
+    const isCurrent = i === n-1;
+    ctx.fillStyle = isCurrent ? textColor : labelColor;
+    ctx.font = `${isCurrent ? '700' : '500'} 10px -apple-system,sans-serif`;
+    ctx.fillText(p.label, xOf(i), pad.t + iH + 22);
   });
 
-  // Cumulative growth line — clean, matches budget bar style
-  if (cumulativeVals.some(v => v > 0)) {
-    const pts = cumulativeVals.map((v, i) => ({
-      x: pad.l + i * groupW + groupW / 2,
-      y: pad.t + iH * (1 - v / maxVal)
-    }));
-
-    // Smooth gradient fill under line
-    const lineColor = isDark ? 'rgba(99,148,245,1)' : 'rgba(79,128,225,1)';
-    const gradTop   = isDark ? 'rgba(99,148,245,0.15)' : 'rgba(79,128,225,0.12)';
-    const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
-    grad.addColorStop(0, gradTop);
-    grad.addColorStop(1, 'rgba(99,148,245,0)');
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pad.t + iH);
-    pts.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(pts[pts.length-1].x, pad.t + iH);
-    ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
-
-    // Line
-    ctx.beginPath();
-    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
-
-    // Clean dots
-    pts.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = lineColor; ctx.fill();
-      const bgColor = isDark ? '#111' : '#fff';
-      ctx.strokeStyle = bgColor; ctx.lineWidth = 1.5; ctx.stroke();
+  // Attach interactive crosshair (only once)
+  if (!canvas._icBound) {
+    canvas._icBound = true;
+    function _drawWithCrosshair(hovIdx) {
+      renderInvestChart(allEntries, mode);
+      if (hovIdx === null) return;
+      const pts = canvas._icPoints;
+      const p2 = canvas._icPad;
+      const mv = canvas._icMaxVal;
+      const iW2 = canvas._icIW, iH2 = canvas._icIH;
+      const n2 = pts.length;
+      if (!pts || !n2) return;
+      const ctx2 = canvas.getContext('2d');
+      const dpr2 = devicePixelRatio;
+      ctx2.scale(dpr2, dpr2);
+      const x2Of = ii => p2.l + (n2 <= 1 ? iW2/2 : (ii/(n2-1))*iW2);
+      const y2Of = vv => p2.t + iH2 - (vv/mv)*iH2;
+      const cx = x2Of(hovIdx), cy = y2Of(pts[hovIdx].cum);
+      // Vertical dashed line
+      ctx2.save();
+      ctx2.setLineDash([4,4]);
+      ctx2.strokeStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
+      ctx2.lineWidth = 1;
+      ctx2.beginPath(); ctx2.moveTo(cx, p2.t); ctx2.lineTo(cx, p2.t + iH2); ctx2.stroke();
+      ctx2.restore();
+      // Dot
+      ctx2.beginPath(); ctx2.arc(cx, cy, 7, 0, Math.PI*2);
+      ctx2.fillStyle = 'rgba(39,174,110,0.15)'; ctx2.fill();
+      ctx2.beginPath(); ctx2.arc(cx, cy, 5, 0, Math.PI*2);
+      ctx2.fillStyle = '#fff'; ctx2.fill();
+      ctx2.beginPath(); ctx2.arc(cx, cy, 3.5, 0, Math.PI*2);
+      ctx2.fillStyle = '#27ae6e'; ctx2.fill();
+      // Tooltip pill — dark pill above cursor like reference
+      const val = pts[hovIdx].cum;
+      const label = '€' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      ctx2.font = '700 12px -apple-system,sans-serif';
+      const tw = ctx2.measureText(label).width;
+      const pw = tw + 20, ph = 26, pr = 8;
+      let px = cx - pw/2;
+      if (px < 4) px = 4;
+      if (px + pw > W - 4) px = W - pw - 4;
+      let py = cy - ph - 10;
+      if (py < 4) py = 4;
+      ctx2.fillStyle = isDark ? 'rgba(18,18,24,0.95)' : 'rgba(20,20,30,0.9)';
+      ctx2.beginPath();
+      if (ctx2.roundRect) ctx2.roundRect(px, py, pw, ph, pr);
+      else ctx2.rect(px, py, pw, ph);
+      ctx2.fill();
+      ctx2.fillStyle = '#ffffff';
+      ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+      ctx2.fillText(label, px + pw/2, py + ph/2);
+      ctx2.textBaseline = 'alphabetic';
+    }
+    canvas.addEventListener('mousemove', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const pts = canvas._icPoints;
+      if (!pts || pts.length < 2) return;
+      const p2 = canvas._icPad;
+      const iW2 = canvas._icIW;
+      const n2 = pts.length;
+      const x2Of = ii => p2.l + (ii/(n2-1))*iW2;
+      let closest = 0, minD = Infinity;
+      pts.forEach((_, ii) => { const d = Math.abs(mx - x2Of(ii)); if (d < minD) { minD = d; closest = ii; }});
+      _drawWithCrosshair(closest);
+    });
+    canvas.addEventListener('mouseleave', function() {
+      renderInvestChart(allEntries, mode);
     });
   }
-
-  // Legend — inline below canvas (top-right style matching budget bar)
-  const legendEl = document.getElementById('invest-chart-legend');
-  if (legendEl) {
-    const INVEST_LABELS = { stocks:'Stocks', etf:'ETF', crypto:'Crypto', bonds:'Bonds', realestate:'Real Estate', other:'Other' };
-    legendEl.innerHTML = allItypes.map(itype => {
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const label = INVEST_LABELS[itype] || itype;
-      const total = invEntries.filter(e => (e.itype||'other') === itype).reduce((s,e)=>s+e.amount,0);
-      return `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0"></div>${label} <span style="font-weight:700;color:var(--text)">€${total.toFixed(0)}</span></div>`;
-    }).join('') + (cumulativeVals.some(v=>v>0) ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:18px;height:2px;border-radius:1px;background:${isDark?'rgba(99,148,245,1)':'rgba(79,128,225,1)'};flex-shrink:0"></div>Total Growth <span style="font-weight:700;color:var(--text)">€${(cumulativeVals[cumulativeVals.length-1]||0).toFixed(0)}</span></div>` : '');
-  }
 }
-
-
-
-document.getElementById('sav-modal').addEventListener('click', e => { if(e.target===document.getElementById('sav-modal')) closeSavingsModal(); });
 
 function openBgtGoalModal() {
   bgtGoalCat = null;
@@ -4761,6 +4954,9 @@ function toggleTheme() {
   const meta = document.getElementById('theme-color-meta');
   if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
   try { localStorage.setItem('theme_pref', next); } catch(e) {}
+  // Update dropdown label
+  const lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
 }
 // ── HERO BALANCE UPDATER (tab-aware) ──
 function updateHero() {
@@ -4868,6 +5064,507 @@ function toggleTheme() {
   if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
 }
 
+// ══════════════════════════════════════════
+// PORTFOLIO PRICE CHART — ETH-style with buy/sell markers & crosshair
+// ══════════════════════════════════════════
+let _ptfActiveCoin = null;
+let _ptfRange = '1W';
+let _ptfChartData = [];
+let _ptfPad = { top: 16, right: 16, bottom: 32, left: 16 };
+let _ptfDims = { W: 0, H: 0, w: 0, h: 0 };
+let _ptfMin = 0, _ptfMax = 1;
+let _ptfHoveredMarker = null;
+
+// ── helpers ──
+function _ptfXOf(i, n, w) { return _ptfPad.left + (i / (n - 1)) * w; }
+function _ptfYOf(v, min, range, h) { return _ptfPad.top + h - ((v - min) / range) * h; }
+
+function _ptfPurchasesForCoin() {
+  if (!_ptfActiveCoin) return [];
+  // filter purchases to active coin, within visible time window
+  const tStart = _ptfChartData.length ? _ptfChartData[0].t : 0;
+  const tEnd   = _ptfChartData.length ? _ptfChartData[_ptfChartData.length-1].t : Infinity;
+  return (S.purchases || []).filter(p => {
+    if (p.coinId !== _ptfActiveCoin) return false;
+    const ts = new Date(p.date).getTime();
+    return ts >= tStart && ts <= tEnd;
+  });
+}
+
+function renderPtfChart() {
+  if (!S.holdings.length) return;
+  const pillsEl = document.getElementById('ptf-coin-pills');
+  if (!pillsEl) return;
+  pillsEl.innerHTML = S.holdings.map((h, i) => {
+    const coin = COIN_BY_ID[h.coinId] || COIN_BY_SYM[h.symbol];
+    const col = coinColor(h.symbol);
+    const imgUrl = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
+    const iconHtml = imgUrl
+      ? `<img src="${imgUrl}" width="18" height="18" style="border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="ptf-coin-pill-fb" style="display:none;background:${col}22;color:${col}">${h.symbol.slice(0,2)}</div>`
+      : `<div class="ptf-coin-pill-fb" style="background:${col}22;color:${col}">${h.symbol.slice(0,2)}</div>`;
+    const isActive = _ptfActiveCoin === h.coinId || (!_ptfActiveCoin && i === 0);
+    return `<button class="ptf-coin-pill ${isActive ? 'active' : ''}" onclick="selectPtfCoin('${h.coinId}')">${iconHtml}<span>${h.symbol}</span></button>`;
+  }).join('');
+  if (!_ptfActiveCoin && S.holdings.length) _ptfActiveCoin = S.holdings[0].coinId;
+  loadPtfChartData();
+}
+
+function selectPtfCoin(coinId) {
+  _ptfActiveCoin = coinId;
+  document.querySelectorAll('.ptf-coin-pill').forEach((el, i) => {
+    el.classList.toggle('active', S.holdings[i]?.coinId === coinId);
+  });
+  loadPtfChartData();
+}
+
+function setPtfRange(range) {
+  _ptfRange = range;
+  document.querySelectorAll('.ptf-range-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('ptf-range-' + range);
+  if (btn) btn.classList.add('active');
+  loadPtfChartData();
+}
+
+async function loadPtfChartData() {
+  if (!_ptfActiveCoin) return;
+  const holding = S.holdings.find(h => h.coinId === _ptfActiveCoin);
+  if (!holding) return;
+  const coin = COIN_BY_ID[_ptfActiveCoin];
+  const lp = priceOf(holding);
+
+  const nameEl = document.getElementById('ptf-chart-name');
+  const priceEl = document.getElementById('ptf-chart-price');
+  const changeEl = document.getElementById('ptf-chart-change');
+  if (nameEl) nameEl.textContent = (coin?.n || holding.name) + ' (' + holding.symbol + ')';
+  if (priceEl && lp) priceEl.textContent = fmtPrice(lp.usd);
+  if (changeEl && lp) {
+    const chg = lp.change24 || 0;
+    changeEl.textContent = (chg >= 0 ? '↑ ' : '↓ ') + Math.abs(chg).toFixed(2) + '% (24h)';
+    changeEl.className = 'ptf-chart-change ' + (chg >= 0 ? 'up' : 'down');
+  }
+
+  const daysMap = { '1D':'1','1W':'7','1M':'30','1Y':'365' };
+  const days = daysMap[_ptfRange] || '7';
+  const loadEl = document.getElementById('ptf-chart-loading');
+  if (loadEl) loadEl.style.display = 'flex';
+  _ptfChartData = [];
+
+  try {
+    const data = await cgFetch(`/coins/${_ptfActiveCoin}/market_chart?vs_currency=usd&days=${days}`);
+    _ptfChartData = (data.prices || []).map(p => ({ t: p[0], v: p[1] }));
+  } catch(e) {
+    const p = lp?.usd || 100;
+    const n = _ptfRange === '1D' ? 24 : _ptfRange === '1W' ? 7*24 : _ptfRange === '1M' ? 30 : 365;
+    _ptfChartData = Array.from({length: n}, (_, i) => ({
+      t: Date.now() - (n - i) * 3600000,
+      v: p * (0.85 + Math.random() * 0.3)
+    }));
+  }
+  if (loadEl) loadEl.style.display = 'none';
+  _ptfHoveredMarker = null;
+  drawPtfChart();
+  _attachPtfEvents();
+}
+
+function drawPtfChart(crosshairIdx) {
+  // Polyfill roundRect for older browsers
+  if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+      r = Math.min(r, w/2, h/2);
+      this.moveTo(x+r, y);
+      this.lineTo(x+w-r, y);
+      this.arcTo(x+w, y, x+w, y+r, r);
+      this.lineTo(x+w, y+h-r);
+      this.arcTo(x+w, y+h, x+w-r, y+h, r);
+      this.lineTo(x+r, y+h);
+      this.arcTo(x, y+h, x, y+h-r, r);
+      this.lineTo(x, y+r);
+      this.arcTo(x, y, x+r, y, r);
+      this.closePath();
+      return this;
+    };
+  }
+  const canvas = document.getElementById('ptf-chart-canvas');
+  if (!canvas || !_ptfChartData.length) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const wrap = canvas.parentElement;
+  const W = wrap.offsetWidth, H = wrap.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+
+  const pad = _ptfPad;
+  const w = W - pad.left - pad.right;
+  const h = H - pad.top - pad.bottom;
+  _ptfDims = { W, H, w, h };
+
+  const vals = _ptfChartData.map(d => d.v);
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = max - min || 1;
+  _ptfMin = min; _ptfMax = max;
+  const first = vals[0], last = vals[vals.length-1];
+  const isUp = last >= first;
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const lineColor = isUp ? (isDark ? '#27ae6e' : '#1a7a4a') : (isDark ? '#e05555' : '#c0392b');
+  const mutedColor = isDark ? '#606060' : '#aaaaaa';
+  const n = vals.length;
+  const xOf = i => pad.left + (i / (n-1)) * w;
+  const yOf = v => pad.top + h - ((v - min) / range) * h;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Filled area
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(vals[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(vals[i]));
+  ctx.lineTo(xOf(n-1), pad.top + h);
+  ctx.lineTo(xOf(0), pad.top + h);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + h);
+  grad.addColorStop(0, lineColor + (isDark ? '44' : '28'));
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(xOf(0), yOf(vals[0]));
+  for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(vals[i]));
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2.2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Crosshair vertical line
+  if (crosshairIdx !== undefined && crosshairIdx >= 0) {
+    const cx = xOf(crosshairIdx);
+    const cy = yOf(vals[crosshairIdx]);
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = mutedColor + '88';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, pad.top);
+    ctx.lineTo(cx, pad.top + h);
+    ctx.stroke();
+    ctx.restore();
+    // Dot on line
+    ctx.beginPath();
+    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = lineColor;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+  }
+
+  // ── Buy/Sell markers — circular coin badges with callout labels ──
+  const purchases = _ptfPurchasesForCoin();
+  const timeSpan = _ptfChartData[n-1].t - _ptfChartData[0].t || 1;
+  purchases.forEach(p => {
+    const ts = new Date(p.date).getTime();
+    const fracX = (ts - _ptfChartData[0].t) / timeSpan;
+    const px = pad.left + fracX * w;
+    const nearestIdx = Math.round(fracX * (n - 1));
+    const nearestV = vals[Math.max(0, Math.min(n-1, nearestIdx))];
+    const py = yOf(nearestV);
+
+    const isBuy = p.type === 'buy';
+    const markerColor = isBuy ? '#27ae6e' : '#e05555';
+    const isHovered = _ptfHoveredMarker && _ptfHoveredMarker.id === p.id;
+    const radius = isHovered ? 13 : 11;
+
+    ctx.save();
+
+    // ── Callout label (shown on hover OR always if space permits) ──
+    if (isHovered) {
+      const sym = (p.symbol || '').slice(0, 6);
+      const priceStr = '$' + (p.priceUsd || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      const amtStr = (p.amount || 0).toLocaleString('en-US', {maximumFractionDigits: 4});
+      const label = `${amtStr} ${sym} @ ${priceStr}`;
+      const labelFont = '600 11px -apple-system,BlinkMacSystemFont,sans-serif';
+      ctx.font = labelFont;
+      const textW = ctx.measureText(label).width;
+      const boxW = textW + 16;
+      const boxH = 22;
+      const boxR = 7;
+      // Position label above the marker
+      let bx = px - boxW / 2;
+      if (bx < 4) bx = 4;
+      if (bx + boxW > W - 4) bx = W - boxW - 4;
+      const by = py - radius - boxH - 8;
+
+      // Pill background (dark, like the reference)
+      ctx.fillStyle = isDark ? 'rgba(20,20,22,0.92)' : 'rgba(30,30,30,0.88)';
+      ctx.beginPath();
+      ctx.roundRect(bx, by, boxW, boxH, boxR);
+      ctx.fill();
+
+      // Label text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = labelFont;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx + 8, by + boxH / 2);
+
+      // Connector line from box bottom to circle top
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(px, by + boxH);
+      ctx.lineTo(px, py - radius);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // ── Circle badge ──
+    // Outer glow ring on hover
+    if (isHovered) {
+      ctx.beginPath();
+      ctx.arc(px, py, radius + 4, 0, Math.PI * 2);
+      ctx.fillStyle = markerColor + '33';
+      ctx.fill();
+    }
+
+    // Main filled circle
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.fillStyle = markerColor;
+    ctx.globalAlpha = isHovered ? 1 : 0.9;
+    ctx.fill();
+
+    // White border
+    ctx.beginPath();
+    ctx.arc(px, py, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = isHovered ? 2 : 1.5;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    // B for buy, S for sell (not coin symbol)
+    const initial = p.type === 'buy' ? 'B' : 'S';
+    ctx.fillStyle = '#ffffff';
+    ctx.font = `700 ${isHovered ? 10 : 9}px -apple-system,BlinkMacSystemFont,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(initial, px, py);
+
+    ctx.restore();
+  });
+
+  // Time labels
+  ctx.fillStyle = mutedColor;
+  ctx.font = '10px -apple-system,BlinkMacSystemFont,sans-serif';
+  ctx.textAlign = 'center';
+  const labelCount = 4;
+  for (let i = 0; i <= labelCount; i++) {
+    const idx = Math.round(i / labelCount * (n - 1));
+    const d = new Date(_ptfChartData[idx].t);
+    let label;
+    if (_ptfRange === '1D') label = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    else if (_ptfRange === '1Y') label = d.toLocaleDateString([], {month:'short'});
+    else label = d.toLocaleDateString([], {month:'short', day:'numeric'});
+    ctx.fillText(label, xOf(idx), pad.top + h + 18);
+  }
+}
+
+function _ptfGetEventXY(e, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: clientX - rect.left, y: clientY - rect.top };
+}
+
+function _attachPtfEvents() {
+  const canvas = document.getElementById('ptf-chart-canvas');
+  if (!canvas || canvas._ptfBound) return;
+  canvas._ptfBound = true;
+
+  function onMove(e) {
+    if (!_ptfChartData.length) return;
+    const { x, y } = _ptfGetEventXY(e, canvas);
+    const pad = _ptfPad;
+    const { w, h } = _ptfDims;
+    if (x < pad.left || x > pad.left + w) { onLeave(); return; }
+
+    const frac = (x - pad.left) / w;
+    const idx = Math.max(0, Math.min(_ptfChartData.length - 1, Math.round(frac * (_ptfChartData.length - 1))));
+    const d = _ptfChartData[idx];
+
+    // Update crosshair bar
+    const bar = document.getElementById('ptf-crosshair-bar');
+    const chPrice = document.getElementById('ptf-ch-price');
+    const chDate = document.getElementById('ptf-ch-date');
+    if (bar) bar.style.display = 'flex';
+    if (chPrice) chPrice.textContent = fmtPrice(d.v);
+    if (chDate) {
+      const dt = new Date(d.t);
+      chDate.textContent = _ptfRange === '1D'
+        ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+    }
+
+    // Check marker hover
+    const purchases = _ptfPurchasesForCoin();
+    const n = _ptfChartData.length;
+    const timeSpan = _ptfChartData[n-1].t - _ptfChartData[0].t || 1;
+    let hovered = null;
+    purchases.forEach(p => {
+      const ts = new Date(p.date).getTime();
+      const fracX = (ts - _ptfChartData[0].t) / timeSpan;
+      const px = pad.left + fracX * w;
+      const nearestIdx = Math.round(fracX * (n - 1));
+      const nearestV = _ptfChartData[Math.max(0, Math.min(n-1, nearestIdx))].v;
+      const range = _ptfMax - _ptfMin || 1;
+      const py = pad.top + h - ((nearestV - _ptfMin) / range) * h;
+      const dist = Math.sqrt((x - px)**2 + (y - py)**2);
+      if (dist < 22) hovered = p;
+    });
+
+    const tipEl = document.getElementById('ptf-marker-tip');
+    if (hovered && tipEl) {
+      _ptfHoveredMarker = hovered;
+      // Position tip
+      const rect = canvas.getBoundingClientRect();
+      const ts = new Date(hovered.date).getTime();
+      const fracX = (ts - _ptfChartData[0].t) / timeSpan;
+      const px = pad.left + fracX * w;
+      const nearestIdx = Math.round(fracX * (n - 1));
+      const nearestV = _ptfChartData[Math.max(0, Math.min(n-1, nearestIdx))].v;
+      const range = _ptfMax - _ptfMin || 1;
+      const py = pad.top + h - ((nearestV - _ptfMin) / range) * h;
+      // Offset tip so it doesn't cover the marker
+      let tipLeft = px + 14;
+      let tipTop = py - 30;
+      const canvasW = canvas.offsetWidth, canvasH = canvas.offsetHeight;
+      if (tipLeft + 175 > canvasW) tipLeft = px - 175 - 10;
+      if (tipTop < 4) tipTop = 4;
+      if (tipTop + 130 > canvasH) tipTop = canvasH - 134;
+      tipEl.style.left = tipLeft + 'px';
+      tipEl.style.top = tipTop + 'px';
+      tipEl.style.display = 'block';
+      // Populate tip
+      const typeEl = document.getElementById('ptf-mt-type');
+      if (typeEl) { typeEl.textContent = hovered.type === 'buy' ? 'BUY' : 'SELL'; typeEl.className = 'ptf-mt-type ' + hovered.type; }
+      document.getElementById('ptf-mt-coin').textContent = hovered.symbol || '—';
+      document.getElementById('ptf-mt-amount').textContent = (hovered.amount || 0).toLocaleString('en-US', {maximumFractionDigits:8}) + ' ' + (hovered.symbol || '');
+      document.getElementById('ptf-mt-price').textContent = fmtPrice(hovered.priceUsd || 0);
+      document.getElementById('ptf-mt-total').textContent = fmt(hovered.total || 0);
+      const noteRow = document.getElementById('ptf-mt-note-row');
+      const noteVal = document.getElementById('ptf-mt-note');
+      if (hovered.note) { if(noteRow)noteRow.style.display='flex'; if(noteVal)noteVal.textContent=hovered.note; }
+      else { if(noteRow)noteRow.style.display='none'; }
+      document.getElementById('ptf-mt-date').textContent = hovered.date || '';
+    } else {
+      _ptfHoveredMarker = null;
+      if (tipEl) tipEl.style.display = 'none';
+    }
+
+    drawPtfChart(idx);
+  }
+
+  function onLeave() {
+    _ptfHoveredMarker = null;
+    const bar = document.getElementById('ptf-crosshair-bar');
+    if (bar) bar.style.display = 'none';
+    const tipEl = document.getElementById('ptf-marker-tip');
+    if (tipEl) tipEl.style.display = 'none';
+    drawPtfChart();
+  }
+
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); onMove(e); }, { passive: false });
+  canvas.addEventListener('mouseleave', onLeave);
+  canvas.addEventListener('touchend', onLeave);
+}
+
+// ── Purchase History Modal ──
+let _phFilter = 'all';
+function openPurchaseHistory() {
+  _phFilter = 'all';
+  document.querySelectorAll('#purchase-history-modal .bgt-type-btn').forEach(b => b.classList.remove('active'));
+  const allBtn = document.getElementById('ph-filter-all');
+  if (allBtn) allBtn.classList.add('active');
+  renderPurchaseHistory();
+  document.getElementById('purchase-history-modal').classList.remove('hidden');
+}
+function closePurchaseHistory() {
+  document.getElementById('purchase-history-modal').classList.add('hidden');
+}
+function setPHFilter(f) {
+  _phFilter = f;
+  document.querySelectorAll('#purchase-history-modal .bgt-type-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('ph-filter-' + f);
+  if (btn) btn.classList.add('active');
+  renderPurchaseHistory();
+}
+function renderPurchaseHistory() {
+  const all = S.purchases || [];
+  const buys = all.filter(p => p.type === 'buy');
+  const sells = all.filter(p => p.type === 'sell');
+  document.getElementById('ph-total-invested').textContent = fmt(buys.reduce((s,p)=>s+p.total,0));
+  document.getElementById('ph-total-proceeds').textContent = fmt(sells.reduce((s,p)=>s+p.total,0));
+  document.getElementById('ph-count').textContent = all.length;
+
+  const filtered = _phFilter === 'all' ? all : all.filter(p => p.type === _phFilter);
+  const sorted = [...filtered].sort((a,b) => new Date(b.date) - new Date(a.date));
+  const list = document.getElementById('ph-log-list');
+  if (!list) return;
+  if (!sorted.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px">No purchases logged yet.<br>Use <strong>Buy</strong> to start tracking.</div>';
+    return;
+  }
+  list.innerHTML = sorted.map(p => {
+    const coin = COIN_BY_ID[p.coinId] || COIN_BY_SYM[p.symbol];
+    const col = coinColor(p.symbol);
+    const imgUrl = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
+    const iconHtml = imgUrl
+      ? `<img src="${imgUrl}" width="32" height="32" style="border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="display:none;width:32px;height:32px;border-radius:50%;background:${col}22;color:${col};align-items:center;justify-content:center;font-size:11px;font-weight:800">${p.symbol.slice(0,2)}</div>`
+      : `<div style="display:flex;width:32px;height:32px;border-radius:50%;background:${col}22;color:${col};align-items:center;justify-content:center;font-size:11px;font-weight:800">${p.symbol.slice(0,2)}</div>`;
+    return `<div class="ph-row">
+      <div class="ph-row-icon">${iconHtml}</div>
+      <div class="ph-row-info">
+        <div class="ph-row-sym"><span class="ph-type-badge ${p.type}">${p.type}</span>${p.symbol}</div>
+        <div class="ph-row-meta">${p.amount.toLocaleString('en-US',{maximumFractionDigits:8})} · ${p.date}${p.note ? ' · ' + p.note : ''}</div>
+      </div>
+      <div class="ph-row-right">
+        <div class="ph-row-total ${p.type}">${p.type==='buy'?'-':'+'}${fmt(p.total)}</div>
+        <div class="ph-row-price">@ ${fmtPrice(p.priceUsd)}</div>
+      </div>
+      <button class="btn-log-rm" onclick="deletePurchase(${p.id});renderPurchaseHistory()" title="Delete">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Header dropdown menu ──
+function toggleHdrMenu() {
+  const dd = document.getElementById('hdr-dropdown');
+  if (dd) dd.classList.toggle('hidden');
+}
+function closeHdrMenu() {
+  const dd = document.getElementById('hdr-dropdown');
+  if (dd) dd.classList.add('hidden');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('hdr-menu-wrap');
+  if (wrap && !wrap.contains(e.target)) closeHdrMenu();
+});
+// Update theme label in dropdown
+function _updateThemeLabel() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const lbl = document.getElementById('theme-label');
+  const sun = document.getElementById('theme-icon-sun');
+  const moon = document.getElementById('theme-icon-moon');
+  if (lbl) lbl.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  if (sun) sun.style.display = isDark ? 'none' : 'inline';
+  if (moon) moon.style.display = isDark ? 'inline' : 'none';
+}
+
 async function init(){
   $('btn-usd').classList.toggle('active',S.currency!=='USD'?false:true);
   $('btn-eur').classList.toggle('active',S.currency==='EUR');
@@ -4881,7 +5578,7 @@ async function init(){
   // Start on budget tab - hide ticker/watchlist
   switchMainTab('budget');
   // Redraw DCA chart on resize
-  window.addEventListener('resize',()=>{ if(activeDcaCoin) drawDCAChart(activeDcaCoin); renderInvestChart(bgtLoad(), invChartMode); });
+  window.addEventListener('resize',()=>{ if(activeDcaCoin) drawDCAChart(activeDcaCoin); renderInvestChart(bgtLoad(), invChartMode); drawPtfChart(); });
   setInterval(async()=>{ await fetchPrices(); await fetchTicker(); }, REFRESH_MS);
   initBudget();
 }
@@ -4916,6 +5613,47 @@ init();
   </button>
 
 </nav>
+
+<!-- ══════ PURCHASE HISTORY MODAL ══════ -->
+<div class="overlay hidden" id="purchase-history-modal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hd">
+      <span class="modal-title">📋 Purchase History</span>
+      <button class="modal-x" onclick="closePurchaseHistory()">✕</button>
+    </div>
+    <div class="modal-bd" style="padding:0">
+      <!-- Summary stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--border)">
+        <div style="padding:16px;text-align:center;border-right:1px solid var(--border)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">Total Invested</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums" id="ph-total-invested">—</div>
+        </div>
+        <div style="padding:16px;text-align:center;border-right:1px solid var(--border)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">Proceeds</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums" id="ph-total-proceeds">—</div>
+        </div>
+        <div style="padding:16px;text-align:center">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">Entries</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="ph-count">0</div>
+        </div>
+      </div>
+      <!-- Filter tabs -->
+      <div style="display:flex;gap:3px;padding:10px 16px;background:var(--surface2);border-bottom:1px solid var(--border)">
+        <button class="bgt-type-btn active" id="ph-filter-all" onclick="setPHFilter('all')" style="flex:1;padding:6px;font-size:11px;border-radius:9px">All</button>
+        <button class="bgt-type-btn" id="ph-filter-buy" onclick="setPHFilter('buy')" style="flex:1;padding:6px;font-size:11px;border-radius:9px">Buys</button>
+        <button class="bgt-type-btn" id="ph-filter-sell" onclick="setPHFilter('sell')" style="flex:1;padding:6px;font-size:11px;border-radius:9px">Sells</button>
+      </div>
+      <!-- Log list -->
+      <div style="max-height:55vh;overflow-y:auto;-webkit-overflow-scrolling:touch">
+        <div id="ph-log-list" style="display:flex;flex-direction:column;gap:0"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-primary" onclick="openPurchaseModal();closePurchaseHistory()">+ Log Purchase</button>
+      <button class="btn-cancel" onclick="closePurchaseHistory()">Close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
 <script>
@@ -4977,6 +5715,6 @@ self.addEventListener('fetch',e=>{
     },3500);
   }
 
-  document.addEventListener('touchmove',e=>{if(e.target===document.body||e.target===document.documentElement)e.preventDefault();},{passive:false});
+  // touchmove scroll block removed — was preventing desktop scroll
 })();
 </script>
