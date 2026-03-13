@@ -585,10 +585,10 @@ td.td-c{text-align:center;}
   box-shadow:var(--card-shadow);margin-bottom:24px;overflow:hidden;
   animation:fadeUp .3s ease both;
 }
-.bgt-hero-card{flex:1;padding:28px 24px;text-align:center;}
+.bgt-hero-card{flex:1;padding:20px 12px;text-align:center;min-width:0;overflow:hidden;}
 .bgt-hero-divider{width:1px;background:var(--border);flex-shrink:0;margin:20px 0;}
 .bgt-hero-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:10px;}
-.bgt-hero-val{font-size:clamp(24px,5vw,36px);font-weight:700;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;line-height:1;}
+.bgt-hero-val{font-size:clamp(16px,3.5vw,28px);font-weight:700;letter-spacing:-.8px;font-variant-numeric:tabular-nums;line-height:1.1;word-break:break-all;}
 .bgt-hero-val.green{color:var(--green);}
 .bgt-hero-val.red{color:var(--red);}
 
@@ -757,7 +757,7 @@ html, body { overscroll-behavior-x: none; }
 .ptf-range-btn:hover{color:var(--text);}
 .ptf-range-btn.active{background:var(--text);color:var(--bg);}
 
-.ptf-canvas-wrap{position:relative;height:220px;padding:16px 0 0;}
+.ptf-canvas-wrap{position:relative;height:260px;padding:16px 0 0;}
 #ptf-chart-canvas{width:100%;height:100%;cursor:crosshair;display:block;}
 .ptf-chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 
@@ -776,20 +776,20 @@ html, body { overscroll-behavior-x: none; }
 /* Buy/sell marker tooltip */
 .ptf-marker-tip{
   position:absolute;z-index:100;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:14px;padding:12px 14px;
-  pointer-events:none;min-width:160px;
-  box-shadow:0 8px 32px rgba(0,0,0,.18);
-  animation:modalIn .15s ease;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:16px;padding:14px 16px;
+  pointer-events:none;min-width:170px;
+  box-shadow:0 12px 40px rgba(0,0,0,.22);
+  animation:modalIn .12s ease;
 }
-[data-theme="dark"] .ptf-marker-tip{box-shadow:0 8px 32px rgba(0,0,0,.5);}
-.ptf-mt-type{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;padding:3px 8px;border-radius:6px;display:inline-block;}
-.ptf-mt-type.buy{background:rgba(26,122,74,.12);color:var(--green);}
-.ptf-mt-type.sell{background:rgba(192,57,43,.12);color:var(--red);}
-.ptf-mt-row{display:flex;justify-content:space-between;gap:12px;margin-top:4px;font-size:11px;}
-.ptf-mt-lbl{color:var(--muted);}
-.ptf-mt-val{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
-.ptf-mt-date{font-size:10px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px solid var(--border);}
+[data-theme="dark"] .ptf-marker-tip{background:#1e1e24;box-shadow:0 12px 40px rgba(0,0,0,.6);}
+.ptf-mt-type{font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;padding:4px 9px;border-radius:8px;display:inline-block;}
+.ptf-mt-type.buy{background:rgba(39,174,110,.18);color:#27ae6e;}
+.ptf-mt-type.sell{background:rgba(224,85,85,.18);color:#e05555;}
+.ptf-mt-row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:5px;font-size:11px;}
+.ptf-mt-lbl{color:var(--muted);font-weight:500;}
+.ptf-mt-val{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;text-align:right;}
+.ptf-mt-date{font-size:10px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
 
 /* Purchase History Modal rows */
 .ph-row{display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);transition:background .1s;}
@@ -1435,17 +1435,25 @@ html, body { overscroll-behavior-x: none; }
 
     <!-- ── EXPENSE BREAKDOWN (donut) ── -->
     <div class="bgt-section">
-      <div class="sec-hdr" style="margin-bottom:20px">
-        <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <button class="dca-range-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')">Month</button>
-          <button class="dca-range-btn" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
-          <button class="dca-range-btn" onclick="openCatEditor()" style="border-color:var(--accent2);color:var(--accent2)">Categories</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap">
+        <div>
+          <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <!-- Period toggle -->
+          <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
+            <button style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;" id="bgt-period-month" onclick="setBgtPeriod('month')" class="bgt-period-active">Month</button>
+            <button style="padding:5px 14px;font-size:11px;font-weight:600;border:none;background:none;color:var(--muted);border-radius:16px;cursor:pointer;transition:all .15s;" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
+          </div>
+          <button onclick="openCatEditor()" style="background:none;border:none;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;padding:5px 8px;border-radius:10px;transition:color .15s" title="Edit categories">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Expenses</button>
-        <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:8px 10px;font-size:11px;border-radius:10px">Income</button>
+      <!-- Expense / Income tab -->
+      <div style="display:flex;gap:2px;background:var(--surface2);border-radius:12px;padding:2px;margin-bottom:20px">
+        <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:7px 10px;font-size:11px;border-radius:10px">Expenses</button>
+        <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:7px 10px;font-size:11px;border-radius:10px">Income</button>
       </div>
       <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
         <svg id="bgt-donut" width="140" height="140" viewBox="0 0 130 130" style="cursor:pointer;flex-shrink:0"></svg>
@@ -3862,8 +3870,17 @@ function clearBgtData() { if (!confirm('Clear all budget data?')) return; localS
 
 function setBgtPeriod(p) {
   bgtPeriod = p;
-  document.getElementById('bgt-period-month').classList.toggle('active', p === 'month');
-  document.getElementById('bgt-period-all').classList.toggle('active', p === 'all');
+  // Update new pill-style period buttons
+  const mBtn = document.getElementById('bgt-period-month');
+  const aBtn = document.getElementById('bgt-period-all');
+  if (mBtn) {
+    mBtn.style.background = p === 'month' ? 'var(--text)' : 'none';
+    mBtn.style.color = p === 'month' ? 'var(--bg)' : 'var(--muted)';
+  }
+  if (aBtn) {
+    aBtn.style.background = p === 'all' ? 'var(--text)' : 'none';
+    aBtn.style.color = p === 'all' ? 'var(--bg)' : 'var(--muted)';
+  }
   renderBudget();
 }
 
@@ -5240,48 +5257,39 @@ function drawPtfChart(crosshairIdx) {
     ctx.fill();
   }
 
-  // ── Buy/Sell markers ──
+  // ── Buy/Sell markers (circle with B/S letter) ──
   const purchases = _ptfPurchasesForCoin();
   const timeSpan = _ptfChartData[n-1].t - _ptfChartData[0].t || 1;
   purchases.forEach(p => {
     const ts = new Date(p.date).getTime();
     const fracX = (ts - _ptfChartData[0].t) / timeSpan;
     const px = pad.left + fracX * w;
-    // Find nearest price point for y
     const nearestIdx = Math.round(fracX * (n - 1));
     const nearestV = vals[Math.max(0, Math.min(n-1, nearestIdx))];
     const py = yOf(nearestV);
-
     const isBuy = p.type === 'buy';
-    const markerColor = isBuy ? (isDark ? '#27ae6e' : '#1a7a4a') : (isDark ? '#e05555' : '#c0392b');
+    const markerColor = isBuy ? '#27ae6e' : '#e05555';
     const isHovered = _ptfHoveredMarker && _ptfHoveredMarker.id === p.id;
-
-    // Triangle marker pointing up (buy) or down (sell)
+    const r = isHovered ? 13 : 11;
     ctx.save();
-    ctx.translate(px, py);
-    const sz = isHovered ? 10 : 7;
-    ctx.beginPath();
-    if (isBuy) {
-      // pointing up
-      ctx.moveTo(0, -sz - 4);
-      ctx.lineTo(sz, sz - 2);
-      ctx.lineTo(-sz, sz - 2);
-    } else {
-      // pointing down
-      ctx.moveTo(0, sz + 4);
-      ctx.lineTo(sz, -sz + 2);
-      ctx.lineTo(-sz, -sz + 2);
-    }
-    ctx.closePath();
-    ctx.fillStyle = markerColor;
-    ctx.globalAlpha = isHovered ? 1 : 0.85;
-    ctx.fill();
     if (isHovered) {
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(px, py, r + 5, 0, Math.PI * 2);
+      ctx.fillStyle = markerColor + '28';
+      ctx.fill();
     }
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fillStyle = markerColor;
+    ctx.globalAlpha = isHovered ? 1 : 0.9;
+    ctx.fill();
     ctx.globalAlpha = 1;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold ' + (isHovered ? 11 : 10) + 'px -apple-system,BlinkMacSystemFont,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(isBuy ? 'B' : 'S', px, py);
+    ctx.textBaseline = 'alphabetic';
     ctx.restore();
   });
 
@@ -5351,7 +5359,7 @@ function _attachPtfEvents() {
       const range = _ptfMax - _ptfMin || 1;
       const py = pad.top + h - ((nearestV - _ptfMin) / range) * h;
       const dist = Math.sqrt((x - px)**2 + (y - py)**2);
-      if (dist < 18) hovered = p;
+      if (dist < 20) hovered = p;
     });
 
     const tipEl = document.getElementById('ptf-marker-tip');
