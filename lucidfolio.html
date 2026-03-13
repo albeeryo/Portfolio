@@ -2246,7 +2246,7 @@ async function fetchPrices() {
   $('last-upd').textContent='Updated '+now();
   renderHoldings(false);
   renderWL();
-  // Always refresh live price display so stats bar (P&L, 24h, value) stay current
+  // Always refresh live price display so P&L/stats stay current
   updatePtfPriceDisplay();
 }
 
@@ -2295,18 +2295,20 @@ function rebuildTicker() {
   track.style.animation=`ticker-scroll ${Math.max(40,all.length*3.5)}s linear infinite`;
 }
 async function manualRefresh(){
-  // Target all refresh buttons (header action button + side-menu button)
-  const btns = [document.getElementById('action-refresh'), document.getElementById('btn-refresh')].filter(Boolean);
+  const btns = [
+    document.getElementById('action-refresh'),
+    document.getElementById('btn-refresh')
+  ].filter(Boolean);
   btns.forEach(b => { b.disabled = true; b.classList.add('spinning'); });
-  try{
+  try {
     await Promise.all([fetchPrices(), fetchTicker()]);
-    // If on portfolio tab, also refresh the live price chart display and the graph
-    if (window._currentTab === 'portfolio') {
-      updatePtfPriceDisplay();
-      // Re-fetch chart candles to get latest data on the graph
-      if (_ptfActiveCoin) loadPtfChartData();
+    // Always update live price display and stats bar
+    updatePtfPriceDisplay();
+    // If on portfolio tab, also reload the chart with fresh candle data
+    if (window._currentTab === 'portfolio' && _ptfActiveCoin) {
+      loadPtfChartData();
     }
-  } finally{
+  } finally {
     btns.forEach(b => { b.disabled = false; b.classList.remove('spinning'); });
   }
 }
@@ -3674,6 +3676,8 @@ function switchMainTab(tab) {
   if (ptfSec) {
     if (tab === 'portfolio' && S.holdings && S.holdings.length) {
       ptfSec.style.display = '';
+      // Immediately show live price from cache BEFORE chart finishes loading
+      updatePtfPriceDisplay();
       setTimeout(() => renderPtfChart(), 50);
     } else {
       ptfSec.style.display = 'none';
@@ -5792,6 +5796,10 @@ async function init(){
   await fetchPrices();
   renderHoldings(false);
   renderWL();
+  // Pre-warm active coin so live price shows instantly when portfolio tab is opened
+  if (!_ptfActiveCoin && S.holdings && S.holdings.length) {
+    _ptfActiveCoin = S.holdings[0].coinId;
+  }
   // Start on budget tab - hide ticker/watchlist
   switchMainTab('budget');
   // Redraw DCA chart on resize
