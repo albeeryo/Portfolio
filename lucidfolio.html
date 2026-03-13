@@ -710,15 +710,15 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 .ptf-coin-pill-fb{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:800;flex-shrink:0;}
 
 .ptf-chart-card{background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--card-shadow);}
-.ptf-chart-header{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 20px 0;flex-wrap:wrap;gap:10px;}
-.ptf-chart-coin-name{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px;}
-.ptf-chart-price{font-size:clamp(26px,6vw,38px);font-weight:700;letter-spacing:-1.5px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
+.ptf-chart-header{display:flex;align-items:flex-start;justify-content:space-between;padding:16px 16px 0;flex-wrap:nowrap;gap:8px;}
+.ptf-chart-coin-name{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:3px;}
+.ptf-chart-price{font-size:clamp(20px,5vw,34px);font-weight:700;letter-spacing:-1px;color:var(--text);line-height:1;font-variant-numeric:tabular-nums;}
 .ptf-chart-change{font-size:13px;font-weight:600;margin-top:5px;}
 .ptf-chart-change.up{color:var(--green);}
 .ptf-chart-change.down{color:var(--red);}
 
-.ptf-range-btns{display:flex;gap:2px;background:var(--surface2);border-radius:20px;padding:3px;flex-shrink:0;}
-.ptf-range-btn{background:none;border:none;color:var(--muted);border-radius:16px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;}
+.ptf-range-btns{display:flex;gap:1px;background:var(--surface2);border-radius:20px;padding:3px;flex-shrink:0;align-self:flex-start;margin-top:2px;}
+.ptf-range-btn{background:none;border:none;color:var(--muted);border-radius:16px;padding:5px 8px;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap;}
 .ptf-range-btn:hover{color:var(--text);}
 .ptf-range-btn.active{background:var(--text);color:var(--bg);}
 
@@ -797,8 +797,8 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 }
 
 /* Crosshair info bar */
-.ptf-crosshair-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:30px;}
-.ptf-ch-price{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+.ptf-crosshair-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:32px;}
+.ptf-ch-price{font-size:14px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
 .ptf-ch-date{font-size:11px;color:var(--muted);}
 
 /* Buy/sell marker tooltip */
@@ -1311,7 +1311,7 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
         </div>
       </div>
       <!-- Crosshair price tooltip bar -->
-      <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:none">
+      <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:flex">
         <span class="ptf-ch-price" id="ptf-ch-price">—</span>
         <span class="ptf-ch-date" id="ptf-ch-date">—</span>
       </div>
@@ -2151,6 +2151,8 @@ function setCur(c) {
   S.currency=c; save();
   $('btn-usd').classList.toggle('active',c==='USD');
   $('btn-eur').classList.toggle('active',c==='EUR');
+  // Update inline styles in side panel too
+  _syncSideMenuCur();
   renderHoldings(false); renderWL(); rebuildTicker();
 }
 
@@ -5203,6 +5205,21 @@ async function loadPtfChartData() {
   _ptfHoveredMarker = null;
   drawPtfChart();
   _attachPtfEvents();
+  // Pre-fill crosshair bar with latest price
+  const _bar = document.getElementById('ptf-crosshair-bar');
+  const _chP = document.getElementById('ptf-ch-price');
+  const _chD = document.getElementById('ptf-ch-date');
+  if (_bar && _ptfChartData.length) {
+    const _last = _ptfChartData[_ptfChartData.length - 1];
+    if (_chP) _chP.textContent = fmtPrice(_last.v);
+    if (_chD) {
+      const _dt = new Date(_last.t);
+      _chD.textContent = _ptfRange === '1D'
+        ? _dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+        : _dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+    }
+    _bar.style.display = 'flex';
+  }
 }
 
 function drawPtfChart(crosshairIdx) {
@@ -5508,8 +5525,21 @@ function _attachPtfEvents() {
 
   function onLeave() {
     _ptfHoveredMarker = null;
-    const bar = document.getElementById('ptf-crosshair-bar');
-    if (bar) bar.style.display = 'none';
+    // Keep bar visible — just reset to latest candle
+    if (_ptfChartData.length) {
+      const _last = _ptfChartData[_ptfChartData.length - 1];
+      const bar = document.getElementById('ptf-crosshair-bar');
+      const chP = document.getElementById('ptf-ch-price');
+      const chD = document.getElementById('ptf-ch-date');
+      if (chP) chP.textContent = fmtPrice(_last.v);
+      if (chD) {
+        const dt = new Date(_last.t);
+        chD.textContent = _ptfRange === '1D'
+          ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+          : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
+      }
+      if (bar) bar.style.display = 'flex';
+    }
     const tipEl = document.getElementById('ptf-marker-tip');
     if (tipEl) tipEl.style.display = 'none';
     drawPtfChart();
@@ -5620,8 +5650,17 @@ function _syncSideMenuCur() {
   const isEur = typeof S !== 'undefined' && S.currency === 'EUR';
   const usdBtn = document.getElementById('btn-usd');
   const eurBtn = document.getElementById('btn-eur');
-  if (usdBtn) { usdBtn.style.background = isEur ? 'none' : 'var(--text)'; usdBtn.style.color = isEur ? 'var(--muted)' : 'var(--bg)'; }
-  if (eurBtn) { eurBtn.style.background = isEur ? 'var(--text)' : 'none'; eurBtn.style.color = isEur ? 'var(--bg)' : 'var(--muted)'; }
+  // Inline styles take priority over class — set both explicitly
+  if (usdBtn) {
+    usdBtn.style.cssText = isEur
+      ? 'flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:none;color:var(--muted);'
+      : 'flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--text);color:var(--bg);';
+  }
+  if (eurBtn) {
+    eurBtn.style.cssText = isEur
+      ? 'flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--text);color:var(--bg);'
+      : 'flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:none;color:var(--muted);';
+  }
 }
 // Also update theme label in side panel
 function _updateThemeLabel() {
@@ -5647,6 +5686,7 @@ function _updateThemeLabel() {
 async function init(){
   $('btn-usd').classList.toggle('active',S.currency!=='USD'?false:true);
   $('btn-eur').classList.toggle('active',S.currency==='EUR');
+  _syncSideMenuCur();
   renderHoldings(false);
   renderWL();
   await fetchEUR();
