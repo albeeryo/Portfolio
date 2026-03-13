@@ -238,9 +238,9 @@ body{
 header{margin-bottom:0;animation:fadeDown .4s ease both;display:flex;align-items:center;justify-content:space-between;}
 .logo-line{display:flex;align-items:center;gap:6px;}
 .logo-dot{display:none;} /* hidden — replaced by wordmark */
-h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
+h1{font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--text);}
 .subtitle{display:none;}
-.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:0;}
+.hdr-right{display:flex;flex-direction:row;align-items:center;gap:6px;}
 .hdr-controls{display:flex;align-items:center;gap:6px;}
 .last-upd{display:none;}
 
@@ -745,11 +745,11 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 }
 .hdr-menu-btn:hover{background:var(--surface3);color:var(--text);}
 .hdr-dropdown{
-  position:absolute;top:calc(100% + 8px);right:0;
+  position:fixed;top:64px;right:12px;
   background:var(--surface);border:1.5px solid var(--border2);
-  border-radius:16px;padding:6px;
-  min-width:195px;z-index:500;
-  box-shadow:0 12px 40px rgba(0,0,0,.18);
+  border-radius:20px;padding:8px;
+  min-width:220px;z-index:2000;
+  box-shadow:0 16px 50px rgba(0,0,0,.25);
   animation:modalIn .15s ease;
 }
 [data-theme="dark"] .hdr-dropdown{box-shadow:0 12px 40px rgba(0,0,0,.5);}
@@ -1130,16 +1130,46 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 <div class="container">
   <header>
     <div>
-      <div class="logo-line"><div class="logo-dot"></div><h1>LUCIDFOLIO</h1></div>
-      <div class="subtitle">Live Portfolio Tracker</div>
+      <button onclick="switchMainTab('budget')" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:9px;outline:none;" title="Home">
+        <!-- Lucidfolio logo — L-heart mark, theme-aware -->
+        <svg width="34" height="34" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;display:block">
+          <defs>
+            <style>
+              .logo-body { fill: var(--text); }
+            </style>
+          </defs>
+          <!-- Outer rounded square body -->
+          <rect x="8" y="8" width="84" height="84" rx="26" ry="26" class="logo-body"/>
+          <!-- Inner white cutout forming the L-bracket shape -->
+          <!-- The white notch top-right (the "heart" opening) -->
+          <path d="
+            M 38 22
+            Q 38 22 62 22
+            Q 76 22 76 36
+            Q 76 50 62 50
+            L 52 50
+            L 52 78
+            L 38 78
+            Z
+          " fill="var(--bg)" opacity="1"/>
+          <!-- Small rounding on the inner corner -->
+        </svg>
+        <span style="font-size:14px;font-weight:700;letter-spacing:-.3px;color:var(--text)">Lucidfolio</span>
+      </button>
     </div>
     <div class="hdr-right">
-      <div class="live-badge" style="margin-right:4px"><div class="live-dot"></div>LIVE</div>
-      <div class="hdr-menu-wrap" id="hdr-menu-wrap">
-        <button class="hdr-menu-btn" id="hdr-menu-btn" onclick="toggleHdrMenu()" aria-label="Menu">
-          <div class="sync-dot offline" id="sync-indicator" style="position:absolute;top:6px;right:6px"></div>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg>
-        </button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+        <div class="hdr-menu-wrap" id="hdr-menu-wrap">
+          <button class="hdr-menu-btn" id="hdr-menu-btn" onclick="toggleHdrMenu()" aria-label="Menu">
+            <div class="sync-dot offline" id="sync-indicator" style="position:absolute;top:5px;right:5px;width:5px;height:5px;"></div>
+            <!-- Hamburger icon (3 lines) -->
+            <svg viewBox="0 0 22 16" width="17" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <line x1="0" y1="2" x2="22" y2="2"/>
+              <line x1="0" y1="8" x2="22" y2="8"/>
+              <line x1="0" y1="14" x2="22" y2="14"/>
+            </svg>
+          </button>
         <div class="hdr-dropdown hidden" id="hdr-dropdown">
           <div class="hdr-drop-section">
             <div class="hdr-drop-label">Account</div>
@@ -1171,6 +1201,7 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
           </div>
         </div>
       </div>
+      </div><!-- end inline row -->
     </div>
   </header>
 
@@ -4558,6 +4589,7 @@ function renderInvestChart(allEntries, mode) {
   canvas._icIW = iW;
   canvas._icIH = iH;
   canvas._icH = H;
+  canvas._icW = W;
 
   const xOf = i => pad.l + (n <= 1 ? iW/2 : (i / (n-1)) * iW);
   const yOf = v => pad.t + iH - (v / maxVal) * iH;
@@ -4639,54 +4671,67 @@ function renderInvestChart(allEntries, mode) {
   if (!canvas._icBound) {
     canvas._icBound = true;
     function _drawWithCrosshair(hovIdx) {
+      // Redraw base chart cleanly
       renderInvestChart(allEntries, mode);
       if (hovIdx === null) return;
       const pts = canvas._icPoints;
       const p2 = canvas._icPad;
       const mv = canvas._icMaxVal;
       const iW2 = canvas._icIW, iH2 = canvas._icIH;
+      const cW = canvas._icW || canvas.offsetWidth;
       const n2 = pts.length;
-      if (!pts || !n2) return;
+      if (!pts || !n2 || mv <= 1) return;
+      // Draw overlay WITHOUT re-scaling (renderInvestChart already set the transform)
       const ctx2 = canvas.getContext('2d');
-      const dpr2 = devicePixelRatio;
+      const dpr2 = window.devicePixelRatio || 1;
+      // Save current state and apply correct scale for overlay drawing
+      ctx2.save();
       ctx2.scale(dpr2, dpr2);
       const x2Of = ii => p2.l + (n2 <= 1 ? iW2/2 : (ii/(n2-1))*iW2);
       const y2Of = vv => p2.t + iH2 - (vv/mv)*iH2;
       const cx = x2Of(hovIdx), cy = y2Of(pts[hovIdx].cum);
+      const isDarkNow = document.documentElement.getAttribute('data-theme') === 'dark';
       // Vertical dashed line
-      ctx2.save();
       ctx2.setLineDash([4,4]);
-      ctx2.strokeStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
+      ctx2.strokeStyle = isDarkNow ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.18)';
       ctx2.lineWidth = 1;
       ctx2.beginPath(); ctx2.moveTo(cx, p2.t); ctx2.lineTo(cx, p2.t + iH2); ctx2.stroke();
-      ctx2.restore();
-      // Dot
-      ctx2.beginPath(); ctx2.arc(cx, cy, 7, 0, Math.PI*2);
-      ctx2.fillStyle = 'rgba(39,174,110,0.15)'; ctx2.fill();
-      ctx2.beginPath(); ctx2.arc(cx, cy, 5, 0, Math.PI*2);
+      ctx2.setLineDash([]);
+      // Glow ring
+      ctx2.beginPath(); ctx2.arc(cx, cy, 8, 0, Math.PI*2);
+      ctx2.fillStyle = 'rgba(39,174,110,0.18)'; ctx2.fill();
+      // White outer dot
+      ctx2.beginPath(); ctx2.arc(cx, cy, 5.5, 0, Math.PI*2);
       ctx2.fillStyle = '#fff'; ctx2.fill();
+      // Green inner dot
       ctx2.beginPath(); ctx2.arc(cx, cy, 3.5, 0, Math.PI*2);
       ctx2.fillStyle = '#27ae6e'; ctx2.fill();
-      // Tooltip pill — dark pill above cursor like reference
+      // Tooltip pill
       const val = pts[hovIdx].cum;
       const label = '€' + val.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      ctx2.font = '700 12px -apple-system,sans-serif';
+      ctx2.font = '700 12px -apple-system,BlinkMacSystemFont,sans-serif';
       const tw = ctx2.measureText(label).width;
-      const pw = tw + 20, ph = 26, pr = 8;
-      let px = cx - pw/2;
-      if (px < 4) px = 4;
-      if (px + pw > W - 4) px = W - pw - 4;
-      let py = cy - ph - 10;
-      if (py < 4) py = 4;
-      ctx2.fillStyle = isDark ? 'rgba(18,18,24,0.95)' : 'rgba(20,20,30,0.9)';
+      const pw = tw + 22, ph = 28, pr = 10;
+      let bx = cx - pw/2;
+      if (bx < 6) bx = 6;
+      if (bx + pw > cW - 6) bx = cW - pw - 6;
+      let by = cy - ph - 12;
+      if (by < 6) by = cy + 16;
+      // Pill shadow
+      ctx2.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx2.shadowBlur = 8;
+      ctx2.fillStyle = isDarkNow ? 'rgba(15,15,20,0.96)' : 'rgba(18,18,26,0.92)';
       ctx2.beginPath();
-      if (ctx2.roundRect) ctx2.roundRect(px, py, pw, ph, pr);
-      else ctx2.rect(px, py, pw, ph);
+      if (ctx2.roundRect) ctx2.roundRect(bx, by, pw, ph, pr);
+      else ctx2.rect(bx, by, pw, ph);
       ctx2.fill();
+      ctx2.shadowBlur = 0;
+      // Text
       ctx2.fillStyle = '#ffffff';
       ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
-      ctx2.fillText(label, px + pw/2, py + ph/2);
+      ctx2.fillText(label, bx + pw/2, by + ph/2);
       ctx2.textBaseline = 'alphabetic';
+      ctx2.restore();
     }
     canvas.addEventListener('mousemove', function(e) {
       const rect = canvas.getBoundingClientRect();
@@ -5543,16 +5588,34 @@ function renderPurchaseHistory() {
 // ── Header dropdown menu ──
 function toggleHdrMenu() {
   const dd = document.getElementById('hdr-dropdown');
-  if (dd) dd.classList.toggle('hidden');
+  const overlay = document.getElementById('hdr-menu-overlay');
+  if (!dd) return;
+  const isHidden = dd.classList.contains('hidden');
+  if (isHidden) {
+    dd.classList.remove('hidden');
+    if (overlay) overlay.style.display = 'block';
+  } else {
+    dd.classList.add('hidden');
+    if (overlay) overlay.style.display = 'none';
+  }
 }
 function closeHdrMenu() {
   const dd = document.getElementById('hdr-dropdown');
+  const overlay = document.getElementById('hdr-menu-overlay');
   if (dd) dd.classList.add('hidden');
+  if (overlay) overlay.style.display = 'none';
 }
-// Close dropdown when clicking outside
+// Close dropdown when clicking outside (desktop)
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('hdr-menu-wrap');
   if (wrap && !wrap.contains(e.target)) closeHdrMenu();
+});
+// Currency buttons in dropdown should close menu after selecting
+document.addEventListener('DOMContentLoaded', function() {
+  ['btn-usd','btn-eur'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', () => setTimeout(closeHdrMenu, 200));
+  });
 });
 // Update theme label in dropdown
 function _updateThemeLabel() {
@@ -5613,6 +5676,9 @@ init();
   </button>
 
 </nav>
+
+<!-- Header menu tap-outside overlay (mobile) -->
+<div id="hdr-menu-overlay" onclick="closeHdrMenu()" style="display:none;position:fixed;inset:0;z-index:1999;background:transparent;"></div>
 
 <!-- ══════ PURCHASE HISTORY MODAL ══════ -->
 <div class="overlay hidden" id="purchase-history-modal">
