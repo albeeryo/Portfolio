@@ -1284,81 +1284,14 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
     <button class="main-tab" id="tab-portfolio">Portfolio</button>
   </div>
 
-  <!-- ══════════ PORTFOLIO VIEW ══════════ -->
+  <!-- ══════════ CRYPTOFOLIO VIEW ══════════ -->
   <div id="view-portfolio" style="display:none">
 
-  <!-- hidden elements kept for JS compat -->
-  <div id="chart-sec" style="display:none"><svg id="donut" width="1" height="1" viewBox="0 0 140 140"></svg><div id="legend"></div></div>
-  <div id="dca-sec" style="display:none"><div id="dca-stats-grid"></div><div id="dca-coin-tabs"></div><div id="dca-canvas-wrap"><canvas id="dca-canvas"></canvas><div id="dca-chart-loading"></div></div><span id="dca-chart-title"></span><tbody id="purchase-log-body-hidden"></tbody></div>
-  <div id="wl-inline-sec" style="display:none"><div id="wl-inline-body"></div></div>
-  <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
-
-  <!-- ══════ PRICE CHART SECTION (TOP) ══════ -->
-  <div class="ptf-chart-sec" id="ptf-chart-sec" style="display:none">
-    <div class="ptf-coin-pills" id="ptf-coin-pills"></div>
-    <div class="ptf-chart-card">
-      <div class="ptf-chart-header">
-        <div>
-          <div class="ptf-chart-coin-name" id="ptf-chart-name">—</div>
-          <div class="ptf-chart-price" id="ptf-chart-price">—</div>
-          <div class="ptf-chart-change" id="ptf-chart-change"></div>
-        </div>
-        <div class="ptf-range-btns">
-          <button class="ptf-range-btn" onclick="setPtfRange('1D')" id="ptf-range-1D">1D</button>
-          <button class="ptf-range-btn active" onclick="setPtfRange('1W')" id="ptf-range-1W">1W</button>
-          <button class="ptf-range-btn" onclick="setPtfRange('1M')" id="ptf-range-1M">1M</button>
-          <button class="ptf-range-btn" onclick="setPtfRange('1Y')" id="ptf-range-1Y">1Y</button>
-        </div>
-      </div>
-      <!-- Crosshair price tooltip bar -->
-      <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:flex">
-        <span class="ptf-ch-price" id="ptf-ch-price">—</span>
-        <span class="ptf-ch-date" id="ptf-ch-date">—</span>
-      </div>
-      <div class="ptf-canvas-wrap">
-        <canvas id="ptf-chart-canvas"></canvas>
-        <div class="ptf-chart-loading" id="ptf-chart-loading" style="display:none"><div class="spin"></div></div>
-        <!-- Floating buy/sell tooltip -->
-        <div class="ptf-marker-tip" id="ptf-marker-tip" style="display:none">
-          <div class="ptf-mt-type" id="ptf-mt-type"></div>
-          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Coin</span><span class="ptf-mt-val" id="ptf-mt-coin"></span></div>
-          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Amount</span><span class="ptf-mt-val" id="ptf-mt-amount"></span></div>
-          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Price</span><span class="ptf-mt-val" id="ptf-mt-price"></span></div>
-          <div class="ptf-mt-row"><span class="ptf-mt-lbl">Total</span><span class="ptf-mt-val" id="ptf-mt-total"></span></div>
-          <div class="ptf-mt-row" id="ptf-mt-note-row"><span class="ptf-mt-lbl">Note</span><span class="ptf-mt-val" id="ptf-mt-note"></span></div>
-          <div class="ptf-mt-date" id="ptf-mt-date"></div>
-        </div>
-      </div>
-      <div class="ptf-action-bar">
-        <button class="ptf-action-btn" onclick="showToast('Send coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
-          <span>Send</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Receive coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-          <span>Receive</span>
-        </button>
-        <button class="ptf-action-btn" onclick="openPurchaseModal()">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-          <span>Buy</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Swap coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
-          <span>Swap</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Earn coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-          <span>Earn</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- STATS -->
-  <div class="stats-bar" style="margin-top:16px">
+  <div class="stats-bar">
     <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
     <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="spnl">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Unrealised P&amp;L</div><div class="stat-val" id="spnl">—</div></div>
     <div class="stat-card"><div class="stat-lbl">24h Change</div><div class="stat-val" id="s24">—</div></div>
   </div>
 
@@ -1367,9 +1300,8 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
     <div class="sec-hdr">
       <div class="sec-title">Holdings</div>
       <div class="sec-actions">
-        <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
+        <button class="btn-edit-bp" onclick="openBP()">✏ Buy Prices</button>
         <button class="btn-add-holding" onclick="openAddModal()">+ Add Holding</button>
-        <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
         <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
       </div>
     </div>
@@ -1382,12 +1314,77 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
             <th class="th-r">Live Price</th>
             <th class="th-r">24h</th>
             <th class="th-r">Value</th>
-            <th class="th-r">P&L</th>
+            <th class="th-r">P&amp;L</th>
             <th>Alloc.</th>
             <th class="th-c">Actions</th>
           </tr>
         </thead>
         <tbody id="holdings-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-sec" id="chart-sec" style="display:none">
+    <div class="sec-hdr"><div class="sec-title">Allocation</div></div>
+    <div class="chart-wrap">
+      <svg id="donut" width="140" height="140" viewBox="0 0 140 140"></svg>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <!-- ══════ DCA / PURCHASE TRACKER ══════ -->
+  <div class="dca-sec" id="dca-sec" style="display:none">
+    <div class="sec-hdr">
+      <div class="sec-title">📅 Purchase History</div>
+      <div class="sec-actions">
+        <button class="btn-add-holding" onclick="openPurchaseModal()" style="background:linear-gradient(135deg,var(--accent2),var(--accent))">+ Log Purchase</button>
+      </div>
+    </div>
+    <div class="dca-top-grid" id="dca-stats-grid"></div>
+    <div class="dca-coin-tabs" id="dca-coin-tabs"></div>
+    <div class="dca-chart-wrap">
+      <div class="dca-chart-hdr">
+        <span class="dca-chart-title" id="dca-chart-title">Purchase History</span>
+        <div class="dca-chart-controls">
+          <div class="dca-range-btns">
+            <button class="dca-range-btn" onclick="setChartRange('7')" id="range-7">7D</button>
+            <button class="dca-range-btn active" onclick="setChartRange('30')" id="range-30">1M</button>
+            <button class="dca-range-btn" onclick="setChartRange('90')" id="range-90">3M</button>
+            <button class="dca-range-btn" onclick="setChartRange('180')" id="range-180">6M</button>
+            <button class="dca-range-btn" onclick="setChartRange('365')" id="range-365">1Y</button>
+            <button class="dca-range-btn" onclick="setChartRange('max')" id="range-max">All</button>
+          </div>
+          <div class="dca-chart-legend">
+            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--accent);width:6px;height:6px;border-radius:50%"></div>Buy</div>
+            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--red);width:6px;height:6px;border-radius:50%"></div>Sell</div>
+            <div class="dca-leg-item"><div class="dca-leg-dot" style="background:var(--muted);height:1px"></div>Avg</div>
+          </div>
+        </div>
+      </div>
+      <div id="dca-canvas-wrap">
+        <canvas id="dca-canvas"></canvas>
+        <div class="dca-chart-loading" id="dca-chart-loading" style="display:none">
+          <div class="spin"></div>
+          <span>Loading price history…</span>
+        </div>
+      </div>
+    </div>
+    <div class="purchase-log-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Coin</th>
+            <th>Type</th>
+            <th class="th-r">Amount</th>
+            <th class="th-r">Price</th>
+            <th class="th-r">Total</th>
+            <th>Date</th>
+            <th>Note</th>
+            <th class="th-c">Del</th>
+          </tr>
+        </thead>
+        <tbody id="purchase-log-body"></tbody>
       </table>
     </div>
   </div>
@@ -2246,8 +2243,8 @@ async function fetchPrices() {
   $('last-upd').textContent='Updated '+now();
   renderHoldings(false);
   renderWL();
-  // Always update price display so stats/P&L stay live on every auto-refresh
-  updatePtfPriceDisplay();
+  // If portfolio tab is open, refresh live price display without re-fetching chart
+
 }
 
 function priceOf(h) {
@@ -2295,15 +2292,11 @@ function rebuildTicker() {
   track.style.animation=`ticker-scroll ${Math.max(40,all.length*3.5)}s linear infinite`;
 }
 async function manualRefresh(){
-  // action-refresh = portfolio action bar button, btn-refresh = side menu button
   const btns = ['action-refresh','btn-refresh'].map(id=>document.getElementById(id)).filter(Boolean);
   btns.forEach(b=>{ b.disabled=true; b.classList.add('spinning'); });
   try{
-    await Promise.all([fetchPrices(),fetchTicker()]);
-    // Force update stats bar + chart price label right now
-    updatePtfPriceDisplay();
-    // Reload chart candles so graph reflects latest prices
-    if(_ptfActiveCoin) loadPtfChartData();
+    await Promise.all([fetchPrices(), fetchTicker()]);
+    renderHoldings(false);
   } finally{
     btns.forEach(b=>{ b.disabled=false; b.classList.remove('spinning'); });
   }
@@ -2415,7 +2408,7 @@ function confirmAddHolding() {
       buyPrice: bpUsd,
     });
   }
-  save(); closeAddModal(); _ptfActiveCoin = null; fetchPrices(); renderHoldings(false);
+  save(); closeAddModal(); fetchPrices(); renderHoldings(false);
   showToast(`✓ Added ${amtRaw} ${pendingCoin.s}`);
 }
 
@@ -2520,7 +2513,7 @@ function removeH(id){
 }
 function clearAll(){
   if(!S.holdings.length) return;
-  if(confirm('Remove all holdings?')){ S.holdings=[]; _ptfActiveCoin=null; save(); renderHoldings(false); }
+  if(confirm('Remove all holdings?')){ S.holdings=[]; save(); renderHoldings(false); }
 }
 
 function renderHoldings(changed){
@@ -2560,23 +2553,11 @@ function renderHoldings(changed){
       <button class="empty-cta" onclick="openAddModal()">+ Add Holding</button>
     </div></td></tr>`;
     $('chart-sec').style.display='none';
-    const ptfSec = document.getElementById('ptf-chart-sec');
-    if (ptfSec) ptfSec.style.display = 'none';
+    $('dca-sec').style.display='none';
     return;
   }
-  $('chart-sec').style.display='none'; // hide old donut, use new chart
-  // Show price chart section — only do full reload if not yet initialised
-  const ptfSec = document.getElementById('ptf-chart-sec');
-  if (ptfSec) {
-    ptfSec.style.display = '';
-    if (!_ptfActiveCoin) {
-      // First time — do full chart load
-      renderPtfChart();
-    } else {
-      // Already loaded — just refresh the live price text without re-fetching chart
-      updatePtfPriceDisplay();
-    }
-  }
+  renderDonut(tv);
+  renderDCA();
 
   tbody.innerHTML=S.holdings.map((h,i)=>{
     const lp=priceOf(h);
@@ -3662,23 +3643,6 @@ function switchMainTab(tab) {
   if (arb) arb.style.display = tab === 'budget' ? '' : 'none';
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
-
-  // Show inline watchlist section only on portfolio (hidden — replaced by new chart)
-  const wlSec = document.getElementById('wl-inline-sec');
-  if (wlSec) wlSec.style.display = 'none';
-
-  // Show new portfolio chart section
-  const ptfSec = document.getElementById('ptf-chart-sec');
-  if (ptfSec) {
-    if (tab === 'portfolio' && S.holdings && S.holdings.length) {
-      ptfSec.style.display = '';
-      // Show live price from cache instantly, then load chart history
-      updatePtfPriceDisplay();
-      setTimeout(() => renderPtfChart(), 50);
-    } else {
-      ptfSec.style.display = 'none';
-    }
-  }
 
   updateHero();
 }
@@ -5127,586 +5091,6 @@ function toggleTheme() {
   if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
 }
 
-// ══════════════════════════════════════════
-// PORTFOLIO PRICE CHART — ETH-style with buy/sell markers & crosshair
-// ══════════════════════════════════════════
-let _ptfActiveCoin = null;
-let _ptfRange = '1W';
-let _ptfChartData = [];
-let _ptfPad = { top: 16, right: 16, bottom: 32, left: 16 };
-let _ptfDims = { W: 0, H: 0, w: 0, h: 0 };
-let _ptfMin = 0, _ptfMax = 1;
-let _ptfHoveredMarker = null;
-
-// ── helpers ──
-function _ptfXOf(i, n, w) { return _ptfPad.left + (i / (n - 1)) * w; }
-function _ptfYOf(v, min, range, h) { return _ptfPad.top + h - ((v - min) / range) * h; }
-
-function _ptfPurchasesForCoin() {
-  if (!_ptfActiveCoin) return [];
-  // filter purchases to active coin, within visible time window
-  const tStart = _ptfChartData.length ? _ptfChartData[0].t : 0;
-  const tEnd   = _ptfChartData.length ? _ptfChartData[_ptfChartData.length-1].t : Infinity;
-  return (S.purchases || []).filter(p => {
-    if (p.coinId !== _ptfActiveCoin) return false;
-    const ts = new Date(p.date).getTime();
-    return ts >= tStart && ts <= tEnd;
-  });
-}
-
-function renderPtfChart() {
-  if (!S.holdings.length) return;
-  const pillsEl = document.getElementById('ptf-coin-pills');
-  if (!pillsEl) return;
-  pillsEl.innerHTML = S.holdings.map((h, i) => {
-    const coin = COIN_BY_ID[h.coinId] || COIN_BY_SYM[h.symbol];
-    const col = coinColor(h.symbol);
-    const imgUrl = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
-    const iconHtml = imgUrl
-      ? `<img src="${imgUrl}" width="18" height="18" style="border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="ptf-coin-pill-fb" style="display:none;background:${col}22;color:${col}">${h.symbol.slice(0,2)}</div>`
-      : `<div class="ptf-coin-pill-fb" style="background:${col}22;color:${col}">${h.symbol.slice(0,2)}</div>`;
-    const isActive = _ptfActiveCoin === h.coinId || (!_ptfActiveCoin && i === 0);
-    return `<button class="ptf-coin-pill ${isActive ? 'active' : ''}" onclick="selectPtfCoin('${h.coinId}')">${iconHtml}<span>${h.symbol}</span></button>`;
-  }).join('');
-  if (!_ptfActiveCoin && S.holdings.length) _ptfActiveCoin = S.holdings[0].coinId;
-  loadPtfChartData();
-}
-
-// Lightweight refresh — updates live price + P&L text without re-fetching chart history
-function updatePtfPriceDisplay() {
-  if (!_ptfActiveCoin) return;
-  const holding = S.holdings.find(h => h.coinId === _ptfActiveCoin);
-  if (!holding) return;
-  const lp = priceOf(holding);
-  if (!lp?.usd) return; // no fresh price yet — leave existing text alone
-
-  const priceEl  = document.getElementById('ptf-chart-price');
-  const changeEl = document.getElementById('ptf-chart-change');
-  const chP      = document.getElementById('ptf-ch-price');
-  const bar      = document.getElementById('ptf-crosshair-bar');
-
-  if (priceEl)  priceEl.textContent = fmtPrice(lp.usd);
-  if (chP)      chP.textContent     = fmtPrice(lp.usd);
-  if (bar)      bar.style.display   = 'flex';
-
-  if (changeEl) {
-    const chg = lp.change24 || 0;
-    changeEl.textContent = (chg >= 0 ? '↑ ' : '↓ ') + Math.abs(chg).toFixed(2) + '% (24h)';
-    changeEl.className   = 'ptf-chart-change ' + (chg >= 0 ? 'up' : 'down');
-  }
-
-  // Also refresh the stats bar values (Total Value, Cost Basis, P&L, 24h)
-  const sv   = document.getElementById('sv');
-  const spnl = document.getElementById('spnl');
-  const s24  = document.getElementById('s24');
-  const si   = document.getElementById('si');
-  let tv = 0, ti = 0, p24base = 0;
-  S.holdings.forEach(h => {
-    const p2 = priceOf(h);
-    const p  = p2 ? p2.usd : h.buyPrice;
-    const c  = p2 ? p2.change24 : 0;
-    tv      += h.amount * p;
-    ti      += h.amount * (h.buyPrice || 0);
-    p24base += h.amount * (c !== 0 ? p / (1 + c / 100) : p);
-  });
-  const pnl  = tv - ti;
-  const pnlP = ti > 0 ? pnl / ti * 100 : 0;
-  const p24  = p24base > 0 ? (tv - p24base) / p24base * 100 : 0;
-  if (sv)   sv.textContent   = fmt(tv);
-  if (si)   si.textContent   = fmt(ti);
-  if (spnl) {
-    spnl.textContent  = (pnl >= 0 ? '+' : '') + fmt(pnl) + ' (' + (pnl >= 0 ? '+' : '') + pnlP.toFixed(2) + '%)';
-    spnl.className    = 'stat-val ' + (pnl >= 0 ? 'pos' : 'neg');
-  }
-  if (s24) {
-    s24.textContent = pctStr(p24);
-    s24.className   = 'stat-val ' + (p24 >= 0 ? 'green' : 'red');
-  }
-  updateHero();
-}
-
-function selectPtfCoin(coinId) {
-  _ptfActiveCoin = coinId;
-  document.querySelectorAll('.ptf-coin-pill').forEach((el, i) => {
-    el.classList.toggle('active', S.holdings[i]?.coinId === coinId);
-  });
-  loadPtfChartData();
-}
-
-function setPtfRange(range) {
-  _ptfRange = range;
-  document.querySelectorAll('.ptf-range-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('ptf-range-' + range);
-  if (btn) btn.classList.add('active');
-  loadPtfChartData();
-}
-
-async function loadPtfChartData() {
-  if (!_ptfActiveCoin) return;
-  const holding = S.holdings.find(h => h.coinId === _ptfActiveCoin);
-  if (!holding) return;
-  const coin = COIN_BY_ID[_ptfActiveCoin];
-
-  const nameEl   = document.getElementById('ptf-chart-name');
-  const priceEl  = document.getElementById('ptf-chart-price');
-  const changeEl = document.getElementById('ptf-chart-change');
-  const bar      = document.getElementById('ptf-crosshair-bar');
-  const chP      = document.getElementById('ptf-ch-price');
-  const chD      = document.getElementById('ptf-ch-date');
-
-  if (nameEl) nameEl.textContent = (coin?.n || holding.name || holding.symbol) + ' (' + holding.symbol + ')';
-
-  // Helper — update both the big price and the crosshair bar
-  function showPrice(usdVal, chg24) {
-    if (!usdVal) return;
-    if (priceEl)  priceEl.textContent  = fmtPrice(usdVal);
-    if (chP)      chP.textContent      = fmtPrice(usdVal);
-    if (changeEl && chg24 !== undefined) {
-      changeEl.textContent = (chg24 >= 0 ? '↑ ' : '↓ ') + Math.abs(chg24).toFixed(2) + '% (24h)';
-      changeEl.className   = 'ptf-chart-change ' + (chg24 >= 0 ? 'up' : 'down');
-    }
-    if (bar) bar.style.display = 'flex';
-  }
-
-  // Use live price cache immediately if available
-  const lp = priceOf(holding);
-  if (lp?.usd) showPrice(lp.usd, lp.change24 || 0);
-
-  // Fetch chart candles
-  const daysMap = { '1D':'1','1W':'7','1M':'30','1Y':'365' };
-  const days = daysMap[_ptfRange] || '7';
-  const loadEl = document.getElementById('ptf-chart-loading');
-  if (loadEl) loadEl.style.display = 'flex';
-  _ptfChartData = [];
-
-  try {
-    const data = await cgFetch(`/coins/${_ptfActiveCoin}/market_chart?vs_currency=usd&days=${days}`);
-    _ptfChartData = (data.prices || []).map(p => ({ t: p[0], v: p[1] }));
-  } catch(e) {
-    const fallback = lp?.usd || holding.buyPrice || 1;
-    const n = _ptfRange === '1D' ? 24 : _ptfRange === '1W' ? 168 : _ptfRange === '1M' ? 30 : 365;
-    _ptfChartData = Array.from({length: n}, (_, i) => ({
-      t: Date.now() - (n - i) * 3600000,
-      v: fallback * (0.88 + Math.random() * 0.24)
-    }));
-  }
-  if (loadEl) loadEl.style.display = 'none';
-
-  // Always update price from latest candle (most accurate/current value)
-  if (_ptfChartData.length) {
-    const last  = _ptfChartData[_ptfChartData.length - 1];
-    const first = _ptfChartData[0];
-    const candleChg = first.v ? ((last.v - first.v) / first.v) * 100 : 0;
-    // Prefer live price for the header but always use candle for crosshair bar date
-    showPrice(lp?.usd || last.v, lp?.change24 ?? candleChg);
-    if (chD) {
-      const dt = new Date(last.t);
-      chD.textContent = _ptfRange === '1D'
-        ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
-    }
-  }
-
-  _ptfHoveredMarker = null;
-  drawPtfChart();
-  _attachPtfEvents();
-
-  // If prices weren't cached yet, retry after prices likely loaded
-  if (!lp?.usd) {
-    setTimeout(() => {
-      const lp2 = priceOf(holding);
-      if (lp2?.usd) showPrice(lp2.usd, lp2.change24 || 0);
-    }, 2500);
-  }
-}
-
-function drawPtfChart(crosshairIdx) {
-  // Polyfill roundRect for older browsers
-  if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-      r = Math.min(r, w/2, h/2);
-      this.moveTo(x+r, y);
-      this.lineTo(x+w-r, y);
-      this.arcTo(x+w, y, x+w, y+r, r);
-      this.lineTo(x+w, y+h-r);
-      this.arcTo(x+w, y+h, x+w-r, y+h, r);
-      this.lineTo(x+r, y+h);
-      this.arcTo(x, y+h, x, y+h-r, r);
-      this.lineTo(x, y+r);
-      this.arcTo(x, y, x+r, y, r);
-      this.closePath();
-      return this;
-    };
-  }
-  const canvas = document.getElementById('ptf-chart-canvas');
-  if (!canvas || !_ptfChartData.length) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  const wrap = canvas.parentElement;
-  const W = wrap.offsetWidth, H = wrap.offsetHeight;
-  canvas.width = W * dpr; canvas.height = H * dpr;
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-  ctx.scale(dpr, dpr);
-
-  const pad = _ptfPad;
-  const w = W - pad.left - pad.right;
-  const h = H - pad.top - pad.bottom;
-  _ptfDims = { W, H, w, h };
-
-  const vals = _ptfChartData.map(d => d.v);
-  const min = Math.min(...vals), max = Math.max(...vals);
-  const range = max - min || 1;
-  _ptfMin = min; _ptfMax = max;
-  const first = vals[0], last = vals[vals.length-1];
-  const isUp = last >= first;
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  const lineColor = isUp ? (isDark ? '#27ae6e' : '#1a7a4a') : (isDark ? '#e05555' : '#c0392b');
-  const mutedColor = isDark ? '#606060' : '#aaaaaa';
-  const n = vals.length;
-  const xOf = i => pad.left + (i / (n-1)) * w;
-  const yOf = v => pad.top + h - ((v - min) / range) * h;
-
-  ctx.clearRect(0, 0, W, H);
-
-  // Filled area
-  ctx.beginPath();
-  ctx.moveTo(xOf(0), yOf(vals[0]));
-  for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(vals[i]));
-  ctx.lineTo(xOf(n-1), pad.top + h);
-  ctx.lineTo(xOf(0), pad.top + h);
-  ctx.closePath();
-  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + h);
-  grad.addColorStop(0, lineColor + (isDark ? '44' : '28'));
-  grad.addColorStop(1, 'transparent');
-  ctx.fillStyle = grad;
-  ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  ctx.moveTo(xOf(0), yOf(vals[0]));
-  for (let i = 1; i < n; i++) ctx.lineTo(xOf(i), yOf(vals[i]));
-  ctx.strokeStyle = lineColor;
-  ctx.lineWidth = 2.2;
-  ctx.lineJoin = 'round';
-  ctx.stroke();
-
-  // Crosshair vertical line
-  if (crosshairIdx !== undefined && crosshairIdx >= 0) {
-    const cx = xOf(crosshairIdx);
-    const cy = yOf(vals[crosshairIdx]);
-    ctx.save();
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = mutedColor + '88';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(cx, pad.top);
-    ctx.lineTo(cx, pad.top + h);
-    ctx.stroke();
-    ctx.restore();
-    // Dot on line
-    ctx.beginPath();
-    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-    ctx.fillStyle = lineColor;
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-  }
-
-  // ── Buy/Sell markers — circular coin badges with callout labels ──
-  const purchases = _ptfPurchasesForCoin();
-  const timeSpan = _ptfChartData[n-1].t - _ptfChartData[0].t || 1;
-  purchases.forEach(p => {
-    const ts = new Date(p.date).getTime();
-    const fracX = (ts - _ptfChartData[0].t) / timeSpan;
-    const px = pad.left + fracX * w;
-    const nearestIdx = Math.round(fracX * (n - 1));
-    const nearestV = vals[Math.max(0, Math.min(n-1, nearestIdx))];
-    const py = yOf(nearestV);
-
-    const isBuy = p.type === 'buy';
-    const markerColor = isBuy ? '#27ae6e' : '#e05555';
-    const isHovered = _ptfHoveredMarker && _ptfHoveredMarker.id === p.id;
-    const radius = isHovered ? 13 : 11;
-
-    ctx.save();
-
-    // ── Callout label (shown on hover OR always if space permits) ──
-    if (isHovered) {
-      const sym = (p.symbol || '').slice(0, 6);
-      const priceStr = '$' + (p.priceUsd || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      const amtStr = (p.amount || 0).toLocaleString('en-US', {maximumFractionDigits: 4});
-      const label = `${amtStr} ${sym} @ ${priceStr}`;
-      const labelFont = '600 11px -apple-system,BlinkMacSystemFont,sans-serif';
-      ctx.font = labelFont;
-      const textW = ctx.measureText(label).width;
-      const boxW = textW + 16;
-      const boxH = 22;
-      const boxR = 7;
-      // Position label above the marker
-      let bx = px - boxW / 2;
-      if (bx < 4) bx = 4;
-      if (bx + boxW > W - 4) bx = W - boxW - 4;
-      const by = py - radius - boxH - 8;
-
-      // Pill background (dark, like the reference)
-      ctx.fillStyle = isDark ? 'rgba(20,20,22,0.92)' : 'rgba(30,30,30,0.88)';
-      ctx.beginPath();
-      ctx.roundRect(bx, by, boxW, boxH, boxR);
-      ctx.fill();
-
-      // Label text
-      ctx.fillStyle = '#ffffff';
-      ctx.font = labelFont;
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(label, bx + 8, by + boxH / 2);
-
-      // Connector line from box bottom to circle top
-      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath();
-      ctx.moveTo(px, by + boxH);
-      ctx.lineTo(px, py - radius);
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-
-    // ── Circle badge ──
-    // Outer glow ring on hover
-    if (isHovered) {
-      ctx.beginPath();
-      ctx.arc(px, py, radius + 4, 0, Math.PI * 2);
-      ctx.fillStyle = markerColor + '33';
-      ctx.fill();
-    }
-
-    // Main filled circle
-    ctx.beginPath();
-    ctx.arc(px, py, radius, 0, Math.PI * 2);
-    ctx.fillStyle = markerColor;
-    ctx.globalAlpha = isHovered ? 1 : 0.9;
-    ctx.fill();
-
-    // White border
-    ctx.beginPath();
-    ctx.arc(px, py, radius, 0, Math.PI * 2);
-    ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.6)';
-    ctx.lineWidth = isHovered ? 2 : 1.5;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-
-    // B for buy, S for sell (not coin symbol)
-    const initial = p.type === 'buy' ? 'B' : 'S';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = `700 ${isHovered ? 10 : 9}px -apple-system,BlinkMacSystemFont,sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(initial, px, py);
-
-    ctx.restore();
-  });
-
-  // Time labels
-  ctx.fillStyle = mutedColor;
-  ctx.font = '10px -apple-system,BlinkMacSystemFont,sans-serif';
-  ctx.textAlign = 'center';
-  const labelCount = 4;
-  for (let i = 0; i <= labelCount; i++) {
-    const idx = Math.round(i / labelCount * (n - 1));
-    const d = new Date(_ptfChartData[idx].t);
-    let label;
-    if (_ptfRange === '1D') label = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    else if (_ptfRange === '1Y') label = d.toLocaleDateString([], {month:'short'});
-    else label = d.toLocaleDateString([], {month:'short', day:'numeric'});
-    ctx.fillText(label, xOf(idx), pad.top + h + 18);
-  }
-}
-
-function _ptfGetEventXY(e, canvas) {
-  const rect = canvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  return { x: clientX - rect.left, y: clientY - rect.top };
-}
-
-function _attachPtfEvents() {
-  const canvas = document.getElementById('ptf-chart-canvas');
-  if (!canvas || canvas._ptfBound) return;
-  canvas._ptfBound = true;
-
-  function onMove(e) {
-    if (!_ptfChartData.length) return;
-    const { x, y } = _ptfGetEventXY(e, canvas);
-    const pad = _ptfPad;
-    const { w, h } = _ptfDims;
-    if (x < pad.left || x > pad.left + w) { onLeave(); return; }
-
-    const frac = (x - pad.left) / w;
-    const idx = Math.max(0, Math.min(_ptfChartData.length - 1, Math.round(frac * (_ptfChartData.length - 1))));
-    const d = _ptfChartData[idx];
-
-    // Update crosshair bar
-    const bar = document.getElementById('ptf-crosshair-bar');
-    const chPrice = document.getElementById('ptf-ch-price');
-    const chDate = document.getElementById('ptf-ch-date');
-    if (bar) bar.style.display = 'flex';
-    if (chPrice) chPrice.textContent = fmtPrice(d.v);
-    if (chDate) {
-      const dt = new Date(d.t);
-      chDate.textContent = _ptfRange === '1D'
-        ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-        : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
-    }
-
-    // Check marker hover
-    const purchases = _ptfPurchasesForCoin();
-    const n = _ptfChartData.length;
-    const timeSpan = _ptfChartData[n-1].t - _ptfChartData[0].t || 1;
-    let hovered = null;
-    purchases.forEach(p => {
-      const ts = new Date(p.date).getTime();
-      const fracX = (ts - _ptfChartData[0].t) / timeSpan;
-      const px = pad.left + fracX * w;
-      const nearestIdx = Math.round(fracX * (n - 1));
-      const nearestV = _ptfChartData[Math.max(0, Math.min(n-1, nearestIdx))].v;
-      const range = _ptfMax - _ptfMin || 1;
-      const py = pad.top + h - ((nearestV - _ptfMin) / range) * h;
-      const dist = Math.sqrt((x - px)**2 + (y - py)**2);
-      if (dist < 22) hovered = p;
-    });
-
-    const tipEl = document.getElementById('ptf-marker-tip');
-    if (hovered && tipEl) {
-      _ptfHoveredMarker = hovered;
-      // Position tip
-      const rect = canvas.getBoundingClientRect();
-      const ts = new Date(hovered.date).getTime();
-      const fracX = (ts - _ptfChartData[0].t) / timeSpan;
-      const px = pad.left + fracX * w;
-      const nearestIdx = Math.round(fracX * (n - 1));
-      const nearestV = _ptfChartData[Math.max(0, Math.min(n-1, nearestIdx))].v;
-      const range = _ptfMax - _ptfMin || 1;
-      const py = pad.top + h - ((nearestV - _ptfMin) / range) * h;
-      // Offset tip so it doesn't cover the marker
-      let tipLeft = px + 14;
-      let tipTop = py - 30;
-      const canvasW = canvas.offsetWidth, canvasH = canvas.offsetHeight;
-      if (tipLeft + 175 > canvasW) tipLeft = px - 175 - 10;
-      if (tipTop < 4) tipTop = 4;
-      if (tipTop + 130 > canvasH) tipTop = canvasH - 134;
-      tipEl.style.left = tipLeft + 'px';
-      tipEl.style.top = tipTop + 'px';
-      tipEl.style.display = 'block';
-      // Populate tip
-      const typeEl = document.getElementById('ptf-mt-type');
-      if (typeEl) { typeEl.textContent = hovered.type === 'buy' ? 'BUY' : 'SELL'; typeEl.className = 'ptf-mt-type ' + hovered.type; }
-      document.getElementById('ptf-mt-coin').textContent = hovered.symbol || '—';
-      document.getElementById('ptf-mt-amount').textContent = (hovered.amount || 0).toLocaleString('en-US', {maximumFractionDigits:8}) + ' ' + (hovered.symbol || '');
-      document.getElementById('ptf-mt-price').textContent = fmtPrice(hovered.priceUsd || 0);
-      document.getElementById('ptf-mt-total').textContent = fmt(hovered.total || 0);
-      const noteRow = document.getElementById('ptf-mt-note-row');
-      const noteVal = document.getElementById('ptf-mt-note');
-      if (hovered.note) { if(noteRow)noteRow.style.display='flex'; if(noteVal)noteVal.textContent=hovered.note; }
-      else { if(noteRow)noteRow.style.display='none'; }
-      document.getElementById('ptf-mt-date').textContent = hovered.date || '';
-    } else {
-      _ptfHoveredMarker = null;
-      if (tipEl) tipEl.style.display = 'none';
-    }
-
-    drawPtfChart(idx);
-  }
-
-  function onLeave() {
-    _ptfHoveredMarker = null;
-    // Keep bar visible — just reset to latest candle
-    if (_ptfChartData.length) {
-      const _last = _ptfChartData[_ptfChartData.length - 1];
-      const bar = document.getElementById('ptf-crosshair-bar');
-      const chP = document.getElementById('ptf-ch-price');
-      const chD = document.getElementById('ptf-ch-date');
-      if (chP) chP.textContent = fmtPrice(_last.v);
-      if (chD) {
-        const dt = new Date(_last.t);
-        chD.textContent = _ptfRange === '1D'
-          ? dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-          : dt.toLocaleDateString([], {month:'short', day:'numeric', year:'numeric'});
-      }
-      if (bar) bar.style.display = 'flex';
-    }
-    const tipEl = document.getElementById('ptf-marker-tip');
-    if (tipEl) tipEl.style.display = 'none';
-    drawPtfChart();
-  }
-
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('touchmove', e => { e.preventDefault(); onMove(e); }, { passive: false });
-  canvas.addEventListener('mouseleave', onLeave);
-  canvas.addEventListener('touchend', onLeave);
-}
-
-// ── Purchase History Modal ──
-let _phFilter = 'all';
-function openPurchaseHistory() {
-  _phFilter = 'all';
-  document.querySelectorAll('#purchase-history-modal .bgt-type-btn').forEach(b => b.classList.remove('active'));
-  const allBtn = document.getElementById('ph-filter-all');
-  if (allBtn) allBtn.classList.add('active');
-  renderPurchaseHistory();
-  document.getElementById('purchase-history-modal').classList.remove('hidden');
-}
-function closePurchaseHistory() {
-  document.getElementById('purchase-history-modal').classList.add('hidden');
-}
-function setPHFilter(f) {
-  _phFilter = f;
-  document.querySelectorAll('#purchase-history-modal .bgt-type-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById('ph-filter-' + f);
-  if (btn) btn.classList.add('active');
-  renderPurchaseHistory();
-}
-function renderPurchaseHistory() {
-  const all = S.purchases || [];
-  const buys = all.filter(p => p.type === 'buy');
-  const sells = all.filter(p => p.type === 'sell');
-  document.getElementById('ph-total-invested').textContent = fmt(buys.reduce((s,p)=>s+p.total,0));
-  document.getElementById('ph-total-proceeds').textContent = fmt(sells.reduce((s,p)=>s+p.total,0));
-  document.getElementById('ph-count').textContent = all.length;
-
-  const filtered = _phFilter === 'all' ? all : all.filter(p => p.type === _phFilter);
-  const sorted = [...filtered].sort((a,b) => new Date(b.date) - new Date(a.date));
-  const list = document.getElementById('ph-log-list');
-  if (!list) return;
-  if (!sorted.length) {
-    list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px">No purchases logged yet.<br>Use <strong>Buy</strong> to start tracking.</div>';
-    return;
-  }
-  list.innerHTML = sorted.map(p => {
-    const coin = COIN_BY_ID[p.coinId] || COIN_BY_SYM[p.symbol];
-    const col = coinColor(p.symbol);
-    const imgUrl = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
-    const iconHtml = imgUrl
-      ? `<img src="${imgUrl}" width="32" height="32" style="border-radius:50%;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div style="display:none;width:32px;height:32px;border-radius:50%;background:${col}22;color:${col};align-items:center;justify-content:center;font-size:11px;font-weight:800">${p.symbol.slice(0,2)}</div>`
-      : `<div style="display:flex;width:32px;height:32px;border-radius:50%;background:${col}22;color:${col};align-items:center;justify-content:center;font-size:11px;font-weight:800">${p.symbol.slice(0,2)}</div>`;
-    return `<div class="ph-row">
-      <div class="ph-row-icon">${iconHtml}</div>
-      <div class="ph-row-info">
-        <div class="ph-row-sym"><span class="ph-type-badge ${p.type}">${p.type}</span>${p.symbol}</div>
-        <div class="ph-row-meta">${p.amount.toLocaleString('en-US',{maximumFractionDigits:8})} · ${p.date}${p.note ? ' · ' + p.note : ''}</div>
-      </div>
-      <div class="ph-row-right">
-        <div class="ph-row-total ${p.type}">${p.type==='buy'?'-':'+'}${fmt(p.total)}</div>
-        <div class="ph-row-price">@ ${fmtPrice(p.priceUsd)}</div>
-      </div>
-      <button class="btn-log-rm" onclick="deletePurchase(${p.id});renderPurchaseHistory()" title="Delete">✕</button>
-    </div>`;
-  }).join('');
-}
-
 // ── Header dropdown menu ──
 // ── Side menu panel ──
 function toggleHdrMenu() {
@@ -5792,14 +5176,10 @@ async function init(){
   await fetchPrices();
   renderHoldings(false);
   renderWL();
-  // Pre-set active coin so live price shows instantly on first portfolio tab open
-  if (!_ptfActiveCoin && S.holdings && S.holdings.length) {
-    _ptfActiveCoin = S.holdings[0].coinId;
-  }
   // Start on budget tab - hide ticker/watchlist
   switchMainTab('budget');
   // Redraw DCA chart on resize
-  window.addEventListener('resize',()=>{ if(activeDcaCoin) drawDCAChart(activeDcaCoin); renderInvestChart(bgtLoad(), invChartMode); drawPtfChart(); });
+  window.addEventListener('resize',()=>{ if(activeDcaCoin) drawDCAChart(activeDcaCoin); renderInvestChart(bgtLoad(), invChartMode); });
   setInterval(async()=>{ await fetchPrices(); await fetchTicker(); }, REFRESH_MS);
   initBudget();
 }
@@ -5825,12 +5205,12 @@ init();
     <span class="nav-tab-label">Invest</span>
   </button>
 
-  <!-- Portfolio -->
-  <button class="nav-tab" id="nav-portfolio" onclick="switchMainTab('portfolio')" role="tab" aria-selected="false" aria-label="Crypto Portfolio">
+  <!-- Cryptofolio -->
+  <button class="nav-tab" id="nav-portfolio" onclick="switchMainTab('portfolio')" role="tab" aria-selected="false" aria-label="Cryptofolio">
     <div class="nav-tab-icon">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
     </div>
-    <span class="nav-tab-label">Portfolio</span>
+    <span class="nav-tab-label">Cryptofolio</span>
   </button>
 
 </nav>
@@ -5900,7 +5280,7 @@ init();
       <div class="side-menu-nav-icon">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       </div>
-      <span>Portfolio</span>
+      <span>Cryptofolio</span>
     </button>
 
     <div style="height:1px;background:var(--border);margin:10px 8px;"></div>
