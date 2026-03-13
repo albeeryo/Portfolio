@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#efede8" id="theme-color-meta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -498,8 +498,8 @@ td.td-c{text-align:center;}
 /* ─────────────────────────────────
    BUDGET — same wallet-app cards
 ───────────────────────────────── */
-.bgt-summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;animation:fadeUp .4s ease both;}
-@media(max-width:900px){.bgt-summary-grid{grid-template-columns:repeat(3,1fr);}}
+.bgt-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;animation:fadeUp .4s ease both;}
+@media(max-width:900px){.bgt-summary-grid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:560px){.bgt-summary-grid{grid-template-columns:repeat(2,1fr);}}
 .bgt-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:var(--card-shadow);}
 .bgt-card::before,.bgt-card::after{display:none;}
@@ -596,6 +596,52 @@ td.td-c{text-align:center;}
 .dt-header{font-size:13px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;gap:7px;}
 .dt-row{display:flex;justify-content:space-between;gap:16px;font-size:11px;color:var(--muted);margin-top:3px;}
 .dt-row .dt-val{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text);}
+
+
+/* ── iOS PERFORMANCE & SMOOTH SCROLL ── */
+html { -webkit-overflow-scrolling: touch; }
+* { -webkit-tap-highlight-color: transparent; }
+body { overscroll-behavior: none; }
+.modal, .bgt-tx-list, .coin-results, .wl-body, .tbl-wrap, .purchase-log-wrap {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+/* GPU-accelerate animated elements */
+.hero-balance, .action-row, .stats-bar, .tbl-wrap, .stat-card, .bgt-card,
+.main-tabs, .bgt-tx-item, .coin-result, .modal {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+/* Remove 300ms tap delay on iOS */
+a, button, input, select, textarea { touch-action: manipulation; }
+/* Prevent text selection on tap */
+.action-btn, .main-tab, .cur-btn, .dca-tab, .bgt-cat-btn, .ticker-item { user-select: none; -webkit-user-select: none; }
+/* Smooth transitions */
+.bgt-tx-item, .coin-result, .stat-card, tbody tr { -webkit-transition: background .12s ease; transition: background .12s ease; }
+/* Safe area bottom padding on home-screen install */
+.container { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+
+
+/* Prevent input zoom on iOS (font-size must be >= 16px for inputs) */
+input, select, textarea { font-size: 16px !important; }
+.f-label, .bp-lbl, .f-hint { font-size: 11px; }
+/* Smooth page transitions */
+#view-portfolio, #view-budget { animation: fadeUp .25s ease both; }
+/* Bottom action row spacing on iPhone X+ */
+.action-row { padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* Tab bar at bottom safe area */
+.ticker-wrap { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
+/* Prevent horizontal overflow on mobile */
+body { max-width: 100vw; }
+table { table-layout: auto; }
+
+
+/* ── INVEST TAB ── */
+.bgt-card-savings .bgt-card-icon{background:rgba(26,122,74,.1);color:var(--green);}
+.bgt-card-pot .bgt-card-icon{background:rgba(160,96,16,.1);color:var(--amber);}
+#view-invest .bgt-savings-section { margin-bottom: 14px; }
+#view-invest .sec-title { color: var(--muted); }
 
 /* ── ANIMATIONS ── */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
@@ -914,15 +960,15 @@ td.td-c{text-align:center;}
 
   <!-- HERO BALANCE -->
   <div class="hero-balance">
-    <div class="hero-label">Total Portfolio Value</div>
+    <div class="hero-label" id="hero-label">Portfolio Value</div>
     <div class="hero-amount" id="hero-val">—</div>
     <div class="hero-sub">
       <span class="hero-pnl" id="hero-pnl" style="display:none"></span>
     </div>
   </div>
 
-  <!-- ACTION BUTTONS -->
-  <div class="action-row">
+  <!-- ACTION BUTTONS — switches per tab -->
+  <div class="action-row" id="action-row-portfolio">
     <button class="action-btn" onclick="openAddModal()">
       <div class="action-icon">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -935,11 +981,57 @@ td.td-c{text-align:center;}
       </div>
       <span class="action-label">Edit</span>
     </button>
+    <button class="action-btn" onclick="openPurchaseModal()">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      </div>
+      <span class="action-label">Log Buy</span>
+    </button>
     <button class="action-btn" onclick="manualRefresh()" id="action-refresh">
       <div class="action-icon">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
       </div>
       <span class="action-label">Refresh</span>
+    </button>
+  </div>
+  <div class="action-row" id="action-row-invest" style="display:none">
+    <button class="action-btn" onclick="openSavingsModal()">
+      <div class="action-icon" style="background:rgba(26,122,74,.1)">
+        <svg viewBox="0 0 24 24" stroke="var(--green)" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span class="action-label">Add Savings</span>
+    </button>
+    <button class="action-btn" onclick="openInvestModal()">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <span class="action-label">Add Invest</span>
+    </button>
+    <button class="action-btn" onclick="openAuthModal()">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <span class="action-label">Account</span>
+    </button>
+  </div>
+  <div class="action-row" id="action-row-budget" style="display:none">
+    <button class="action-btn" onclick="setBgtType('income');document.getElementById('bgt-amount').focus()">
+      <div class="action-icon" style="background:rgba(26,122,74,.1)">
+        <svg viewBox="0 0 24 24" stroke="var(--green)"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span class="action-label">Income</span>
+    </button>
+    <button class="action-btn" onclick="setBgtType('expense');document.getElementById('bgt-amount').focus()">
+      <div class="action-icon" style="background:rgba(192,57,43,.1)">
+        <svg viewBox="0 0 24 24" stroke="var(--red)"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span class="action-label">Expense</span>
+    </button>
+    <button class="action-btn" onclick="setBgtType('investment');document.getElementById('bgt-amount').focus()">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <span class="action-label">Invest</span>
     </button>
     <button class="action-btn" onclick="openAuthModal()">
       <div class="action-icon">
@@ -953,6 +1045,7 @@ td.td-c{text-align:center;}
   <div class="main-tabs">
     <button class="main-tab active" id="tab-portfolio" onclick="switchMainTab('portfolio')">Portfolio</button>
     <button class="main-tab" id="tab-budget" onclick="switchMainTab('budget')">Budget</button>
+    <button class="main-tab" id="tab-invest" onclick="switchMainTab('invest')">Savings & Invest</button>
   </div>
 
   <!-- ══════════ PORTFOLIO VIEW ══════════ -->
@@ -1089,27 +1182,9 @@ td.td-c{text-align:center;}
           <div class="bgt-card-val" id="bgt-total-expense">€0.00</div>
         </div>
       </div>
-      <div class="bgt-card bgt-card-balance">
-        <div class="bgt-card-icon"></div>
-        <div>
-          <div class="bgt-card-lbl">Balance</div>
-          <div class="bgt-card-val" id="bgt-balance">€0.00</div>
-        </div>
-      </div>
-      <div class="bgt-card bgt-card-savings">
-        <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
-        <div>
-          <div class="bgt-card-lbl">Investments</div>
-          <div class="bgt-card-val" id="bgt-invest-total">€0.00</div>
-        </div>
-      </div>
-      <div class="bgt-card bgt-card-pot">
-        <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-        <div>
-          <div class="bgt-card-lbl">Savings Pot</div>
-          <div class="bgt-card-val" id="bgt-pot-total">€0.00</div>
-        </div>
-      </div>
+      <span id="bgt-balance" style="display:none">€0.00</span>
+      <span id="bgt-invest-total" style="display:none">€0.00</span>
+      <span id="bgt-pot-total" style="display:none">€0.00</span>
     </div>
 
     <!-- Charts Row -->
@@ -1204,7 +1279,38 @@ td.td-c{text-align:center;}
       </div>
     </div>
 
-    <!-- ══ SAVINGS POT ══ -->
+
+  </div><!-- end view-budget -->
+
+<!-- ══════════ INVEST & SAVINGS VIEW ══════════ -->
+<div id="view-invest" style="display:none">
+
+  <!-- Summary cards: Investments + Savings Pot + Combined -->
+  <div class="bgt-summary-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="bgt-card bgt-card-savings">
+      <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <div>
+        <div class="bgt-card-lbl">Total Invested</div>
+        <div class="bgt-card-val inv-invest-mirror" id="inv-invest-total">€0.00</div>
+      </div>
+    </div>
+    <div class="bgt-card bgt-card-pot">
+      <div class="bgt-card-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div>
+        <div class="bgt-card-lbl">Savings Pot</div>
+        <div class="bgt-card-val" id="inv-sav-total">€0.00</div>
+      </div>
+    </div>
+    <div class="bgt-card" style="border:2px solid var(--border2)">
+      <div class="bgt-card-icon" style="background:var(--surface2)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <div>
+        <div class="bgt-card-lbl">Combined Total</div>
+        <div class="bgt-card-val" id="inv-combined-total" style="color:var(--green)">€0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SAVINGS POT ══ -->
     <div class="bgt-savings-section">
       <div class="sec-hdr" style="margin-bottom:14px">
         <div class="sec-title">Savings Pot</div>
@@ -1281,7 +1387,7 @@ td.td-c{text-align:center;}
     <!-- ══ INVESTMENT GROWTH CHART ══ -->
     <div class="bgt-savings-section" style="animation:fadeUp .5s .3s ease both">
       <div class="sec-hdr" style="margin-bottom:14px">
-        <div class="sec-title">📈 Investment Growth</div>
+        <div class="sec-title">Investment Growth</div>
         <div style="display:flex;gap:5px;align-items:center">
           <button class="dca-range-btn active" id="inv-chart-month" onclick="setInvChartMode('month')">Month</button>
           <button class="dca-range-btn" id="inv-chart-all" onclick="setInvChartMode('all')">All Time</button>
@@ -1291,13 +1397,14 @@ td.td-c{text-align:center;}
       <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap" id="invest-chart-legend"></div>
     </div>
 
-  </div><!-- end view-budget -->
+</div><!-- end view-invest -->
+
 
 <!-- INVESTMENT ADD MODAL -->
 <div class="overlay hidden" id="invest-modal">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd">
-      <span class="modal-title">📈 Add Investment</span>
+      <span class="modal-title">Add Investment</span>
       <button class="modal-x" onclick="closeInvestModal()">✕</button>
     </div>
     <div class="modal-bd">
@@ -1312,11 +1419,11 @@ td.td-c{text-align:center;}
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="invest-type-grid">
-          <button class="bgt-cat-btn active" data-itype="stocks" style="border-color:var(--accent);color:var(--accent2);background:rgba(108,99,255,.1)" onclick="selectInvestType(this,'stocks')">📊 Stocks</button>
-          <button class="bgt-cat-btn" data-itype="etf" onclick="selectInvestType(this,'etf')">🗂 ETF</button>
-          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectInvestType(this,'crypto')">₿ Crypto</button>
-          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectInvestType(this,'bonds')">🏛 Bonds</button>
-          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectInvestType(this,'realestate')">🏠 Real Estate</button>
+          <button class="bgt-cat-btn active" data-itype="stocks"  onclick="selectInvestType(this,'stocks')">Stocks</button>
+          <button class="bgt-cat-btn" data-itype="etf" onclick="selectInvestType(this,'etf')">ETF</button>
+          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectInvestType(this,'crypto')">Crypto</button>
+          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectInvestType(this,'bonds')">Bonds</button>
+          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectInvestType(this,'realestate')">Real Estate</button>
           <button class="bgt-cat-btn" data-itype="other" onclick="selectInvestType(this,'other')">◦ Other</button>
         </div>
       </div>
@@ -1336,7 +1443,7 @@ td.td-c{text-align:center;}
 <div class="overlay hidden" id="edit-invest-modal">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd">
-      <span class="modal-title">✏ Edit Investment</span>
+      <span class="modal-title">Edit Investment</span>
       <button class="modal-x" onclick="closeEditInvestModal()">✕</button>
     </div>
     <div class="modal-bd">
@@ -1351,11 +1458,11 @@ td.td-c{text-align:center;}
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="einvest-type-grid">
-          <button class="bgt-cat-btn" data-itype="stocks" onclick="selectEditInvestType(this,'stocks')">📊 Stocks</button>
-          <button class="bgt-cat-btn" data-itype="etf" onclick="selectEditInvestType(this,'etf')">🗂 ETF</button>
-          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectEditInvestType(this,'crypto')">₿ Crypto</button>
-          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectEditInvestType(this,'bonds')">🏛 Bonds</button>
-          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectEditInvestType(this,'realestate')">🏠 Real Estate</button>
+          <button class="bgt-cat-btn" data-itype="stocks" onclick="selectEditInvestType(this,'stocks')">Stocks</button>
+          <button class="bgt-cat-btn" data-itype="etf" onclick="selectEditInvestType(this,'etf')">ETF</button>
+          <button class="bgt-cat-btn" data-itype="crypto" onclick="selectEditInvestType(this,'crypto')">Crypto</button>
+          <button class="bgt-cat-btn" data-itype="bonds" onclick="selectEditInvestType(this,'bonds')">Bonds</button>
+          <button class="bgt-cat-btn" data-itype="realestate" onclick="selectEditInvestType(this,'realestate')">Real Estate</button>
           <button class="bgt-cat-btn" data-itype="other" onclick="selectEditInvestType(this,'other')">◦ Other</button>
         </div>
       </div>
@@ -1375,7 +1482,7 @@ td.td-c{text-align:center;}
 <div class="overlay hidden" id="sav-modal">
   <div class="modal" style="max-width:380px">
     <div class="modal-hd">
-      <span class="modal-title">🏦 Add to Savings</span>
+      <span class="modal-title">Add to Savings</span>
       <button class="modal-x" onclick="closeSavingsModal()">✕</button>
     </div>
     <div class="modal-bd">
@@ -3279,11 +3386,23 @@ document.addEventListener('keydown',e=>{
 // MAIN TAB SWITCHING
 // ══════════════════════════════════════════
 function switchMainTab(tab) {
+  window._currentTab = tab;
   document.getElementById('view-portfolio').style.display = tab === 'portfolio' ? '' : 'none';
   document.getElementById('view-budget').style.display = tab === 'budget' ? '' : 'none';
+  const vi = document.getElementById('view-invest');
+  if (vi) vi.style.display = tab === 'invest' ? '' : 'none';
   document.getElementById('tab-portfolio').classList.toggle('active', tab === 'portfolio');
   document.getElementById('tab-budget').classList.toggle('active', tab === 'budget');
-  if (tab === 'budget') renderBudget();
+  const ti = document.getElementById('tab-invest');
+  if (ti) ti.classList.toggle('active', tab === 'invest');
+  const arp = document.getElementById('action-row-portfolio');
+  const arb = document.getElementById('action-row-budget');
+  const ari = document.getElementById('action-row-invest');
+  if (arp) arp.style.display = tab === 'portfolio' ? '' : 'none';
+  if (arb) arb.style.display = tab === 'budget' ? '' : 'none';
+  if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
+  if (tab === 'budget' || tab === 'invest') { renderBudget(); }
+  updateHero();
 }
 
 // ══════════════════════════════════════════
@@ -3522,6 +3641,23 @@ function renderBudget() {
   renderInvestments(allEntries);
   renderInvestChart(allEntries, invChartMode);
   setTimeout(() => { if(window._attachBarTooltip) window._attachBarTooltip(); }, 50);
+  setTimeout(() => {
+    // Mirror values to invest tab summary cards
+    const invTotal = document.getElementById('invest-total');
+    const savTotal = document.getElementById('sav-total');
+    const invMirror = document.getElementById('inv-invest-total');
+    const savMirror = document.getElementById('inv-sav-total');
+    const combined = document.getElementById('inv-combined-total');
+    if (invMirror && invTotal) invMirror.textContent = invTotal.textContent;
+    if (savMirror && savTotal) savMirror.textContent = savTotal.textContent;
+    if (combined && invTotal && savTotal) {
+      // parse both values and sum
+      const parse = s => parseFloat((s||'0').replace(/[^0-9.-]/g,'')) || 0;
+      const sum = parse(invTotal.textContent) + parse(savTotal.textContent);
+      combined.textContent = '€' + sum.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+    updateHero();
+  }, 60);
 }
 
 function renderBgtDonut(entries, mode) {
@@ -4427,31 +4563,85 @@ function toggleTheme() {
   if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
   try { localStorage.setItem('theme_pref', next); } catch(e) {}
 }
-// ── HERO BALANCE UPDATER ──
+// ── HERO BALANCE UPDATER (tab-aware) ──
 function updateHero() {
-  const sv = document.getElementById('sv');
-  const spnl = document.getElementById('spnl');
   const heroVal = document.getElementById('hero-val');
   const heroPnl = document.getElementById('hero-pnl');
-  if (sv && heroVal && sv.textContent !== '—') {
-    const txt = sv.textContent;
-    const dotIdx = txt.lastIndexOf('.');
-    if (dotIdx > 0) {
-      heroVal.innerHTML = txt.slice(0, dotIdx) + '<span class="hero-cents">.' + txt.slice(dotIdx+1) + '</span>';
-    } else {
-      heroVal.textContent = txt;
+  const heroLabel = document.getElementById('hero-label');
+  if (!heroVal) return;
+  const tab = window._currentTab || 'portfolio';
+
+  if (tab === 'portfolio') {
+    // Show total portfolio value + unrealised P&L
+    if (heroLabel) heroLabel.textContent = 'Portfolio Value';
+    const sv = document.getElementById('sv');
+    if (sv && sv.textContent && sv.textContent !== '—') {
+      const txt = sv.textContent;
+      const dotIdx = txt.lastIndexOf('.');
+      if (dotIdx > 0) {
+        heroVal.innerHTML = txt.slice(0, dotIdx) + '<span class="hero-cents">.' + txt.slice(dotIdx+1) + '</span>';
+      } else { heroVal.textContent = txt; }
     }
-  }
-  if (spnl && heroPnl) {
-    const v = spnl.textContent;
-    if (v && v !== '—') {
-      heroPnl.textContent = v;
-      heroPnl.className = 'hero-pnl ' + (v.startsWith('-') ? 'neg' : 'pos');
-      heroPnl.style.display = '';
+    if (heroPnl) {
+      const spnl = document.getElementById('spnl');
+      const v = spnl ? spnl.textContent : '';
+      if (v && v !== '—') {
+        heroPnl.textContent = v + ' P&L';
+        heroPnl.className = 'hero-pnl ' + (v.startsWith('-') ? 'neg' : 'pos');
+        heroPnl.style.display = '';
+      } else { heroPnl.style.display = 'none'; }
+    }
+  } else if (tab === 'invest') {
+    // Invest tab: show combined investments + savings
+    if (heroLabel) heroLabel.textContent = 'Savings & Investments';
+    const combined = document.getElementById('inv-combined-total');
+    if (combined && combined.textContent && combined.textContent !== '€0.00') {
+      const txt = combined.textContent;
+      const dotIdx = txt.lastIndexOf('.');
+      if (dotIdx > 0) {
+        heroVal.innerHTML = txt.slice(0, dotIdx) + '<span class="hero-cents">.' + txt.slice(dotIdx+1) + '</span>';
+      } else { heroVal.textContent = txt; }
+    } else {
+      heroVal.textContent = '€0.00';
+    }
+    if (heroPnl) {
+      const inv = document.getElementById('inv-invest-total');
+      const sav = document.getElementById('inv-sav-total');
+      const iVal = inv ? inv.textContent : '€0';
+      const sVal = sav ? sav.textContent : '€0';
+      heroPnl.textContent = iVal + ' invested  ·  ' + sVal + ' saved';
+      heroPnl.className = 'hero-pnl pos';
+      heroPnl.style.cssText = 'display:inline-block;background:transparent;color:var(--muted);font-weight:400;font-size:12px;padding:2px 0';
+    }
+  } else {
+    // Budget tab: show balance (income - expenses)
+    if (heroLabel) heroLabel.textContent = 'Budget Balance';
+    const balEl = document.getElementById('bgt-balance');
+    if (balEl && balEl.textContent && balEl.textContent !== '€0.00') {
+      const txt = balEl.textContent;
+      const dotIdx = txt.lastIndexOf('.');
+      if (dotIdx > 0) {
+        heroVal.innerHTML = txt.slice(0, dotIdx) + '<span class="hero-cents">.' + txt.slice(dotIdx+1) + '</span>';
+      } else { heroVal.textContent = txt; }
+    } else {
+      heroVal.textContent = '€0.00';
+    }
+    // Sub: show income vs expense summary
+    if (heroPnl) {
+      const inc = document.getElementById('bgt-total-income');
+      const exp = document.getElementById('bgt-total-expense');
+      const iVal = inc ? inc.textContent : '€0';
+      const eVal = exp ? exp.textContent : '€0';
+      if (iVal && eVal) {
+        heroPnl.textContent = iVal + ' in  ·  ' + eVal + ' out';
+        heroPnl.className = 'hero-pnl pos';
+        heroPnl.style.cssText = 'display:inline-block;background:transparent;color:var(--muted);font-weight:400;font-size:12px;padding:2px 0';
+      } else { heroPnl.style.display = 'none'; }
     }
   }
 }
 (function(){
+  window._currentTab = 'portfolio';
   try {
     const saved = localStorage.getItem('theme_pref') || 'light';
     if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
