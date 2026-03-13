@@ -2246,8 +2246,8 @@ async function fetchPrices() {
   $('last-upd').textContent='Updated '+now();
   renderHoldings(false);
   renderWL();
-  // If portfolio tab is open, refresh live price display without re-fetching chart
-  if (window._currentTab === 'portfolio') updatePtfPriceDisplay();
+  // Always refresh live price display so stats bar (P&L, 24h, value) stay current
+  updatePtfPriceDisplay();
 }
 
 function priceOf(h) {
@@ -2295,9 +2295,20 @@ function rebuildTicker() {
   track.style.animation=`ticker-scroll ${Math.max(40,all.length*3.5)}s linear infinite`;
 }
 async function manualRefresh(){
-  const btn=$('btn-refresh'); btn.disabled=true; btn.classList.add('spinning');
-  try{ await Promise.all([fetchPrices(),fetchTicker()]); }
-  finally{ btn.disabled=false; btn.classList.remove('spinning'); }
+  // Target all refresh buttons (header action button + side-menu button)
+  const btns = [document.getElementById('action-refresh'), document.getElementById('btn-refresh')].filter(Boolean);
+  btns.forEach(b => { b.disabled = true; b.classList.add('spinning'); });
+  try{
+    await Promise.all([fetchPrices(), fetchTicker()]);
+    // If on portfolio tab, also refresh the live price chart display and the graph
+    if (window._currentTab === 'portfolio') {
+      updatePtfPriceDisplay();
+      // Re-fetch chart candles to get latest data on the graph
+      if (_ptfActiveCoin) loadPtfChartData();
+    }
+  } finally{
+    btns.forEach(b => { b.disabled = false; b.classList.remove('spinning'); });
+  }
 }
 
 // ══════════════════════════════════════════
