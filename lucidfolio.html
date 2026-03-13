@@ -733,7 +733,7 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 .ptf-ab-icon{width:44px;height:44px;border-radius:14px;background:var(--surface2);display:flex;align-items:center;justify-content:center;}
 .ptf-ab-icon svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 
-/* ── HEADER DROPDOWN MENU ── */
+/* ── HEADER DROPDOWN MENU (legacy — panel now in side-panel) ── */
 .hdr-menu-wrap{position:relative;}
 .hdr-menu-btn{
   position:relative;
@@ -766,6 +766,35 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 .hdr-drop-item:hover{background:var(--surface2);color:var(--text);}
 .hdr-drop-cur{display:flex;background:var(--surface2);border-radius:16px;padding:2px;gap:2px;margin:2px 4px 4px;}
 .hdr-drop-divider{height:1px;background:var(--border);margin:4px 6px;}
+
+
+/* ── SIDE MENU NAV ITEMS ── */
+.side-menu-nav-item {
+  display:flex;align-items:center;gap:14px;
+  width:100%;background:none;border:none;
+  padding:11px 12px;border-radius:14px;
+  cursor:pointer;transition:background .14s;
+  text-align:left;color:var(--text2);font-size:13px;font-weight:500;
+}
+.side-menu-nav-item:hover, .side-menu-nav-item.active {
+  background:var(--surface2);color:var(--text);
+}
+.side-menu-nav-icon {
+  width:36px;height:36px;border-radius:10px;
+  background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:background .14s;
+}
+.side-menu-nav-item:hover .side-menu-nav-icon,
+.side-menu-nav-item.active .side-menu-nav-icon {
+  background:var(--surface3);
+}
+/* cur-btn active state inside side panel */
+#side-menu-panel .cur-btn-active, #btn-usd.active, #btn-eur.active {
+  background:var(--text) !important;
+  color:var(--bg) !important;
+  border-radius:12px;
+}
 
 /* Crosshair info bar */
 .ptf-crosshair-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);min-height:30px;}
@@ -1158,50 +1187,15 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
       </button>
     </div>
     <div class="hdr-right">
-      <div style="display:flex;align-items:center;gap:6px">
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-        <div class="hdr-menu-wrap" id="hdr-menu-wrap">
-          <button class="hdr-menu-btn" id="hdr-menu-btn" onclick="toggleHdrMenu()" aria-label="Menu">
-            <div class="sync-dot offline" id="sync-indicator" style="position:absolute;top:5px;right:5px;width:5px;height:5px;"></div>
-            <!-- Hamburger icon (3 lines) -->
-            <svg viewBox="0 0 22 16" width="17" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-              <line x1="0" y1="2" x2="22" y2="2"/>
-              <line x1="0" y1="8" x2="22" y2="8"/>
-              <line x1="0" y1="14" x2="22" y2="14"/>
-            </svg>
-          </button>
-        <div class="hdr-dropdown hidden" id="hdr-dropdown">
-          <div class="hdr-drop-section">
-            <div class="hdr-drop-label">Account</div>
-            <button class="hdr-drop-item" onclick="openAuthModal();closeHdrMenu()">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              <span id="auth-header-label">Sign In</span>
-            </button>
-          </div>
-          <div class="hdr-drop-divider"></div>
-          <div class="hdr-drop-section">
-            <div class="hdr-drop-label">Currency</div>
-            <div class="hdr-drop-cur">
-              <button class="cur-btn" id="btn-usd" onclick="setCur('USD')">USD</button>
-              <button class="cur-btn" id="btn-eur" onclick="setCur('EUR')">EUR</button>
-            </div>
-          </div>
-          <div class="hdr-drop-divider"></div>
-          <div class="hdr-drop-section">
-            <div class="hdr-drop-label">Display</div>
-            <button class="hdr-drop-item" id="btn-theme" onclick="toggleTheme()">
-              <span id="theme-icon-sun">☀️</span>
-              <span id="theme-icon-moon" style="display:none">🌙</span>
-              <span id="theme-label">Light Mode</span>
-            </button>
-            <button class="hdr-drop-item" id="btn-refresh" onclick="manualRefresh();closeHdrMenu()">
-              <i class="ri" style="font-style:normal;font-size:15px">↻</i>
-              <span>Refresh Prices</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      </div><!-- end inline row -->
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="sync-dot offline" id="sync-indicator"></div>
+      <button class="hdr-menu-btn" id="hdr-menu-btn" onclick="toggleHdrMenu()" aria-label="Open menu">
+        <svg viewBox="0 0 22 16" width="18" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="0" y1="2" x2="22" y2="2"/>
+          <line x1="0" y1="8" x2="22" y2="8"/>
+          <line x1="0" y1="14" x2="22" y2="14"/>
+        </svg>
+      </button>
     </div>
   </header>
 
@@ -3618,6 +3612,7 @@ document.addEventListener('keydown',e=>{
 // ══════════════════════════════════════════
 function switchMainTab(tab) {
   window._currentTab = tab;
+  if (typeof _updateSideMenuActiveTab === 'function') _updateSideMenuActiveTab();
   document.getElementById('view-portfolio').style.display = tab === 'portfolio' ? '' : 'none';
   document.getElementById('view-budget').style.display = tab === 'budget' ? '' : 'none';
   const vi = document.getElementById('view-invest');
@@ -4999,9 +4994,8 @@ function toggleTheme() {
   const meta = document.getElementById('theme-color-meta');
   if (meta) meta.content = next === 'dark' ? '#141416' : '#efede8';
   try { localStorage.setItem('theme_pref', next); } catch(e) {}
-  // Update dropdown label
-  const lbl = document.getElementById('theme-label');
-  if (lbl) lbl.textContent = next === 'dark' ? 'Dark Mode' : 'Light Mode';
+  // Update side menu label
+  if (typeof _updateThemeLabel === 'function') _updateThemeLabel();
 }
 // ── HERO BALANCE UPDATER (tab-aware) ──
 function updateHero() {
@@ -5586,37 +5580,59 @@ function renderPurchaseHistory() {
 }
 
 // ── Header dropdown menu ──
+// ── Side menu panel ──
 function toggleHdrMenu() {
-  const dd = document.getElementById('hdr-dropdown');
-  const overlay = document.getElementById('hdr-menu-overlay');
-  if (!dd) return;
-  const isHidden = dd.classList.contains('hidden');
-  if (isHidden) {
-    dd.classList.remove('hidden');
-    if (overlay) overlay.style.display = 'block';
+  const panel = document.getElementById('side-menu-panel');
+  const overlay = document.getElementById('side-menu-overlay');
+  if (!panel) return;
+  const isOpen = panel.style.transform === 'translateX(0%)';
+  if (isOpen) {
+    closeHdrMenu();
   } else {
-    dd.classList.add('hidden');
-    if (overlay) overlay.style.display = 'none';
+    panel.style.transform = 'translateX(0%)';
+    if (overlay) { overlay.style.display = 'block'; requestAnimationFrame(() => { overlay.style.opacity = '1'; }); }
+    document.body.style.overflow = 'hidden';
+    // Highlight current active nav item
+    _updateSideMenuActiveTab();
+    // Sync currency button state
+    _syncSideMenuCur();
   }
 }
 function closeHdrMenu() {
-  const dd = document.getElementById('hdr-dropdown');
-  const overlay = document.getElementById('hdr-menu-overlay');
-  if (dd) dd.classList.add('hidden');
-  if (overlay) overlay.style.display = 'none';
+  const panel = document.getElementById('side-menu-panel');
+  const overlay = document.getElementById('side-menu-overlay');
+  if (panel) panel.style.transform = 'translateX(100%)';
+  if (overlay) {
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 260);
+  }
+  document.body.style.overflow = '';
 }
-// Close dropdown when clicking outside (desktop)
-document.addEventListener('click', function(e) {
-  const wrap = document.getElementById('hdr-menu-wrap');
-  if (wrap && !wrap.contains(e.target)) closeHdrMenu();
-});
-// Currency buttons in dropdown should close menu after selecting
-document.addEventListener('DOMContentLoaded', function() {
-  ['btn-usd','btn-eur'].forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.addEventListener('click', () => setTimeout(closeHdrMenu, 200));
-  });
-});
+function _updateSideMenuActiveTab() {
+  const tab = window._currentTab || 'budget';
+  document.querySelectorAll('.side-menu-nav-item').forEach(btn => btn.classList.remove('active'));
+  const tabMap = { budget: 0, invest: 1, portfolio: 2 };
+  const items = document.querySelectorAll('.side-menu-nav-item');
+  const idx = tabMap[tab];
+  if (idx !== undefined && items[idx]) items[idx].classList.add('active');
+}
+function _syncSideMenuCur() {
+  const isEur = typeof S !== 'undefined' && S.currency === 'EUR';
+  const usdBtn = document.getElementById('btn-usd');
+  const eurBtn = document.getElementById('btn-eur');
+  if (usdBtn) { usdBtn.style.background = isEur ? 'none' : 'var(--text)'; usdBtn.style.color = isEur ? 'var(--muted)' : 'var(--bg)'; }
+  if (eurBtn) { eurBtn.style.background = isEur ? 'var(--text)' : 'none'; eurBtn.style.color = isEur ? 'var(--bg)' : 'var(--muted)'; }
+}
+// Also update theme label in side panel
+function _updateThemeLabel() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const lbl = document.getElementById('theme-label');
+  const sun = document.getElementById('theme-icon-sun');
+  const moon = document.getElementById('theme-icon-moon');
+  if (lbl) lbl.textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  if (sun) sun.style.display = isDark ? 'none' : 'inline';
+  if (moon) moon.style.display = isDark ? 'inline' : 'none';
+}
 // Update theme label in dropdown
 function _updateThemeLabel() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -5677,8 +5693,115 @@ init();
 
 </nav>
 
-<!-- Header menu tap-outside overlay (mobile) -->
-<div id="hdr-menu-overlay" onclick="closeHdrMenu()" style="display:none;position:fixed;inset:0;z-index:1999;background:transparent;"></div>
+
+<!-- ═══════════════════════════════════════
+     SLIDE-IN SIDE MENU PANEL
+═══════════════════════════════════════ -->
+<div id="side-menu-overlay" onclick="closeHdrMenu()" style="
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.45);
+  z-index:3000;
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  transition:opacity .25s;
+  opacity:0;
+"></div>
+
+<div id="side-menu-panel" style="
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(280px,85vw);
+  background:var(--surface);
+  z-index:3001;
+  transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow:-12px 0 50px rgba(0,0,0,.25);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+">
+  <!-- Panel header with user / close -->
+  <div style="padding:52px 22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <!-- Avatar circle -->
+      <div style="width:42px;height:42px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div id="side-menu-name" style="font-size:14px;font-weight:700;color:var(--text);">Guest</div>
+        <button onclick="openAuthModal();closeHdrMenu()" style="background:none;border:none;cursor:pointer;padding:0;font-size:11px;color:var(--accent2);font-weight:600;" id="side-menu-auth-btn">Sign In</button>
+      </div>
+    </div>
+    <button onclick="closeHdrMenu()" style="background:var(--surface2);border:1px solid var(--border);width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:18px;flex-shrink:0;">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Navigation links -->
+  <div style="flex:1;overflow-y:auto;padding:12px 10px;">
+
+    <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);padding:8px 12px 6px;">Navigate</div>
+
+    <button class="side-menu-nav-item" onclick="switchMainTab('budget');closeHdrMenu()">
+      <div class="side-menu-nav-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <span>Budget</span>
+    </button>
+
+    <button class="side-menu-nav-item" onclick="switchMainTab('invest');closeHdrMenu()">
+      <div class="side-menu-nav-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <span>Invest</span>
+    </button>
+
+    <button class="side-menu-nav-item" onclick="switchMainTab('portfolio');closeHdrMenu()">
+      <div class="side-menu-nav-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <span>Portfolio</span>
+    </button>
+
+    <div style="height:1px;background:var(--border);margin:10px 8px;"></div>
+    <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);padding:8px 12px 6px;">Settings</div>
+
+    <!-- Currency -->
+    <div style="padding:10px 12px;">
+      <div style="font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;">Currency</div>
+      <div style="display:flex;background:var(--surface2);border-radius:16px;padding:3px;gap:2px;">
+        <button id="btn-usd" onclick="setCur('USD')" style="flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:none;color:var(--muted);">USD</button>
+        <button id="btn-eur" onclick="setCur('EUR')" style="flex:1;padding:7px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:none;color:var(--muted);">EUR</button>
+      </div>
+    </div>
+
+    <!-- Theme toggle -->
+    <button class="side-menu-nav-item" id="btn-theme" onclick="toggleTheme()">
+      <div class="side-menu-nav-icon" id="theme-icon-wrap">
+        <span id="theme-icon-sun" style="font-size:16px;">☀️</span>
+        <span id="theme-icon-moon" style="font-size:16px;display:none;">🌙</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;">
+        <span id="theme-label">Light Mode</span>
+        <span style="font-size:10px;color:var(--muted);">Toggle appearance</span>
+      </div>
+    </button>
+
+    <!-- Refresh -->
+    <button class="side-menu-nav-item" id="btn-refresh" onclick="manualRefresh();closeHdrMenu()">
+      <div class="side-menu-nav-icon">
+        <i class="ri" style="font-style:normal;font-size:18px;color:var(--text2);">↻</i>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;">
+        <span>Refresh Prices</span>
+        <span style="font-size:10px;color:var(--muted);">Fetch latest data</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- Footer version -->
+  <div style="padding:14px 22px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);text-align:center;">
+    Lucidfolio · Live Portfolio Tracker
+  </div>
+</div>
 
 <!-- ══════ PURCHASE HISTORY MODAL ══════ -->
 <div class="overlay hidden" id="purchase-history-modal">
