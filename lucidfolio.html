@@ -2246,6 +2246,8 @@ async function fetchPrices() {
   $('last-upd').textContent='Updated '+now();
   renderHoldings(false);
   renderWL();
+  // If portfolio tab is open, refresh live price display without re-fetching chart
+  if (window._currentTab === 'portfolio') updatePtfPriceDisplay();
 }
 
 function priceOf(h) {
@@ -2404,7 +2406,7 @@ function confirmAddHolding() {
       buyPrice: bpUsd,
     });
   }
-  save(); closeAddModal(); fetchPrices(); renderHoldings(false);
+  save(); closeAddModal(); _ptfActiveCoin = null; fetchPrices(); renderHoldings(false);
   showToast(`✓ Added ${amtRaw} ${pendingCoin.s}`);
 }
 
@@ -2509,7 +2511,7 @@ function removeH(id){
 }
 function clearAll(){
   if(!S.holdings.length) return;
-  if(confirm('Remove all holdings?')){ S.holdings=[]; save(); renderHoldings(false); }
+  if(confirm('Remove all holdings?')){ S.holdings=[]; _ptfActiveCoin=null; save(); renderHoldings(false); }
 }
 
 function renderHoldings(changed){
@@ -2554,9 +2556,18 @@ function renderHoldings(changed){
     return;
   }
   $('chart-sec').style.display='none'; // hide old donut, use new chart
-  // Show new price chart section
+  // Show price chart section — only do full reload if not yet initialised
   const ptfSec = document.getElementById('ptf-chart-sec');
-  if (ptfSec) { ptfSec.style.display = ''; renderPtfChart(); }
+  if (ptfSec) {
+    ptfSec.style.display = '';
+    if (!_ptfActiveCoin) {
+      // First time — do full chart load
+      renderPtfChart();
+    } else {
+      // Already loaded — just refresh the live price text without re-fetching chart
+      updatePtfPriceDisplay();
+    }
+  }
 
   tbody.innerHTML=S.holdings.map((h,i)=>{
     const lp=priceOf(h);
@@ -5148,6 +5159,59 @@ function renderPtfChart() {
   }).join('');
   if (!_ptfActiveCoin && S.holdings.length) _ptfActiveCoin = S.holdings[0].coinId;
   loadPtfChartData();
+}
+
+// Lightweight refresh — updates live price + P&L text without re-fetching chart history
+function updatePtfPriceDisplay() {
+  if (!_ptfActiveCoin) return;
+  const holding = S.holdings.find(h => h.coinId === _ptfActiveCoin);
+  if (!holding) return;
+  const lp = priceOf(holding);
+  if (!lp?.usd) return; // no fresh price yet — leave existing text alone
+
+  const priceEl  = document.getElementById('ptf-chart-price');
+  const changeEl = document.getElementById('ptf-chart-change');
+  const chP      = document.getElementById('ptf-ch-price');
+  const bar      = document.getElementById('ptf-crosshair-bar');
+
+  if (priceEl)  priceEl.textContent = fmtPrice(lp.usd);
+  if (chP)      chP.textContent     = fmtPrice(lp.usd);
+  if (bar)      bar.style.display   = 'flex';
+
+  if (changeEl) {
+    const chg = lp.change24 || 0;
+    changeEl.textContent = (chg >= 0 ? '↑ ' : '↓ ') + Math.abs(chg).toFixed(2) + '% (24h)';
+    changeEl.className   = 'ptf-chart-change ' + (chg >= 0 ? 'up' : 'down');
+  }
+
+  // Also refresh the stats bar values (Total Value, Cost Basis, P&L, 24h)
+  const sv   = document.getElementById('sv');
+  const spnl = document.getElementById('spnl');
+  const s24  = document.getElementById('s24');
+  const si   = document.getElementById('si');
+  let tv = 0, ti = 0, p24base = 0;
+  S.holdings.forEach(h => {
+    const p2 = priceOf(h);
+    const p  = p2 ? p2.usd : h.buyPrice;
+    const c  = p2 ? p2.change24 : 0;
+    tv      += h.amount * p;
+    ti      += h.amount * (h.buyPrice || 0);
+    p24base += h.amount * (c !== 0 ? p / (1 + c / 100) : p);
+  });
+  const pnl  = tv - ti;
+  const pnlP = ti > 0 ? pnl / ti * 100 : 0;
+  const p24  = p24base > 0 ? (tv - p24base) / p24base * 100 : 0;
+  if (sv)   sv.textContent   = fmt(tv);
+  if (si)   si.textContent   = fmt(ti);
+  if (spnl) {
+    spnl.textContent  = (pnl >= 0 ? '+' : '') + fmt(pnl) + ' (' + (pnl >= 0 ? '+' : '') + pnlP.toFixed(2) + '%)';
+    spnl.className    = 'stat-val ' + (pnl >= 0 ? 'pos' : 'neg');
+  }
+  if (s24) {
+    s24.textContent = pctStr(p24);
+    s24.className   = 'stat-val ' + (p24 >= 0 ? 'green' : 'red');
+  }
+  updateHero();
 }
 
 function selectPtfCoin(coinId) {
