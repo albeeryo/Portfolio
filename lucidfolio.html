@@ -161,7 +161,7 @@ body{
 .wl-foot{padding:6px 10px;border-top:1px solid var(--border);}
 .btn-edit-wl{width:100%;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:5px;font-size:9px;font-weight:600;letter-spacing:.8px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
 .btn-edit-wl:hover{border-color:var(--text2);color:var(--text);}
-@media(max-width:640px){.wl-panel{width:100%;border-radius:14px 14px 0 0;border-right:1px solid var(--border);}}
+@media(max-width:640px){}
 
 /* ── MODALS ── */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:600;display:flex;align-items:flex-end;justify-content:center;padding:0;backdrop-filter:blur(6px);}
@@ -255,7 +255,7 @@ body{
 /* ─────────────────────────────────
    HEADER  — wallet-app style
 ───────────────────────────────── */
-.container{max-width:920px;margin:0 auto;padding:28px 20px 16px;position:relative;z-index:1;}
+.container{max-width:920px;margin:0 auto;padding:32px 20px 20px;position:relative;z-index:1;}
 header{margin-bottom:0;animation:fadeDown .4s ease both;display:flex;align-items:center;justify-content:space-between;}
 .logo-line{display:flex;align-items:center;gap:6px;}
 .logo-dot{display:none;} /* hidden — replaced by wordmark */
@@ -368,8 +368,8 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
    STATS ROW — slim cards
 ───────────────────────────────── */
 .stats-bar{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
-  margin-bottom:24px;animation:fadeUp .4s ease both;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  margin-bottom:28px;animation:fadeUp .4s ease both;
 }
 @media(max-width:580px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
 .stat-card{background:var(--surface);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--card-shadow);}
@@ -383,7 +383,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 /* ─────────────────────────────────
    SECTION HEADERS
 ───────────────────────────────── */
-.holdings-sec{animation:fadeUp .4s .1s ease both;}
+.holdings-sec{animation:fadeUp .4s .1s ease both;margin-bottom:28px;}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .sec-title{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
 .sec-actions{display:flex;gap:6px;align-items:center;}
@@ -439,8 +439,8 @@ td.td-c{text-align:center;}
 .row-actions{display:flex;gap:3px;justify-content:center;}
 
 /* ── DONUT CHART ── */
-.chart-sec{margin-top:14px;animation:fadeUp .4s .2s ease both;}
-.chart-wrap{background:var(--surface);border-radius:var(--radius);padding:22px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow);}
+.chart-sec{margin-top:28px;animation:fadeUp .4s .2s ease both;}
+.chart-wrap{background:var(--surface);border-radius:var(--radius);padding:28px;display:flex;gap:24px;align-items:center;flex-wrap:wrap;box-shadow:var(--card-shadow);}
 .legend{display:flex;flex-direction:column;gap:12px;flex:1;min-width:120px;}
 .leg-item{display:flex;align-items:center;gap:8px;}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -450,18 +450,18 @@ td.td-c{text-align:center;}
 /* ─────────────────────────────────
    DCA / PURCHASE TRACKER
 ───────────────────────────────── */
-.dca-sec{margin-top:18px;animation:fadeUp .4s .3s ease both;}
-.dca-top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.dca-sec{margin-top:28px;animation:fadeUp .4s .3s ease both;}
+.dca-top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
 @media(max-width:640px){.dca-top-grid{grid-template-columns:1fr 1fr;}}
 @media(max-width:400px){.dca-top-grid{grid-template-columns:1fr;}}
-.dca-stat{background:var(--surface);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--card-shadow);}
+.dca-stat{background:var(--surface2);border-radius:var(--radius);padding:18px 20px;}
 .dca-coin-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
 .dca-tab{display:flex;align-items:center;gap:5px;background:var(--surface);border-radius:22px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);transition:all .15s;box-shadow:var(--card-shadow);}
 .dca-tab:hover{background:var(--surface2);}
 .dca-tab.active{background:var(--text);color:var(--bg);}
 .dca-tab img{width:14px;height:14px;border-radius:50%;object-fit:cover;}
 .dca-tab-fb{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;flex-shrink:0;}
-.dca-chart-wrap{background:var(--surface);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--card-shadow);}
+.dca-chart-wrap{background:var(--surface);border-radius:var(--radius);padding:26px;margin-bottom:20px;box-shadow:var(--card-shadow);}
 .dca-chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .dca-chart-title{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
 .dca-chart-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -569,10 +569,10 @@ td.td-c{text-align:center;}
 /* Budget hero income/expense row */
 .bgt-hero-row{
   display:flex;align-items:stretch;background:var(--surface);border-radius:var(--radius);
-  box-shadow:var(--card-shadow);margin-bottom:24px;overflow:hidden;
+  box-shadow:var(--card-shadow);margin-bottom:28px;overflow:hidden;
   animation:fadeUp .3s ease both;
 }
-.bgt-hero-card{flex:1;padding:28px 24px;text-align:center;}
+.bgt-hero-card{flex:1;padding:32px 28px;text-align:center;}
 .bgt-hero-divider{width:1px;background:var(--border);flex-shrink:0;margin:20px 0;}
 .bgt-hero-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600;margin-bottom:10px;}
 .bgt-hero-val{font-size:clamp(24px,5vw,36px);font-weight:700;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;line-height:1;}
@@ -581,13 +581,13 @@ td.td-c{text-align:center;}
 
 /* Budget sections with card style */
 .bgt-section{
-  background:var(--surface);border-radius:var(--radius);padding:24px;
-  margin-bottom:20px;box-shadow:var(--card-shadow);
+  background:var(--surface);border-radius:var(--radius);padding:28px;
+  margin-bottom:28px;box-shadow:var(--card-shadow);
   animation:fadeUp .35s ease both;
 }
 
 /* budget charts */
-.bgt-savings-section{background:var(--surface);border-radius:var(--radius);padding:24px;margin-bottom:20px;animation:fadeUp .4s .2s ease both;box-shadow:var(--card-shadow);}
+.bgt-savings-section{background:var(--surface);border-radius:var(--radius);padding:28px;margin-bottom:28px;animation:fadeUp .4s .2s ease both;box-shadow:var(--card-shadow);}
 .bgt-savings-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;padding:18px;background:var(--surface2);border-radius:14px;}
 @media(max-width:640px){.bgt-savings-overview{grid-template-columns:1fr 1fr;}}
 .bgt-savings-big{font-size:clamp(14px,2vw,19px);font-weight:700;color:var(--text);margin-top:4px;letter-spacing:-.3px;font-variant-numeric:tabular-nums;}
@@ -713,7 +713,7 @@ html, body { position: relative; }
 /* Smooth font rendering everywhere */
 * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 /* Fix potential edge jitter from border-radius on scroll */
-.bgt-card, .stat-card, .tbl-wrap, .modal, .wl-panel { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.bgt-card, .stat-card, .tbl-wrap, .modal { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 
 /* ── ANIMATIONS ── */
 @keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
@@ -781,21 +781,9 @@ html, body { position: relative; }
   </div>
 </div>
 
-<!-- TICKER -->
-<div class="ticker-wrap" style="display:none">
-  <div class="ticker-label">LIVE</div>
-  <div class="ticker-track" id="ticker-track"><span style="color:var(--muted);font-size:11px;padding:0 18px">Loading market data…</span></div>
-</div>
+<!-- ticker removed -->
 
-<!-- WATCHLIST PANEL -->
-<div class="wl-panel collapsed" id="wl-panel" style="display:none">
-  <div class="wl-head" onclick="toggleWL()">
-    <span class="wl-title">Watchlist</span>
-    <span class="wl-arrow" id="wl-arrow">▼</span>
-  </div>
-  <div class="wl-body" id="wl-body"><div class="wl-empty">Loading…</div></div>
-  <div class="wl-foot"><button class="btn-edit-wl" onclick="openWLModal()">Edit Watchlist</button></div>
-</div>
+<!-- watchlist panel removed - now inline in portfolio tab -->
 
 <!-- ══════ ADD HOLDING MODAL ══════ -->
 <div class="overlay hidden" id="add-modal">
@@ -1059,7 +1047,7 @@ html, body { position: relative; }
           <div class="sync-dot offline" id="sync-indicator"></div>
           <span id="auth-header-label">Sign In</span>
         </button>
-        <div class="cur-toggle">
+        <div class="cur-toggle" id="cur-toggle-wrap" style="display:none">
           <button class="cur-btn" id="btn-usd" onclick="setCur('USD')">USD</button>
           <button class="cur-btn" id="btn-eur" onclick="setCur('EUR')">EUR</button>
         </div>
@@ -1201,21 +1189,15 @@ html, body { position: relative; }
     </div>
   </div>
 
-  <!-- CHART -->
-  <div class="chart-sec" id="chart-sec" style="display:none">
-    <div class="sec-hdr"><div class="sec-title">Allocation</div></div>
-    <div class="chart-wrap">
-      <svg id="donut" width="140" height="140" viewBox="0 0 140 140"></svg>
-      <div class="legend" id="legend"></div>
-    </div>
-  </div>
+  <!-- allocation/chart section removed -->
 
   <!-- ══════ DCA / PURCHASE TRACKER ══════ -->
   <div class="dca-sec" id="dca-sec" style="display:none">
-    <div class="sec-hdr">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:28px;margin-bottom:0;box-shadow:var(--card-shadow)">
+    <div class="sec-hdr" style="margin-bottom:20px">
       <div class="sec-title">Purchase History</div>
       <div class="sec-actions">
-        <button class="btn-add-holding" onclick="openPurchaseModal()" style="background:var(--text),var(--accent))">+ Log Purchase</button>
+        <button class="btn-add-holding" onclick="openPurchaseModal()">+ Log Purchase</button>
       </div>
     </div>
 
@@ -1274,6 +1256,18 @@ html, body { position: relative; }
     </div>
   </div>
 
+  <!-- ══════ INLINE WATCHLIST WIDGET ══════ -->
+  <div class="bgt-section" id="inline-wl-section" style="margin-bottom:28px">
+    <div class="sec-hdr" style="margin-bottom:20px">
+      <div class="sec-title">Watchlist</div>
+      <button class="btn-add-holding" onclick="openWLModal()" style="font-size:10px;padding:6px 14px">Edit</button>
+    </div>
+    <div id="inline-wl-body">
+      <div class="bgt-tx-empty" style="padding:24px 0">No coins added yet. Tap Edit to add coins to your watchlist.</div>
+    </div>
+  </div>
+  </div><!-- close dca card wrapper -->
+
   </div><!-- end view-portfolio -->
 
   <!-- ══════════ BUDGET VIEW ══════════ -->
@@ -1302,8 +1296,7 @@ html, body { position: relative; }
       <div class="sec-hdr" style="margin-bottom:20px">
         <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <button class="dca-range-btn active" id="bgt-period-month" onclick="setBgtPeriod('month')">Month</button>
-          <button class="dca-range-btn" id="bgt-period-all" onclick="setBgtPeriod('all')">All Time</button>
+          <select id="bgt-month-select" onchange="setDonutMonth(this.value)" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:5px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;padding-right:24px;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%222.5%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 8px center"></select>
           <button class="dca-range-btn" onclick="openCatEditor()" style="border-color:var(--accent2);color:var(--accent2)">Categories</button>
         </div>
       </div>
@@ -2314,31 +2307,40 @@ function saveBuyPrices(){
 // ══════════════════════════════════════════
 function toggleWL(){
   wlCollapsed = !wlCollapsed;
-  const panel = $('wl-panel');
-  if (wlCollapsed) {
-    panel.classList.add('collapsed');
-    panel.classList.remove('open');
-  } else {
-    panel.classList.remove('collapsed');
-    panel.classList.add('open');
-  }
+  // wl-panel removed — inline watchlist used instead
 }
 function renderWL(){
-  const body=$('wl-body');
-  if(!S.watchlist.length){ body.innerHTML='<div class="wl-empty">No coins selected.</div>'; return; }
-  body.innerHTML=S.watchlist.map(sym=>{
-    const coin=COIN_BY_SYM[sym];
-    const p=prices[coin?.id||sym]||prices[sym];
-    const img=coin?coinIconHTML(coin,sym,18,'wl-icon'):
-      `<div class="wl-icon-fb" style="background:${coinColor(sym)}22;color:${coinColor(sym)}">${sym.slice(0,2)}</div>`;
-    const prStr=p?fmtPrice(p.usd):'—';
-    const chg=p?p.change24:null;
-    return `<div class="wl-item">
-      <div class="wl-left" style="display:flex;align-items:center;gap:7px">${img}<span class="wl-sym">${sym}</span></div>
-      <div class="wl-right">
-        <div class="wl-price">${prStr}</div>
-        ${chg!=null?`<div class="wl-chg ${chg>=0?'up':'down'}">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</div>`
-          :'<div style="color:var(--muted);font-size:9px">—</div>'}
+  // Legacy: kept for compat but now renders the inline widget
+  renderInlineWL();
+}
+
+function renderInlineWL(){
+  const body = document.getElementById('inline-wl-body');
+  if (!body) return;
+  if (!S.watchlist || !S.watchlist.length) {
+    body.innerHTML = '<div class="bgt-tx-empty" style="padding:24px 0">No coins added. Tap Edit to add coins.</div>';
+    return;
+  }
+  body.innerHTML = S.watchlist.map(sym => {
+    const coin = COIN_BY_SYM[sym];
+    const p = prices[coin?.id || sym] || prices[sym];
+    const color = coinColor(sym);
+    const img = coin
+      ? coinIconHTML(coin, sym, 36, 'coin-img')
+      : `<div class="coin-fb" style="background:${color}22;color:${color};display:flex">${sym.slice(0,2)}</div>`;
+    const prStr = p ? fmtPrice(p.usd) : '—';
+    const chg = p ? p.change24 : null;
+    const chgColor = chg == null ? 'var(--muted)' : chg >= 0 ? 'var(--green)' : 'var(--red)';
+    const chgStr = chg != null ? `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%` : '—';
+    return `<div class="bgt-tx-item" style="cursor:default">
+      <div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:${color}22;display:flex;align-items:center;justify-content:center;">${img}</div>
+      <div class="bgt-tx-info">
+        <div class="bgt-tx-name">${coin?.n || sym}</div>
+        <div class="bgt-tx-meta">${sym}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)">${prStr}</div>
+        <div style="font-size:11px;font-weight:600;margin-top:2px;color:${chgColor}">${chgStr}</div>
       </div>
     </div>`;
   }).join('');
@@ -2413,10 +2415,10 @@ function renderHoldings(changed){
       <div class="empty-tx">Your portfolio is empty.<br>Add your first holding to get started.</div>
       <button class="empty-cta" onclick="openAddModal()">+ Add Holding</button>
     </div></td></tr>`;
-    $('chart-sec').style.display='none';
+    if($('chart-sec'))$('chart-sec').style.display='none';
     return;
   }
-  $('chart-sec').style.display='block';
+  if($('chart-sec'))$('chart-sec').style.display='block';
 
   tbody.innerHTML=S.holdings.map((h,i)=>{
     const lp=priceOf(h);
@@ -3503,11 +3505,13 @@ function switchMainTab(tab) {
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
 
-  // Show watchlist + ticker ONLY on portfolio tab
-  const wlPanel = document.getElementById('wl-panel');
+  // Show/hide currency toggle - portfolio tab only
+  const curToggle = document.getElementById('cur-toggle-wrap');
+  if (curToggle) curToggle.style.display = tab === 'portfolio' ? '' : 'none';
+
+  // Hide ticker on all tabs
   const tickerWrap = document.querySelector('.ticker-wrap');
-  if (wlPanel) wlPanel.style.display = tab === 'portfolio' ? '' : 'none';
-  if (tickerWrap) tickerWrap.style.display = tab === 'portfolio' ? '' : 'none';
+  if (tickerWrap) tickerWrap.style.display = 'none';
 
   updateHero();
 }
@@ -3701,23 +3705,54 @@ function saveEditTx() {
 function clearBgtData() { if (!confirm('Clear all budget data?')) return; localStorage.removeItem('bgt_entries'); localStorage.removeItem('bgt_goals'); renderBudget(); }
 
 function setBgtPeriod(p) {
-  bgtPeriod = p;
-  document.getElementById('bgt-period-month').classList.toggle('active', p === 'month');
-  document.getElementById('bgt-period-all').classList.toggle('active', p === 'all');
+  bgtPeriod = p; // legacy compat
+}
+
+// Populate the month selector with months that have data + current month
+function populateMonthSelect() {
+  const sel = document.getElementById('bgt-month-select');
+  if (!sel) return;
+  const all = bgtLoad();
+  const monthsWithData = [...new Set(all.map(e => e.date ? e.date.slice(0,7) : '').filter(Boolean))].sort().reverse();
+  const now = new Date();
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  // Always include last 12 months
+  const allMonths = [];
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    allMonths.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+  }
+  const combined = [...new Set([...allMonths, ...monthsWithData])].sort().reverse();
+  const current = sel.value || currentKey;
+  sel.innerHTML = '<option value="all">All Time</option>' +
+    combined.map(k => {
+      const d = new Date(k + '-01');
+      const lbl = d.toLocaleDateString('en', { month: 'long', year: 'numeric' });
+      return `<option value="${k}" ${k === current ? 'selected' : ''}>${lbl}</option>`;
+    }).join('');
+  // Set default to current month if no selection
+  if (!sel.value || sel.value === '') sel.value = currentKey;
+  _donutMonth = sel.value;
+}
+
+let _donutMonth = null;
+function setDonutMonth(val) {
+  _donutMonth = val;
   renderBudget();
 }
 
 function getFilteredEntries() {
   const all = bgtLoad();
-  if (bgtPeriod === 'all') return all;
-  const now = new Date();
-  const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  return all.filter(e => e.date && e.date.startsWith(prefix));
+  const sel = document.getElementById('bgt-month-select');
+  const monthVal = _donutMonth || (sel ? sel.value : null);
+  if (!monthVal || monthVal === 'all') return all;
+  return all.filter(e => e.date && e.date.startsWith(monthVal));
 }
 
 function getCatById(id) { return ALL_CATS.find(c => c.id === id) || {label: id, icon: '◦', color: '#aaaacc'}; }
 
 function renderBudget() {
+  populateMonthSelect();
   const entries = getFilteredEntries();
   const allEntries = bgtLoad();
   const income  = entries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
