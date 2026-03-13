@@ -1308,30 +1308,6 @@ html { position: relative; overscroll-behavior-x: none; } body { position: relat
 
   <!-- ACTION BUTTONS — switches per tab -->
   <div class="action-row" id="action-row-portfolio" style="display:none">
-    <button class="action-btn" onclick="openAddModal()">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </div>
-      <span class="action-label">Add</span>
-    </button>
-    <button class="action-btn" onclick="openBP()">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      </div>
-      <span class="action-label">Edit</span>
-    </button>
-    <button class="action-btn" onclick="openPurchaseModal()">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
-      </div>
-      <span class="action-label">Log Buy</span>
-    </button>
-    <button class="action-btn" onclick="manualRefresh()" id="action-refresh">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-      </div>
-      <span class="action-label">Refresh</span>
-    </button>
   </div>
   <div class="action-row" id="action-row-invest" style="display:none">
     <button class="action-btn" onclick="openSavingsModal()">
@@ -2790,7 +2766,7 @@ function renderDonut(tv){
 // EDIT HOLDING MODAL
 // ══════════════════════════════════════════
 function openEditModal(id) {
-  const h = S.holdings.find(x=>x.id===id);
+  const h = S.holdings.find(x=>x.id===id||String(x.id)===String(id));
   if(!h) return;
   editingHoldingId = id;
   const coin = COIN_BY_ID[h.coinId]||COIN_BY_SYM[h.symbol];
@@ -2811,7 +2787,7 @@ function openEditModal(id) {
 }
 function closeEditModal() { $('edit-modal').classList.add('hidden'); editingHoldingId=null; }
 function saveEditHolding() {
-  const h = S.holdings.find(x=>x.id===editingHoldingId);
+  const h = S.holdings.find(x=>x.id===editingHoldingId||String(x.id)===String(editingHoldingId));
   if(!h) return;
   const amt = parseFloat($('edit-amount').value||'');
   const bp  = parseFloat($('edit-buyprice').value||'');
@@ -5751,7 +5727,7 @@ function renderPtfTxHistory() {
 
 // Delete a holding (and linked purchases/budget entries)
 function ptfDeleteHolding(id) {
-  const h = S.holdings.find(x => x.id === id);
+  const h = S.holdings.find(x => x.id === id || String(x.id) === String(id));
   if (!h) return;
   if (!confirm('Remove ' + (h.name || h.symbol) + ' from your portfolio?')) return;
   // Remove linked purchases
@@ -5760,7 +5736,7 @@ function ptfDeleteHolding(id) {
     try { const filtered = bgtLoad().filter(e => e._portfolioId !== p.id); bgtSave(filtered); } catch(e) {}
   });
   S.purchases = (S.purchases||[]).filter(p => p.coinId !== h.coinId);
-  S.holdings = S.holdings.filter(x => x.id !== id);
+  S.holdings = S.holdings.filter(x => String(x.id) !== String(id));
   save(); renderBudget(); renderPortfolio();
   showToast('✓ ' + (h.symbol || 'Holding') + ' removed');
 }
