@@ -1,0 +1,45 @@
+# ══════════════════════════════════════
+# Force HTTPS — redirect all HTTP to HTTPS
+# ══════════════════════════════════════
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ══════════════════════════════════════
+# Security Headers
+# ══════════════════════════════════════
+<IfModule mod_headers.c>
+    # Prevent clickjacking — stops your site being embedded in iframes
+    Header always set X-Frame-Options "DENY"
+
+    # Prevent MIME sniffing
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Force HTTPS for 1 year (only add after HTTPS is confirmed working)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+    # Stop referrer leaking to third parties
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Block camera, mic, location access
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ══════════════════════════════════════
+# Protect sensitive files
+# ══════════════════════════════════════
+
+# Block direct access to the PHP proxy config
+<Files "api-proxy.php">
+    # Allow the proxy to run but block directory listing
+    Options -Indexes
+</Files>
+
+# Block access to hidden files (e.g. .git, .env)
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable directory listing everywhere
+Options -Indexes
