@@ -1381,7 +1381,15 @@ html, body { overscroll-behavior-x: none; }
   <div id="wl-inline-sec" style="display:none"><div id="wl-inline-body"></div></div>
   <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
 
-  <!-- ══════ PRICE CHART SECTION (TOP) ══════ -->
+  <!-- STATS (above chart) -->
+  <div class="stats-bar" style="margin-top:0;margin-bottom:16px">
+    <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="spnl">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">24h Change</div><div class="stat-val" id="s24">—</div></div>
+  </div>
+
+  <!-- ══════ PRICE CHART SECTION ══════ -->
   <div class="ptf-chart-sec" id="ptf-chart-sec" style="display:none">
     <div class="ptf-coin-pills" id="ptf-coin-pills"></div>
     <div class="ptf-chart-card">
@@ -1398,7 +1406,6 @@ html, body { overscroll-behavior-x: none; }
           <button class="ptf-range-btn" onclick="setPtfRange('1Y')" id="ptf-range-1Y">1Y</button>
         </div>
       </div>
-      <!-- Crosshair price tooltip bar -->
       <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:none">
         <span class="ptf-ch-price" id="ptf-ch-price">—</span>
         <span class="ptf-ch-date" id="ptf-ch-date">—</span>
@@ -1406,7 +1413,6 @@ html, body { overscroll-behavior-x: none; }
       <div class="ptf-canvas-wrap">
         <canvas id="ptf-chart-canvas"></canvas>
         <div class="ptf-chart-loading" id="ptf-chart-loading" style="display:none"><div class="spin"></div></div>
-        <!-- Floating buy/sell tooltip -->
         <div class="ptf-marker-tip" id="ptf-marker-tip" style="display:none">
           <div class="ptf-mt-type" id="ptf-mt-type"></div>
           <div class="ptf-mt-row"><span class="ptf-mt-lbl">Coin</span><span class="ptf-mt-val" id="ptf-mt-coin"></span></div>
@@ -1442,42 +1448,21 @@ html, body { overscroll-behavior-x: none; }
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-bar" style="margin-top:16px">
-    <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="spnl">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">24h Change</div><div class="stat-val" id="s24">—</div></div>
-  </div>
-
   <!-- HOLDINGS -->
   <div class="holdings-sec">
     <div class="sec-hdr">
       <div class="sec-title">Holdings</div>
       <div class="sec-actions">
         <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
-        <button class="btn-add-holding" onclick="openAddModal()">+ Add Holding</button>
+        <button class="btn-add-holding" onclick="openAddModal()">+ Add</button>
         <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
         <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
       </div>
     </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Asset</th>
-            <th class="th-r">Amount</th>
-            <th class="th-r">Live Price</th>
-            <th class="th-r">24h</th>
-            <th class="th-r">Value</th>
-            <th class="th-r">P&L</th>
-            <th>Alloc.</th>
-            <th class="th-c">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="holdings-body"></tbody>
-      </table>
-    </div>
+    <!-- Card-style holdings list -->
+    <div id="holdings-body" style="display:flex;flex-direction:column;gap:0"></div>
+    <!-- Hidden table kept for any legacy JS that might target tbody -->
+    <table style="display:none"><tbody id="holdings-body-table"></tbody></table>
   </div>
 
   </div><!-- end view-portfolio -->
@@ -2601,7 +2586,7 @@ function clearAll(){
 }
 
 function renderHoldings(changed){
-  const tbody=$('holdings-body');
+  const container = document.getElementById('holdings-body');
   let tv=0,ti=0,p24base=0;
 
   S.holdings.forEach(h=>{
@@ -2631,76 +2616,146 @@ function renderHoldings(changed){
   cEl.className='stat-val '+(p24>=0?'green':'red');
 
   if(!S.holdings.length){
-    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-st">
-      <div class="empty-ic">📈</div>
-      <div class="empty-tx">Your portfolio is empty.<br>Add your first holding to get started.</div>
-      <button class="empty-cta" onclick="openAddModal()">+ Add Holding</button>
-    </div></td></tr>`;
+    container.innerHTML=`<div style="padding:40px 20px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">📈</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.7">Your portfolio is empty.<br>Add your first holding to get started.</div>
+      <button class="empty-cta" onclick="openAddModal()" style="margin-top:16px">+ Add Holding</button>
+    </div>`;
     $('chart-sec').style.display='none';
     const ptfSec = document.getElementById('ptf-chart-sec');
     if (ptfSec) ptfSec.style.display = 'none';
     return;
   }
-  $('chart-sec').style.display='none'; // hide old donut, use new chart
-  // Show new price chart section
+  $('chart-sec').style.display='none';
   const ptfSec = document.getElementById('ptf-chart-sec');
   if (ptfSec) { ptfSec.style.display = ''; renderPtfChart(); }
 
-  tbody.innerHTML=S.holdings.map((h,i)=>{
-    const lp=priceOf(h);
-    const p=lp?lp.usd:h.buyPrice;
-    const prev=lp?.prev;
-    const chg=lp?lp.change24:null;
-    const val=h.amount*p;
-    const bp=h.buyPrice||0;
-    const pnl=h.amount*(p-bp);
-    const pnlP=bp>0?(p-bp)/bp*100:0;
-    const alloc=tv>0?val/tv*100:0;
-    const col=COLORS[i%COLORS.length];
-    const fl=prev&&prev!==p?(p>prev?'fup':'fdn'):'';
-    const coin=COIN_BY_ID[h.coinId]||COIN_BY_SYM[h.symbol];
+  container.innerHTML = '';
 
-    return `<tr>
-      <td>
-        <div class="c-cell">
-          ${coinIconHTML(coin,h.symbol,32,null,'wrap')}
-          <div>
-            <div class="c-name">${h.name}</div>
-            <div class="c-sym">${h.symbol}</div>
-          </div>
+  S.holdings.forEach((h, i) => {
+    const lp = priceOf(h);
+    const p = lp ? lp.usd : h.buyPrice;
+    const chg = lp ? lp.change24 : null;
+    const val = h.amount * p;
+    const bp = h.buyPrice || 0;
+    const pnlH = h.amount * (p - bp);
+    const pnlHP = bp > 0 ? (p - bp) / bp * 100 : 0;
+    const alloc = tv > 0 ? val / tv * 100 : 0;
+    const coin = COIN_BY_ID[h.coinId] || COIN_BY_SYM[h.symbol];
+    const col = COLORS[i % COLORS.length];
+
+    // Row wrapper
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'border-bottom:1px solid var(--border)';
+
+    // Main row
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px 4px;cursor:pointer;transition:opacity .12s';
+    row.addEventListener('mouseenter', () => row.style.opacity = '0.75');
+    row.addEventListener('mouseleave', () => row.style.opacity = '1');
+
+    // Coin icon (large, circular)
+    const iconWrap = document.createElement('div');
+    iconWrap.style.cssText = `width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface3)`;
+    const url = coinImgUrl(coin);
+    if (url) {
+      const img = document.createElement('img');
+      img.src = url; img.width = 48; img.height = 48;
+      img.style.cssText = 'border-radius:50%;object-fit:cover';
+      img.onerror = function(){ this.style.display='none'; fb.style.display='flex'; };
+      const fb = document.createElement('div');
+      const coinCol = coinColor(h.symbol);
+      fb.style.cssText = `width:48px;height:48px;border-radius:50%;background:${coinCol}22;color:${coinCol};display:none;align-items:center;justify-content:center;font-size:16px;font-weight:800`;
+      fb.textContent = h.symbol.slice(0,2).toUpperCase();
+      iconWrap.appendChild(img);
+      iconWrap.appendChild(fb);
+    } else {
+      const coinCol = coinColor(h.symbol);
+      iconWrap.style.background = coinCol + '22';
+      iconWrap.style.color = coinCol;
+      iconWrap.style.fontSize = '16px';
+      iconWrap.style.fontWeight = '800';
+      iconWrap.textContent = h.symbol.slice(0,2).toUpperCase();
+    }
+
+    // Info
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    const chgHtml = chg != null
+      ? `<span style="font-size:12px;color:${chg>=0?'var(--green)':'var(--red)'};margin-left:6px">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</span>`
+      : '';
+    info.innerHTML = `<div style="font-size:16px;font-weight:600;color:var(--text)">${h.name}${chgHtml}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${h.amount.toLocaleString('en-US',{maximumFractionDigits:6})} ${h.symbol}</div>`;
+
+    // Right side
+    const right = document.createElement('div');
+    right.style.cssText = 'text-align:right;flex-shrink:0';
+    right.innerHTML = `<div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${fmt(val)}</div><div style="font-size:12px;font-weight:600;color:${pnlH>=0?'var(--green)':'var(--red)'};margin-top:3px">${pnlH>=0?'+':''}${fmt(pnlH)}</div>`;
+
+    row.appendChild(iconWrap);
+    row.appendChild(info);
+    row.appendChild(right);
+
+    // Expandable detail panel
+    const detail = document.createElement('div');
+    detail.style.cssText = 'overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1)';
+
+    const detailInner = document.createElement('div');
+    detailInner.style.cssText = 'padding:0 4px 18px';
+    const livePriceDisp = lp ? fmtPrice(p) : '—';
+    const avgBuyDisp = bp > 0 ? fmtPrice(bp) : '—';
+    detailInner.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Live Price</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${livePriceDisp}</div>
         </div>
-      </td>
-      <td class="td-r">${h.amount.toLocaleString('en-US',{maximumFractionDigits:8})}</td>
-      <td class="td-r ${fl}">${lp?fmtPrice(p):'<span style="color:var(--muted);font-size:10px">…</span>'}</td>
-      <td class="td-r">${chg!=null
-        ?`<span class="${chg>=0?'pos':'neg'}">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</span>`
-        :'<span style="color:var(--muted)">—</span>'}</td>
-      <td class="td-r">${fmt(val)}</td>
-      <td class="td-r ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${fmt(pnl)}<br>
-        <span style="font-size:9px;opacity:.7">${pnl>=0?'+':''}${pnlP.toFixed(2)}%</span></td>
-      <td>
-        <div class="alloc-w">
-          <div class="alloc-bg"><div class="alloc-fill" style="width:${alloc}%;background:${col}"></div></div>
-          <span class="alloc-p">${alloc.toFixed(1)}%</span>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Avg Buy Price</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${avgBuyDisp}</div>
         </div>
-      </td>
-      <td class="td-c">
-        <div class="row-actions">
-          <button class="btn-edit-row" title="Edit" onclick="openEditModal(${h.id})">✎</button>
-          <button class="btn-rm" title="Remove" onclick="removeH(${h.id})">✕</button>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Total Value</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${fmt(val)}</div>
         </div>
-      </td>
-    </tr>`;
-  }).join('');
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Unrealised P&L</div>
+          <div style="font-size:16px;font-weight:700;color:${pnlH>=0?'var(--green)':'var(--red)'};font-variant-numeric:tabular-nums">${pnlH>=0?'+':''}${fmt(pnlH)}<br><span style="font-size:11px;opacity:.8">${pnlH>=0?'+':''}${pnlHP.toFixed(2)}%</span></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Allocation</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${alloc.toFixed(1)}%</div>
+          <div style="height:4px;background:var(--border2);border-radius:2px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${alloc}%;background:${col};border-radius:2px"></div></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">24h Change</div>
+          <div style="font-size:16px;font-weight:700;color:${chg!=null?(chg>=0?'var(--green)':'var(--red)'):'var(--muted)'}">${chg!=null?(chg>=0?'▲ ':'▼ ')+Math.abs(chg).toFixed(2)+'%':'—'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="openEditModal(${h.id})" style="flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer">✎ Edit</button>
+        <button onclick="removeH(${h.id})" style="padding:12px 16px;background:var(--surface3);color:var(--red);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer">✕</button>
+      </div>
+    `;
+    detail.appendChild(detailInner);
+
+    // Toggle expand on row click
+    let expanded = false;
+    row.addEventListener('click', () => {
+      expanded = !expanded;
+      detail.style.maxHeight = expanded ? detail.scrollHeight + detailInner.scrollHeight + 300 + 'px' : '0';
+      row.style.opacity = '1';
+    });
+
+    wrapper.appendChild(row);
+    wrapper.appendChild(detail);
+    container.appendChild(wrapper);
+  });
 
   renderDonut(tv);
-  // DCA section hidden (replaced by new chart)
   $('dca-sec').style.display = 'none';
-  // Refresh budget investments card with latest portfolio value
   if (document.getElementById('view-budget') && document.getElementById('view-budget').style.display !== 'none') {
     renderBudget();
   } else {
-    // update just the investments card without a full re-render
     try {
       const allBgtEntries = bgtLoad();
       const loggedInvest = allBgtEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
