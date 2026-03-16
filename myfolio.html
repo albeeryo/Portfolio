@@ -4886,147 +4886,189 @@ function renderInvestChart(allEntries, mode) {
   if (!canvas || !canvas.offsetWidth) return;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth, H = 220;
+  const W = canvas.offsetWidth, H = 240;
   canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
   canvas.style.height = H + 'px';
   ctx.scale(devicePixelRatio, devicePixelRatio);
 
   const invEntries = allEntries.filter(e => e.type === 'investment');
-
-  // Build period buckets
-  let buckets = [];
   const now = new Date();
+
+  // Build buckets (cumulative running total per period)
+  let buckets = [];
   if (mode === 'month') {
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      buckets.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('en',{month:'short'}), byType: {} });
+      buckets.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('en',{month:'short'}), total: 0 });
     }
     invEntries.forEach(e => {
       const b = buckets.find(b => e.date && e.date.startsWith(b.key));
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      if (b) b.total += e.amount;
     });
   } else {
-    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].sort();
+    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].filter(Boolean).sort();
     if (!years.length) years.push(String(now.getFullYear()));
-    years.forEach(y => buckets.push({ key: y, label: y, byType: {} }));
+    years.forEach(y => buckets.push({ key: y, label: y, total: 0 }));
     invEntries.forEach(e => {
-      const y = (e.date||'').slice(0,4);
-      const b = buckets.find(b => b.key === y);
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      const b = buckets.find(b => b.key === (e.date||'').slice(0,4));
+      if (b) b.total += e.amount;
     });
   }
 
-  const allItypes = [...new Set(invEntries.map(e => e.itype || 'other'))];
-  // Cleaner color palette matching the budget chart aesthetic
-  const INVEST_COLORS = {
-    stocks:     isDark ? 'rgba(99,148,245,0.85)'  : 'rgba(79,128,225,0.9)',
-    etf:        isDark ? 'rgba(39,174,110,0.85)'  : 'rgba(39,174,110,0.9)',
-    crypto:     isDark ? 'rgba(245,190,80,0.85)'  : 'rgba(230,170,50,0.9)',
-    bonds:      isDark ? 'rgba(100,210,170,0.85)' : 'rgba(70,190,150,0.9)',
-    realestate: isDark ? 'rgba(220,130,180,0.85)' : 'rgba(200,100,160,0.9)',
-    other:      isDark ? 'rgba(160,140,220,0.85)' : 'rgba(140,120,200,0.9)',
-  };
+  // Convert to cumulative
+  let cum = 0;
+  const pts = buckets.map(b => { cum += b.total; return { label: b.label, v: cum }; });
 
-  const bucketTotals = buckets.map(b => Object.values(b.byType).reduce((s,v)=>s+v,0));
-  let cumulative = 0;
-  const cumulativeVals = bucketTotals.map(v => { cumulative += v; return cumulative; });
+  const lineColor = isDark ? '#e0e0dc' : '#111111';
+  const mutedColor = isDark ? '#505058' : '#bbbbbb';
+  const labelColor = isDark ? '#707078' : '#aaaaaa';
+  const bgColor    = isDark ? '#1e1e22' : '#ffffff';
 
-  const maxVal = Math.max(...cumulativeVals, 1);
-  const pad = { t: 24, b: 36, l: 48, r: 16 };
-  const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
-  const groupW = iW / buckets.length;
-  const barW = Math.min(16, groupW * 0.4);
+  const pad = { t: 40, b: 38, l: 16, r: 16 };
+  const iW = W - pad.l - pad.r;
+  const iH = H - pad.t - pad.b;
+  const n = pts.length;
 
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const labelColor = isDark ? '#606070' : '#aaaabc';
-  const textColor  = isDark ? '#a0a0b0' : '#666680';
+  const maxV = Math.max(...pts.map(p => p.v), 1);
+  const minV = 0;
+  const range = maxV - minV || 1;
+
+  const xOf = i => pad.l + (i / (n - 1)) * iW;
+  const yOf = v => pad.t + iH - ((v - minV) / range) * iH;
 
   ctx.clearRect(0, 0, W, H);
 
-  // Subtle horizontal grid lines
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + iH * (1 - i / 4);
-    ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
-    const val = maxVal * i / 4;
+  if (pts.every(p => p.v === 0)) {
     ctx.fillStyle = labelColor;
-    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
+    ctx.font = '13px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No investment data yet', W / 2, H / 2);
+    const legendEl = document.getElementById('invest-chart-legend');
+    if (legendEl) legendEl.innerHTML = '';
+    return;
   }
 
-  // Stacked bars — rounded tops, clean
-  buckets.forEach((b, i) => {
-    const gx = pad.l + i * groupW + groupW / 2;
-    let stackY = pad.t + iH;
-    allItypes.forEach(itype => {
-      const val = b.byType[itype] || 0;
-      if (!val) return;
-      const bh = (val / maxVal) * iH;
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const isTop = stackY - bh <= pad.t + 4;
-      ctx.fillStyle = col;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(gx - barW/2, stackY - bh, barW, bh, isTop ? [4,4,0,0] : 0);
-      else ctx.rect(gx - barW/2, stackY - bh, barW, bh);
-      ctx.fill();
-      stackY -= bh;
-    });
-    // Month label
-    ctx.fillStyle = labelColor;
-    ctx.font = '500 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(b.label, gx, pad.t + iH + 20);
+  // ── Smooth bezier helper ──
+  function smoothLine(points) {
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 0; i < points.length - 1; i++) {
+      const cp1x = points[i].x + (points[i+1].x - points[i].x) * 0.45;
+      const cp1y = points[i].y;
+      const cp2x = points[i+1].x - (points[i+1].x - points[i].x) * 0.45;
+      const cp2y = points[i+1].y;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, points[i+1].x, points[i+1].y);
+    }
+  }
+
+  const coords = pts.map((p, i) => ({ x: xOf(i), y: yOf(p.v) }));
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
+  grad.addColorStop(0, isDark ? 'rgba(224,224,220,0.15)' : 'rgba(17,17,17,0.10)');
+  grad.addColorStop(1, isDark ? 'rgba(224,224,220,0)' : 'rgba(17,17,17,0)');
+  ctx.beginPath();
+  smoothLine(coords);
+  ctx.lineTo(coords[n-1].x, pad.t + iH);
+  ctx.lineTo(coords[0].x, pad.t + iH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  smoothLine(coords);
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.setLineDash([]);
+  ctx.stroke();
+
+  // X-axis labels
+  ctx.fillStyle = labelColor;
+  ctx.font = '11px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  pts.forEach((p, i) => {
+    ctx.fillText(p.label, xOf(i), H - 10);
   });
 
-  // Cumulative growth line — clean, matches budget bar style
-  if (cumulativeVals.some(v => v > 0)) {
-    const pts = cumulativeVals.map((v, i) => ({
-      x: pad.l + i * groupW + groupW / 2,
-      y: pad.t + iH * (1 - v / maxVal)
-    }));
+  // ── Hover tooltip ──
+  canvas._invPts = coords;
+  canvas._invVals = pts;
+  canvas._invPad = pad;
+  canvas._invIW = iW;
 
-    // Smooth gradient fill under line
-    const lineColor = isDark ? 'rgba(99,148,245,1)' : 'rgba(79,128,225,1)';
-    const gradTop   = isDark ? 'rgba(99,148,245,0.15)' : 'rgba(79,128,225,0.12)';
-    const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
-    grad.addColorStop(0, gradTop);
-    grad.addColorStop(1, 'rgba(99,148,245,0)');
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pad.t + iH);
-    pts.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(pts[pts.length-1].x, pad.t + iH);
-    ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
+  if (!canvas._invBound) {
+    canvas._invBound = true;
 
-    // Line
-    ctx.beginPath();
-    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
+    function drawTooltip(idx) {
+      // Redraw base chart
+      renderInvestChart(allEntries, mode);
+      const p = canvas._invPts[idx];
+      const v = canvas._invVals[idx];
+      const pad2 = canvas._invPad;
 
-    // Clean dots
-    pts.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = lineColor; ctx.fill();
-      const bgColor = isDark ? '#111' : '#fff';
-      ctx.strokeStyle = bgColor; ctx.lineWidth = 1.5; ctx.stroke();
-    });
+      // Dashed vertical line
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x, pad2.t);
+      ctx.lineTo(p.x, pad2.t + (H - pad2.t - pad2.b));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Circle on line
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = bgColor;
+      ctx.fill();
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+
+      // Tooltip bubble
+      const label = `€${v.v.toLocaleString('en-EU', {maximumFractionDigits:0})}`;
+      ctx.font = 'bold 12px -apple-system,sans-serif';
+      const tw = ctx.measureText(label).width;
+      const bw = tw + 22, bh = 30, br = 8;
+      let bx = p.x - bw / 2;
+      const by = p.y - bh - 14;
+      bx = Math.max(pad2.l, Math.min(W - pad2.r - bw, bx));
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, br) : ctx.rect(bx, by, bw, bh);
+      ctx.fillStyle = isDark ? '#e0e0dc' : '#111111';
+      ctx.fill();
+      ctx.fillStyle = isDark ? '#111111' : '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx + bw / 2, by + bh / 2);
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    function getIdx(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const pts2 = canvas._invPts;
+      if (!pts2 || !pts2.length) return -1;
+      let best = 0, bestD = Infinity;
+      pts2.forEach((p, i) => { const d = Math.abs(p.x - cx); if (d < bestD) { bestD = d; best = i; } });
+      return best;
+    }
+
+    canvas.addEventListener('mousemove', e => { const i = getIdx(e); if (i >= 0) drawTooltip(i); });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); const i = getIdx(e); if (i >= 0) drawTooltip(i); }, { passive: false });
+    canvas.addEventListener('mouseleave', () => renderInvestChart(allEntries, mode));
+    canvas.addEventListener('touchend', () => renderInvestChart(allEntries, mode));
   }
 
-  // Legend — inline below canvas (top-right style matching budget bar)
+  // Legend
   const legendEl = document.getElementById('invest-chart-legend');
   if (legendEl) {
-    const INVEST_LABELS = { stocks:'Stocks', etf:'ETF', crypto:'Crypto', bonds:'Bonds', realestate:'Real Estate', other:'Other' };
-    legendEl.innerHTML = allItypes.map(itype => {
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const label = INVEST_LABELS[itype] || itype;
-      const total = invEntries.filter(e => (e.itype||'other') === itype).reduce((s,e)=>s+e.amount,0);
-      return `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0"></div>${label} <span style="font-weight:700;color:var(--text)">€${total.toFixed(0)}</span></div>`;
-    }).join('') + (cumulativeVals.some(v=>v>0) ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:18px;height:2px;border-radius:1px;background:${isDark?'rgba(99,148,245,1)':'rgba(79,128,225,1)'};flex-shrink:0"></div>Total Growth <span style="font-weight:700;color:var(--text)">€${(cumulativeVals[cumulativeVals.length-1]||0).toFixed(0)}</span></div>` : '');
+    const lastVal = pts[pts.length - 1]?.v || 0;
+    legendEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">Total invested <span style="font-weight:700;color:var(--text);margin-left:4px">€${lastVal.toLocaleString('en-EU',{maximumFractionDigits:0})}</span></div>`;
   }
 }
 
