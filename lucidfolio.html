@@ -1,8 +1,57 @@
+<!--
+  ═══════════════════════════════════════════════════════════
+  SERVER SECURITY HEADERS — add this to your .htaccess file
+  at /Portfolio/.htaccess or root .htaccess on sakrama.me
+  ═══════════════════════════════════════════════════════════
+
+  <IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  </IfModule>
+
+  # Force HTTPS
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  ═══════════════════════════════════════════════════════════
+  FIREBASE SECURITY RULES — paste in Firebase Console →
+  Firestore → Rules
+  ═══════════════════════════════════════════════════════════
+
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /portfolios/{userId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+    }
+  }
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<!-- ── SECURITY HEADERS ── -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://www.gstatic.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: blob: https://assets.coingecko.com https://coin-images.coingecko.com;
+  connect-src 'self' https://*.coingecko.com https://api.binance.com https://api.frankfurter.app https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  frame-ancestors 'none';
+  base-uri 'self';
+  form-action 'self';
+">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="theme-color" content="#efede8" id="theme-color-meta">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -236,7 +285,7 @@ body{
 /* ─────────────────────────────────
    HEADER  — wallet-app style
 ───────────────────────────────── */
-.container{max-width:920px;margin:0 auto;padding:28px 20px 16px;position:relative;z-index:1;}
+.container{max-width:920px;margin:0 auto;padding:16px 20px 16px;position:relative;z-index:1;}
 header{margin-bottom:0;animation:fadeDown .4s ease both;display:flex;align-items:center;justify-content:space-between;}
 .logo-line{display:flex;align-items:center;gap:6px;}
 .logo-dot{display:none;} /* hidden — replaced by wordmark */
@@ -311,7 +360,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
    HERO BALANCE — like wallet apps
 ───────────────────────────────── */
 .hero-balance{
-  text-align:center;padding:32px 20px 28px;
+  text-align:center;padding:32px 20px 16px;
   animation:fadeUp .45s ease both;
 }
 .hero-label{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.3px;margin-bottom:8px;}
@@ -327,7 +376,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 ───────────────────────────────── */
 .action-row{
   display:flex;justify-content:center;gap:32px;
-  padding:20px 20px 28px;
+  padding:16px 20px 28px;
   animation:fadeUp .4s .05s ease both;
 }
 .action-btn{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:none;cursor:pointer;transition:transform .15s;}
@@ -382,7 +431,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 ───────────────────────────────── */
 .stats-bar{
   display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
-  margin-bottom:24px;animation:fadeUp .4s ease both;
+  margin-top:4px;margin-bottom:24px;animation:fadeUp .4s ease both;
 }
 @media(max-width:580px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
 .stat-card{background:var(--surface);border-radius:var(--radius);padding:22px 20px;box-shadow:var(--card-shadow);}
@@ -396,7 +445,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 /* ─────────────────────────────────
    SECTION HEADERS
 ───────────────────────────────── */
-.holdings-sec{animation:fadeUp .4s .1s ease both;}
+.holdings-sec{animation:fadeUp .4s .1s ease both;background:var(--surface);border-radius:var(--radius);padding:20px;margin-top:16px;margin-bottom:16px;box-shadow:var(--card-shadow);}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .sec-title{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
 .sec-actions{display:flex;gap:6px;align-items:center;}
@@ -582,7 +631,7 @@ td.td-c{text-align:center;}
 /* Budget hero income/expense row */
 .bgt-hero-row{
   display:flex;align-items:stretch;background:var(--surface);border-radius:var(--radius);
-  box-shadow:var(--card-shadow);margin-bottom:24px;overflow:hidden;
+  box-shadow:var(--card-shadow);margin-top:4px;margin-bottom:24px;overflow:hidden;
   animation:fadeUp .3s ease both;
 }
 .bgt-hero-card{flex:1;padding:20px 12px;text-align:center;min-width:0;overflow:hidden;}
@@ -640,7 +689,7 @@ td.td-c{text-align:center;}
 .bgt-cat-btn.active{background:var(--text);color:var(--bg);}
 
 /* transaction rows */
-.bgt-tx-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;}
+.bgt-tx-list{display:flex;flex-direction:column;gap:0;}
 .bgt-tx-empty{font-size:13px;color:var(--muted);padding:28px;text-align:center;line-height:1.8;}
 .bgt-tx-item{display:flex;align-items:center;gap:14px;padding:15px 18px;background:var(--surface2);border-radius:14px;transition:background .1s;}
 .bgt-tx-item:hover{background:var(--surface3);}
@@ -736,7 +785,7 @@ html, body { overscroll-behavior-x: none; }
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── PORTFOLIO PRICE CHART ── */
-.ptf-chart-sec{animation:fadeUp .35s ease both;margin-top:4px;}
+.ptf-chart-sec{animation:fadeUp .35s ease both;margin-top:16px;margin-bottom:16px;}
 .ptf-coin-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .ptf-coin-pill{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid transparent;border-radius:22px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);transition:all .15s;box-shadow:var(--card-shadow);}
 .ptf-coin-pill:hover{background:var(--surface2);}
@@ -757,7 +806,7 @@ html, body { overscroll-behavior-x: none; }
 .ptf-range-btn:hover{color:var(--text);}
 .ptf-range-btn.active{background:var(--text);color:var(--bg);}
 
-.ptf-canvas-wrap{position:relative;height:260px;padding:16px 0 0;}
+.ptf-canvas-wrap{position:relative;height:290px;padding:16px 0 0;}
 #ptf-chart-canvas{width:100%;height:100%;cursor:crosshair;display:block;}
 .ptf-chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 
@@ -807,6 +856,70 @@ html, body { overscroll-behavior-x: none; }
 .ph-type-badge{display:inline-block;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-right:5px;}
 .ph-type-badge.buy{background:rgba(26,122,74,.1);color:var(--green);}
 .ph-type-badge.sell{background:rgba(192,57,43,.1);color:var(--red);}
+
+
+/* ── MONSTER CAN LOGO ── */
+.monster-btn {
+  --mc-hue: 0deg;
+  transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.monster-btn:hover { transform: scale(1.12); }
+
+.monster-img {
+  transition: filter .25s ease;
+  filter: var(--mc-filter, none);
+}
+
+/* default = original green — no filter */
+.monster-btn[data-flavor="green"]  .monster-img { filter: none; }
+/* white/silver */
+.monster-btn[data-flavor="white"]  .monster-img { filter: grayscale(1) brightness(1.6); }
+/* purple */
+.monster-btn[data-flavor="purple"] .monster-img { filter: hue-rotate(200deg) saturate(1.4) brightness(0.85); }
+/* rose/pink */
+.monster-btn[data-flavor="rose"]   .monster-img { filter: hue-rotate(270deg) saturate(1.8) brightness(0.9); }
+/* blue */
+.monster-btn[data-flavor="blue"]   .monster-img { filter: hue-rotate(160deg) saturate(1.5) brightness(0.85); }
+/* orange */
+.monster-btn[data-flavor="orange"] .monster-img { filter: hue-rotate(60deg) saturate(1.6) brightness(1.0); }
+/* red */
+.monster-btn[data-flavor="red"]    .monster-img { filter: hue-rotate(100deg) saturate(2) brightness(0.8); }
+/* black */
+.monster-btn[data-flavor="black"]  .monster-img { filter: grayscale(1) brightness(0.3); }
+/* ── BUTTON PRESS ANIMATION (scale bounce + dot) ── */
+@keyframes btn-press-bounce {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.82); }
+  70%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes btn-dot-pop {
+  0%   { transform: scale(0); opacity: 1; }
+  55%  { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.1); opacity: 0; }
+}
+.btn-press-anim {
+  position: relative;
+  animation: btn-press-bounce 0.38s cubic-bezier(.34,1.56,.64,1) forwards !important;
+}
+.btn-press-anim::after {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #3b82f6;
+  pointer-events: none;
+  z-index: 10;
+  animation: btn-dot-pop 0.42s ease forwards;
+}
+/* Ensure icon containers allow overflow for the dot */
+.nav-tab-icon, .nav-tab, .action-btn, .tab-btn, .bgt-type-btn,
+.btn-primary, .btn-cancel, .cur-btn, .hamburger-btn, .auth-btn,
+.modal-x, .hero-cur-btn, .logo-home-btn {
+  position: relative;
+}
+
 </style>
 
 </head>
@@ -1032,7 +1145,7 @@ html, body { overscroll-behavior-x: none; }
         </div>
         <div class="f-group" style="grid-column:1/-1">
           <label class="f-label">Note (optional)</label>
-          <input class="f-input" id="pm-note" type="text" placeholder="e.g. Weekly DCA">
+          <input class="f-input" id="pm-note" type="text" placeholder="e.g. Weekly DCA" maxlength="100">
         </div>
       </div>
       <div class="total-preview" id="pm-preview" style="display:none">
@@ -1058,7 +1171,7 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Description</label>
-        <input class="f-input" id="etx-desc" type="text" placeholder="Description">
+        <input class="f-input" id="etx-desc" type="text" placeholder="Description" maxlength="100">
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Category</label>
@@ -1091,7 +1204,7 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <div class="f-group" style="margin-bottom:16px">
         <label class="f-label">Description</label>
-        <input class="f-input" id="bgt-desc" type="text" placeholder="e.g. Monthly salary, Groceries…">
+        <input class="f-input" id="bgt-desc" type="text" placeholder="e.g. Monthly salary, Groceries…" maxlength="100">
       </div>
       <div class="f-group" style="margin-bottom:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -1133,7 +1246,9 @@ html, body { overscroll-behavior-x: none; }
 <!-- SLIDE-IN MENU PANEL -->
 <div class="menu-panel" id="menu-panel">
   <div class="menu-header">
-    <div class="menu-logo">LUCIDFOLIO</div>
+    <div class="menu-logo" style="display:flex;align-items:center;gap:0;">
+      <img src="data:image/png;base64,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" alt="Monster" class="monster-img" style="width:30px;height:30px;object-fit:contain;display:block;"/>
+    </div>
     <div class="menu-tagline">Live Portfolio Tracker</div>
   </div>
 
@@ -1183,14 +1298,19 @@ html, body { overscroll-behavior-x: none; }
 <div class="container">
   <header>
     <div>
-      <div class="logo-line"><div class="logo-dot"></div><h1>LUCIDFOLIO</h1></div>
+      <div class="logo-line">
+        <button onclick="switchMainTab('budget')" aria-label="Go to homepage" class="logo-home-btn monster-btn" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;min-height:unset;position:relative;">
+          <img src="data:image/png;base64,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" alt="Monster" class="monster-img" style="width:34px;height:34px;object-fit:contain;display:block;"/>
+        </button>
+      </div>
       <div class="subtitle">Live Portfolio Tracker</div>
     </div>
     <div class="hdr-right">
       <div class="hdr-controls">
-        <button class="auth-btn" id="auth-header-btn" onclick="openAuthModal()">
+        <button class="auth-btn" id="auth-header-btn" onclick="openAuthModal()" style="padding:6px 8px;gap:4px">
           <div class="sync-dot offline" id="sync-indicator"></div>
-          <span id="auth-header-label">Sign In</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span id="auth-header-label" style="display:none">Sign In</span>
         </button>
         <div class="live-badge"><div class="live-dot"></div>LIVE</div>
         <button class="hamburger-btn" id="hamburger-btn" onclick="openMenu()" aria-label="Menu">
@@ -1219,10 +1339,10 @@ html, body { overscroll-behavior-x: none; }
     <div class="hero-sub">
       <span class="hero-pnl" id="hero-pnl" style="display:none"></span>
     </div>
-    <div class="hero-currency-row">
-      <div class="hero-cur-toggle">
-        <button class="hero-cur-btn" id="hero-btn-usd" onclick="setCur('USD')">USD</button>
-        <button class="hero-cur-btn active" id="hero-btn-eur" onclick="setCur('EUR')">EUR</button>
+    <div id="ptf-cur-toggle" style="display:none;justify-content:center;margin-top:12px">
+      <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
+        <button id="ptf-btn-usd" onclick="setCur('USD')" style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;background:none;color:var(--muted)">USD</button>
+        <button id="ptf-btn-eur" onclick="setCur('EUR')" style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;background:var(--text);color:var(--bg)">EUR</button>
       </div>
     </div>
   </div>
@@ -1267,12 +1387,6 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <span class="action-label">Add Invest</span>
     </button>
-    <button class="action-btn" onclick="openAuthModal()">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </div>
-      <span class="action-label">Account</span>
-    </button>
   </div>
   <div class="action-row" id="action-row-budget">
     <button class="action-btn" onclick="openBgtModal('income')">
@@ -1287,12 +1401,6 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <span class="action-label">Expense</span>
     </button>
-    <button class="action-btn" onclick="openAuthModal()">
-      <div class="action-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </div>
-      <span class="action-label">Account</span>
-    </button>
   </div>
 
   <!-- NAV TABS (hidden, kept for JS compatibility) -->
@@ -1303,7 +1411,7 @@ html, body { overscroll-behavior-x: none; }
   </div>
 
   <!-- ══════════ PORTFOLIO VIEW ══════════ -->
-  <div id="view-portfolio" style="display:none">
+  <div id="view-portfolio" style="display:none;padding-top:8px">
 
   <!-- hidden elements kept for JS compat -->
   <div id="chart-sec" style="display:none"><svg id="donut" width="1" height="1" viewBox="0 0 140 140"></svg><div id="legend"></div></div>
@@ -1311,9 +1419,45 @@ html, body { overscroll-behavior-x: none; }
   <div id="wl-inline-sec" style="display:none"><div id="wl-inline-body"></div></div>
   <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
 
-  <!-- ══════ PRICE CHART SECTION (TOP) ══════ -->
+  <!-- STATS -->
+  <div class="bgt-hero-row" style="margin-bottom:16px">
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Total Value</div>
+      <div class="bgt-hero-val" id="sv">—</div>
+    </div>
+    <div class="bgt-hero-divider"></div>
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Cost Basis</div>
+      <div class="bgt-hero-val" id="si">—</div>
+    </div>
+    <!-- hidden for JS compat -->
+    <div style="display:none"><div class="stat-val" id="spnl"></div><div class="stat-val" id="s24"></div></div>
+  </div>
+
+  <!-- HOLDINGS -->
+  <div class="holdings-sec">
+    <div class="sec-hdr">
+      <div class="sec-title">Holdings</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-add-holding" onclick="openAddModal()" style="padding:7px 16px;font-size:12px;font-weight:600">+ Add</button>
+        <!-- overflow menu trigger -->
+        <div style="position:relative">
+          <button id="holdings-more-btn" onclick="toggleHoldingsMenu()" style="width:34px;height:34px;border-radius:50%;border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">···</button>
+          <div id="holdings-more-menu" style="display:none;position:absolute;right:0;top:42px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:150px;padding:6px;white-space:nowrap">
+            <button onclick="openBP();toggleHoldingsMenu()" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:13px;background:none;border:none;color:var(--text);cursor:pointer;border-radius:9px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">Buy Prices</button>
+            <button onclick="openPurchaseHistory();toggleHoldingsMenu()" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:13px;background:none;border:none;color:var(--text);cursor:pointer;border-radius:9px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">📋 History</button>
+            <div style="height:1px;background:var(--border);margin:4px 0"></div>
+            <button onclick="clearAll();toggleHoldingsMenu()" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:13px;background:none;border:none;color:var(--red);cursor:pointer;border-radius:9px" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="holdings-body" style="display:flex;flex-direction:column;gap:0"></div>
+    <table style="display:none"><tbody id="holdings-body-table"></tbody></table>
+  </div>
+
+  <!-- ══════ PRICE CHART SECTION ══════ -->
   <div class="ptf-chart-sec" id="ptf-chart-sec" style="display:none">
-    <div class="ptf-coin-pills" id="ptf-coin-pills"></div>
     <div class="ptf-chart-card">
       <div class="ptf-chart-header">
         <div>
@@ -1328,7 +1472,6 @@ html, body { overscroll-behavior-x: none; }
           <button class="ptf-range-btn" onclick="setPtfRange('1Y')" id="ptf-range-1Y">1Y</button>
         </div>
       </div>
-      <!-- Crosshair price tooltip bar -->
       <div class="ptf-crosshair-bar" id="ptf-crosshair-bar" style="display:none">
         <span class="ptf-ch-price" id="ptf-ch-price">—</span>
         <span class="ptf-ch-date" id="ptf-ch-date">—</span>
@@ -1336,7 +1479,6 @@ html, body { overscroll-behavior-x: none; }
       <div class="ptf-canvas-wrap">
         <canvas id="ptf-chart-canvas"></canvas>
         <div class="ptf-chart-loading" id="ptf-chart-loading" style="display:none"><div class="spin"></div></div>
-        <!-- Floating buy/sell tooltip -->
         <div class="ptf-marker-tip" id="ptf-marker-tip" style="display:none">
           <div class="ptf-mt-type" id="ptf-mt-type"></div>
           <div class="ptf-mt-row"><span class="ptf-mt-lbl">Coin</span><span class="ptf-mt-val" id="ptf-mt-coin"></span></div>
@@ -1347,73 +1489,15 @@ html, body { overscroll-behavior-x: none; }
           <div class="ptf-mt-date" id="ptf-mt-date"></div>
         </div>
       </div>
-      <div class="ptf-action-bar">
-        <button class="ptf-action-btn" onclick="showToast('Send coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
-          <span>Send</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Receive coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-          <span>Receive</span>
-        </button>
-        <button class="ptf-action-btn" onclick="openPurchaseModal()">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-          <span>Buy</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Swap coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
-          <span>Swap</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Earn coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-          <span>Earn</span>
-        </button>
-      </div>
     </div>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats-bar" style="margin-top:16px">
-    <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Unrealised P&L</div><div class="stat-val" id="spnl">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">24h Change</div><div class="stat-val" id="s24">—</div></div>
-  </div>
-
-  <!-- HOLDINGS -->
-  <div class="holdings-sec">
-    <div class="sec-hdr">
-      <div class="sec-title">Holdings</div>
-      <div class="sec-actions">
-        <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
-        <button class="btn-add-holding" onclick="openAddModal()">+ Add Holding</button>
-        <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
-        <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
-      </div>
-    </div>
-    <div class="tbl-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Asset</th>
-            <th class="th-r">Amount</th>
-            <th class="th-r">Live Price</th>
-            <th class="th-r">24h</th>
-            <th class="th-r">Value</th>
-            <th class="th-r">P&L</th>
-            <th>Alloc.</th>
-            <th class="th-c">Actions</th>
-          </tr>
-        </thead>
-        <tbody id="holdings-body"></tbody>
-      </table>
-    </div>
+    <!-- Coin selector rows -->
+    <div id="ptf-coin-pills" style="margin-top:4px"></div>
   </div>
 
   </div><!-- end view-portfolio -->
 
   <!-- ══════════ BUDGET VIEW ══════════ -->
-  <div id="view-budget">
+  <div id="view-budget" style="padding-top:8px">
 
     <!-- Hidden inputs for JS compat (used by addBgtEntry) -->
     <span id="bgt-balance" style="display:none">€0.00</span>
@@ -1433,13 +1517,15 @@ html, body { overscroll-behavior-x: none; }
       </div>
     </div>
 
-    <!-- ── EXPENSE BREAKDOWN (donut) ── -->
-    <div class="bgt-section">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap">
+    <!-- ── SPENDING BREAKDOWN ── -->
+    <div class="bgt-section" id="spending-breakdown-section">
+      <!-- Header row: title + total + controls -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;gap:10px">
         <div>
-          <div class="sec-title" id="bgt-donut-title">Expense Breakdown</div>
+          <div class="sec-title" id="bgt-donut-title">Your Spendings</div>
+          <div id="bgt-spend-total-big" style="font-size:28px;font-weight:700;letter-spacing:-.5px;color:var(--text);margin-top:2px;font-variant-numeric:tabular-nums">€0</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
           <!-- Period toggle -->
           <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
             <button style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;" id="bgt-period-month" onclick="setBgtPeriod('month')" class="bgt-period-active">Month</button>
@@ -1450,15 +1536,22 @@ html, body { overscroll-behavior-x: none; }
           </button>
         </div>
       </div>
+
+      <!-- Mini monthly bar chart -->
+      <div id="bgt-mini-bars" style="display:flex;align-items:flex-end;gap:8px;height:130px;margin:16px 0 18px;padding:0 2px;overflow-x:auto;scrollbar-width:none"></div>
+
       <!-- Expense / Income tab -->
-      <div style="display:flex;gap:2px;background:var(--surface2);border-radius:12px;padding:2px;margin-bottom:20px">
+      <div style="display:flex;gap:2px;background:var(--surface2);border-radius:12px;padding:2px;margin-bottom:16px">
         <button class="bgt-type-btn active" id="donut-btn-expense" onclick="setDonutMode('expense')" style="flex:1;padding:7px 10px;font-size:11px;border-radius:10px">Expenses</button>
         <button class="bgt-type-btn" id="donut-btn-income" onclick="setDonutMode('income')" style="flex:1;padding:7px 10px;font-size:11px;border-radius:10px">Income</button>
       </div>
-      <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
-        <svg id="bgt-donut" width="140" height="140" viewBox="0 0 130 130" style="cursor:pointer;flex-shrink:0"></svg>
-        <div class="legend" id="bgt-legend" style="flex:1;max-height:220px;overflow-y:auto"></div>
-      </div>
+
+      <!-- Category list -->
+      <div id="bgt-cat-list" style="display:flex;flex-direction:column;gap:10px"></div>
+
+      <!-- Hidden SVG kept for JS compat -->
+      <svg id="bgt-donut" width="0" height="0" viewBox="0 0 130 130" style="position:absolute;pointer-events:none;opacity:0"></svg>
+      <div id="bgt-legend" style="display:none"></div>
     </div>
 
     <!-- ── RECENT TRANSACTIONS ── -->
@@ -1477,18 +1570,13 @@ html, body { overscroll-behavior-x: none; }
       </div>
     </div>
 
-    <!-- ── MONTHLY OVERVIEW (bar chart) ── -->
-    <div class="bgt-section" style="margin-bottom:24px">
-      <div class="sec-hdr" style="margin-bottom:20px">
-        <div class="sec-title">Monthly Overview</div>
-      </div>
-      <canvas id="bgt-bar-canvas" style="width:100%;height:220px"></canvas>
-    </div>
+    <!-- bgt-bar-canvas kept hidden for JS compat -->
+    <canvas id="bgt-bar-canvas" style="display:none"></canvas>
 
   </div><!-- end view-budget -->
 
 <!-- ══════════ INVEST & SAVINGS VIEW ══════════ -->
-<div id="view-invest" style="display:none">
+<div id="view-invest" style="display:none;padding-top:8px">
   <!-- Summary hero row -->
   <div class="bgt-hero-row" style="grid-template-columns:repeat(3,1fr)">
     <div class="bgt-hero-card">
@@ -1507,8 +1595,52 @@ html, body { overscroll-behavior-x: none; }
     </div>
   </div>
 
-<!-- ══ SAVINGS POT ══ -->
-    <div class="bgt-savings-section">
+<!-- ══ INVESTMENT GROWTH CHART ══ -->
+    <div class="bgt-savings-section" style="animation:fadeUp .5s .2s ease both">
+      <div class="sec-hdr" style="margin-bottom:14px">
+        <div class="sec-title">Investment Growth</div>
+        <div style="display:flex;gap:5px;align-items:center">
+          <button class="dca-range-btn active" id="inv-chart-month" onclick="setInvChartMode('month')">Month</button>
+          <button class="dca-range-btn" id="inv-chart-all" onclick="setInvChartMode('all')">All Time</button>
+        </div>
+      </div>
+      <canvas id="invest-chart-canvas" style="width:100%;height:200px"></canvas>
+      <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap" id="invest-chart-legend"></div>
+    </div>
+
+    <!-- ══ INVESTMENTS ══ -->
+    <div class="bgt-savings-section" id="invest-section">
+      <div class="sec-hdr" style="margin-bottom:14px">
+        <div class="sec-title">Investments</div>
+        <button class="btn-add-holding" onclick="openInvestModal()" style="font-size:10px;padding:6px 12px">+ Add Investment</button>
+      </div>
+
+      <!-- Investments overview -->
+      <div class="bgt-savings-overview">
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">Total Invested</div>
+          <div class="bgt-savings-big" id="invest-total" style="color:var(--amber)">€0.00</div>
+        </div>
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">No. of Entries</div>
+          <div class="bgt-savings-big" id="invest-count" style="color:var(--amber)">0</div>
+        </div>
+        <div class="bgt-savings-stat">
+          <div class="bgt-card-lbl">Largest</div>
+          <div class="bgt-savings-big" id="invest-largest" style="color:var(--amber)">—</div>
+        </div>
+        <div>
+          <div class="bgt-card-lbl" style="margin-bottom:6px">This Month</div>
+          <div class="bgt-savings-big" id="invest-month" style="color:var(--accent2)">€0.00</div>
+        </div>
+      </div>
+
+      <!-- Investment transactions -->
+      <div id="invest-tx-list" class="bgt-tx-list" style="max-height:280px"></div>
+    </div>
+
+    <!-- ══ SAVINGS POT ══ -->
+    <div class="bgt-savings-section" style="margin-bottom:24px">
       <div class="sec-hdr" style="margin-bottom:14px">
         <div class="sec-title">Savings Pot</div>
         <button class="btn-add-holding" onclick="openSavingsModal()" style="font-size:10px;padding:6px 12px">+ Add Savings</button>
@@ -1550,50 +1682,6 @@ html, body { overscroll-behavior-x: none; }
       <div id="sav-tx-list" class="bgt-tx-list" style="max-height:260px"></div>
     </div>
 
-    <!-- ══ INVESTMENTS ══ -->
-    <div class="bgt-savings-section" id="invest-section">
-      <div class="sec-hdr" style="margin-bottom:14px">
-        <div class="sec-title">Investments</div>
-        <button class="btn-add-holding" onclick="openInvestModal()" style="font-size:10px;padding:6px 12px">+ Add Investment</button>
-      </div>
-
-      <!-- Investments overview -->
-      <div class="bgt-savings-overview">
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Total Invested</div>
-          <div class="bgt-savings-big" id="invest-total" style="color:var(--amber)">€0.00</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">No. of Entries</div>
-          <div class="bgt-savings-big" id="invest-count" style="color:var(--amber)">0</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Largest</div>
-          <div class="bgt-savings-big" id="invest-largest" style="color:var(--amber)">—</div>
-        </div>
-        <div>
-          <div class="bgt-card-lbl" style="margin-bottom:6px">This Month</div>
-          <div class="bgt-savings-big" id="invest-month" style="color:var(--accent2)">€0.00</div>
-        </div>
-      </div>
-
-      <!-- Investment transactions -->
-      <div id="invest-tx-list" class="bgt-tx-list" style="max-height:280px"></div>
-    </div>
-
-    <!-- ══ INVESTMENT GROWTH CHART ══ -->
-    <div class="bgt-savings-section" style="animation:fadeUp .5s .3s ease both;margin-bottom:24px">
-      <div class="sec-hdr" style="margin-bottom:14px">
-        <div class="sec-title">Investment Growth</div>
-        <div style="display:flex;gap:5px;align-items:center">
-          <button class="dca-range-btn active" id="inv-chart-month" onclick="setInvChartMode('month')">Month</button>
-          <button class="dca-range-btn" id="inv-chart-all" onclick="setInvChartMode('all')">All Time</button>
-        </div>
-      </div>
-      <canvas id="invest-chart-canvas" style="width:100%;height:200px"></canvas>
-      <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap" id="invest-chart-legend"></div>
-    </div>
-
 </div><!-- end view-invest -->
 
 
@@ -1611,7 +1699,7 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Asset / Description</label>
-        <input class="f-input" id="invest-desc" type="text" placeholder="e.g. S&P 500 ETF, Bitcoin, Stocks…">
+        <input class="f-input" id="invest-desc" type="text" placeholder="e.g. S&amp;P 500 ETF, Bitcoin, Stocks…" maxlength="100">
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
@@ -1650,7 +1738,7 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Asset / Description</label>
-        <input class="f-input" id="einvest-desc" type="text" placeholder="e.g. S&P 500 ETF…">
+        <input class="f-input" id="einvest-desc" type="text" placeholder="e.g. S&P 500 ETF…" maxlength="100">
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Type</label>
@@ -1689,7 +1777,7 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Note (optional)</label>
-        <input class="f-input" id="sav-note" type="text" placeholder="e.g. Monthly contribution">
+        <input class="f-input" id="sav-note" type="text" placeholder="e.g. Monthly contribution" maxlength="100">
       </div>
       <div class="f-group" style="margin-bottom:10px">
         <label class="f-label">Date</label>
@@ -1851,6 +1939,45 @@ function coinIconHTML(coin, sym, size, imgCls, wrapCls) {
 // ══════════════════════════════════════════
 // CONSTANTS & STATE
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// SECURITY HELPERS
+// ══════════════════════════════════════════
+
+// Sanitize any user-entered string before injecting into innerHTML
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;');
+}
+
+// Validate and clamp numeric inputs
+function safeNum(val, min = 0, max = 1e12) {
+  const n = parseFloat(val);
+  if (isNaN(n) || !isFinite(n)) return null;
+  return Math.min(Math.max(n, min), max);
+}
+
+// Sanitize text input: strip control chars, limit length
+function safeText(val, maxLen = 120) {
+  if (!val) return '';
+  return String(val).replace(/[\x00-\x1F\x7F]/g, '').trim().slice(0, maxLen);
+}
+
+// Guard localStorage writes against quota abuse
+function safeLocalSet(key, value) {
+  try {
+    const str = typeof value === 'string' ? value : JSON.stringify(value);
+    if (str.length > 500000) { console.warn('LucidFolio: storage write too large, skipped'); return false; }
+    localStorage.setItem(key, str);
+    return true;
+  } catch(e) { console.warn('LucidFolio: localStorage write failed', e); return false; }
+}
+
 const CG_KEY     = 'CG-vUyUd14raQgJohVNCfawiSUS';
 const STORE      = 'cfolio_v12';
 const COLORS     = ['#22d3a0','#38bdf8','#ffd700','#ff6b6b','#a78bfa','#fb923c','#34d399','#f472b6','#60a5fa','#facc15'];
@@ -2022,12 +2149,27 @@ function showAuthSuccess(msg) {
   if (errEl) errEl.classList.remove('show');
 }
 
+// ── Auth rate limiting (client-side guard) ──
+const _authAttempts = { count: 0, lockedUntil: 0 };
+
 async function doEmailAuth() {
   if (!_fbAuth) { showAuthErr('Still loading… try again in a moment.'); return; }
+
+  // Client-side rate limit: max 5 attempts, then 60s lockout
+  const now = Date.now();
+  if (_authAttempts.lockedUntil > now) {
+    const secs = Math.ceil((_authAttempts.lockedUntil - now) / 1000);
+    showAuthErr(`Too many attempts. Please wait ${secs}s.`); return;
+  }
+
   const email    = document.getElementById('auth-email-inp')?.value.trim();
   const pass     = document.getElementById('auth-pass-inp')?.value;
   const isSignUp = document.getElementById('tab-signup')?.classList.contains('active');
-  if (!email || !pass) { showAuthErr('Please enter your email and password.'); return; }
+
+  // Basic email format check
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthErr('Enter a valid email address.'); return; }
+  if (!pass || pass.length < 6) { showAuthErr('Password must be at least 6 characters.'); return; }
+
   const btn = document.getElementById('auth-submit-btn');
   btn.disabled = true; btn.textContent = '…';
   try {
@@ -2036,7 +2178,13 @@ async function doEmailAuth() {
     } else {
       await window._fb.signInWithEmailAndPassword(_fbAuth, email, pass);
     }
+    _authAttempts.count = 0; // reset on success
   } catch(e) {
+    _authAttempts.count++;
+    if (_authAttempts.count >= 5) {
+      _authAttempts.lockedUntil = Date.now() + 60000;
+      _authAttempts.count = 0;
+    }
     const msg = e.code === 'auth/user-not-found'      ? 'No account found with this email.' :
                 e.code === 'auth/wrong-password'       ? 'Incorrect password.' :
                 e.code === 'auth/invalid-credential'   ? 'Incorrect email or password.' :
@@ -2145,6 +2293,24 @@ function fmtPrice(usd) {
   return s+v.toFixed(8);
 }
 function pctStr(n){ return (n>=0?'+':'')+((+n)||0).toFixed(2)+'%'; }
+function toggleHoldingsMenu() {
+  const menu = document.getElementById('holdings-more-menu');
+  if (!menu) return;
+  const isOpen = menu.style.display !== 'none';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    setTimeout(() => {
+      const close = (e) => {
+        if (!document.getElementById('holdings-more-btn')?.contains(e.target)) {
+          menu.style.display = 'none';
+          document.removeEventListener('click', close);
+        }
+      };
+      document.addEventListener('click', close);
+    }, 10);
+  }
+}
+
 function showToast(msg) {
   const t=$('toast'); t.textContent=msg; t.style.opacity='1';
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.opacity='0',2300);
@@ -2167,6 +2333,10 @@ function setCur(c) {
   const hU=$('hero-btn-usd'); const hE=$('hero-btn-eur');
   if(hU) hU.classList.toggle('active',c==='USD');
   if(hE) hE.classList.toggle('active',c==='EUR');
+  // Portfolio tab currency toggle
+  const pU=$('ptf-btn-usd'); const pE=$('ptf-btn-eur');
+  if(pU) { pU.style.background = c==='USD' ? 'var(--text)' : 'none'; pU.style.color = c==='USD' ? 'var(--bg)' : 'var(--muted)'; }
+  if(pE) { pE.style.background = c==='EUR' ? 'var(--text)' : 'none'; pE.style.color = c==='EUR' ? 'var(--bg)' : 'var(--muted)'; }
   renderHoldings(false); renderWL(); rebuildTicker();
 }
 
@@ -2343,10 +2513,10 @@ function searchCoins(q) {
   res.innerHTML=matches.map(c=>{
     const p=prices[c.id]||prices[c.s];
     const priceHtml=p?`<span class="cr-price">${fmtPrice(p.usd)}</span>`:'';
-    return `<div class="coin-result" onclick="selectCoin('${c.id}')">
+    return `<div class="coin-result" onclick="selectCoin('${esc(c.id)}')">
       ${coinIconHTML(c,c.s,26,'cr')}
-      <span class="cr-name">${c.n}</span>
-      <span class="cr-sym">${c.s}</span>
+      <span class="cr-name">${esc(c.n)}</span>
+      <span class="cr-sym">${esc(c.s)}</span>
       ${priceHtml}
     </div>`;
   }).join('');
@@ -2373,7 +2543,7 @@ function selectCoin(id) {
 
   $('selected-coin-preview').innerHTML=`<div class="selected-coin">
     ${coinIconHTML(coin,coin.s,32,'sel-coin')}
-    <span class="sel-coin-name">${coin.n} <span style="color:var(--muted);font-size:11px">${coin.s}</span></span>
+    <span class="sel-coin-name">${esc(coin.n)} <span style="color:var(--muted);font-size:11px">${esc(coin.s)}</span></span>
     <span class="sel-coin-price">${liveStr}</span>
     <button class="sel-coin-x" onclick="backToSearch()">✕</button>
   </div>`;
@@ -2392,12 +2562,12 @@ function backToSearch() {
 
 function confirmAddHolding() {
   if(!pendingCoin){ showToast('Please select a coin first.'); return; }
-  const amtRaw=parseFloat($('inp-amount').value||'');
-  if(isNaN(amtRaw)||amtRaw<=0){ showToast('Enter a valid amount.'); return; }
+  const amtRaw = safeNum($('inp-amount').value, 0.000001, 1e12);
+  if(!amtRaw){ showToast('Enter a valid amount.'); return; }
 
   const p=prices[pendingCoin.id]||prices[pendingCoin.s];
-  let bpRaw=parseFloat($('inp-buyprice').value||'');
-  if(isNaN(bpRaw)||bpRaw<=0) bpRaw=p?.usd||0;  // default to live price
+  let bpRaw = safeNum($('inp-buyprice').value, 0, 1e12);
+  if(!bpRaw) bpRaw=p?.usd||0;
   const bpUsd=S.currency==='EUR'?bpRaw/eurRate:bpRaw;
 
   // Check for duplicate — update amount if same coin already exists
@@ -2527,7 +2697,7 @@ function clearAll(){
 }
 
 function renderHoldings(changed){
-  const tbody=$('holdings-body');
+  const container = document.getElementById('holdings-body');
   let tv=0,ti=0,p24base=0;
 
   S.holdings.forEach(h=>{
@@ -2557,87 +2727,147 @@ function renderHoldings(changed){
   cEl.className='stat-val '+(p24>=0?'green':'red');
 
   if(!S.holdings.length){
-    tbody.innerHTML=`<tr><td colspan="8"><div class="empty-st">
-      <div class="empty-ic">📈</div>
-      <div class="empty-tx">Your portfolio is empty.<br>Add your first holding to get started.</div>
-      <button class="empty-cta" onclick="openAddModal()">+ Add Holding</button>
-    </div></td></tr>`;
+    container.innerHTML=`<div style="padding:40px 20px;text-align:center">
+      <div style="font-size:36px;margin-bottom:12px">📈</div>
+      <div style="color:var(--muted);font-size:14px;line-height:1.7">Your portfolio is empty.<br>Add your first holding to get started.</div>
+      <button class="empty-cta" onclick="openAddModal()" style="margin-top:16px">+ Add Holding</button>
+    </div>`;
     $('chart-sec').style.display='none';
     const ptfSec = document.getElementById('ptf-chart-sec');
     if (ptfSec) ptfSec.style.display = 'none';
     return;
   }
-  $('chart-sec').style.display='none'; // hide old donut, use new chart
-  // Show new price chart section
+  $('chart-sec').style.display='none';
   const ptfSec = document.getElementById('ptf-chart-sec');
   if (ptfSec) { ptfSec.style.display = ''; renderPtfChart(); }
 
-  tbody.innerHTML=S.holdings.map((h,i)=>{
-    const lp=priceOf(h);
-    const p=lp?lp.usd:h.buyPrice;
-    const prev=lp?.prev;
-    const chg=lp?lp.change24:null;
-    const val=h.amount*p;
-    const bp=h.buyPrice||0;
-    const pnl=h.amount*(p-bp);
-    const pnlP=bp>0?(p-bp)/bp*100:0;
-    const alloc=tv>0?val/tv*100:0;
-    const col=COLORS[i%COLORS.length];
-    const fl=prev&&prev!==p?(p>prev?'fup':'fdn'):'';
-    const coin=COIN_BY_ID[h.coinId]||COIN_BY_SYM[h.symbol];
+  container.innerHTML = '';
 
-    return `<tr>
-      <td>
-        <div class="c-cell">
-          ${coinIconHTML(coin,h.symbol,32,null,'wrap')}
-          <div>
-            <div class="c-name">${h.name}</div>
-            <div class="c-sym">${h.symbol}</div>
-          </div>
+  S.holdings.forEach((h, i) => {
+    const lp = priceOf(h);
+    const p = lp ? lp.usd : h.buyPrice;
+    const chg = lp ? lp.change24 : null;
+    const val = h.amount * p;
+    const bp = h.buyPrice || 0;
+    const pnlH = h.amount * (p - bp);
+    const pnlHP = bp > 0 ? (p - bp) / bp * 100 : 0;
+    const alloc = tv > 0 ? val / tv * 100 : 0;
+    const coin = COIN_BY_ID[h.coinId] || COIN_BY_SYM[h.symbol];
+    const col = COLORS[i % COLORS.length];
+
+    // Row wrapper
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'border-bottom:1px solid var(--border)';
+
+    // Main row
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:16px;padding:16px 4px;cursor:pointer;transition:opacity .12s';
+    row.addEventListener('mouseenter', () => row.style.opacity = '0.75');
+    row.addEventListener('mouseleave', () => row.style.opacity = '1');
+
+    // Coin icon (large, circular)
+    const iconWrap = document.createElement('div');
+    iconWrap.style.cssText = `width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--surface3)`;
+    const url = coinImgUrl(coin);
+    if (url) {
+      const img = document.createElement('img');
+      img.src = url; img.width = 48; img.height = 48;
+      img.style.cssText = 'border-radius:50%;object-fit:cover';
+      img.onerror = function(){ this.style.display='none'; fb.style.display='flex'; };
+      const fb = document.createElement('div');
+      const coinCol = coinColor(h.symbol);
+      fb.style.cssText = `width:48px;height:48px;border-radius:50%;background:${coinCol}22;color:${coinCol};display:none;align-items:center;justify-content:center;font-size:16px;font-weight:800`;
+      fb.textContent = h.symbol.slice(0,2).toUpperCase();
+      iconWrap.appendChild(img);
+      iconWrap.appendChild(fb);
+    } else {
+      const coinCol = coinColor(h.symbol);
+      iconWrap.style.background = coinCol + '22';
+      iconWrap.style.color = coinCol;
+      iconWrap.style.fontSize = '16px';
+      iconWrap.style.fontWeight = '800';
+      iconWrap.textContent = h.symbol.slice(0,2).toUpperCase();
+    }
+
+    // Info
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    const chgHtml = chg != null
+      ? `<span style="font-size:12px;color:${chg>=0?'var(--green)':'var(--red)'};margin-left:6px">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</span>`
+      : '';
+    info.innerHTML = `<div style="font-size:16px;font-weight:600;color:var(--text)">${esc(h.name)}${chgHtml}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${h.amount.toLocaleString('en-US',{maximumFractionDigits:6})} ${esc(h.symbol)}</div>`;
+
+    // Right side
+    const right = document.createElement('div');
+    right.style.cssText = 'text-align:right;flex-shrink:0';
+    right.innerHTML = `<div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${fmt(val)}</div><div style="font-size:12px;font-weight:600;color:${pnlH>=0?'var(--green)':'var(--red)'};margin-top:3px">${pnlH>=0?'+':''}${fmt(pnlH)}</div>`;
+
+    row.appendChild(iconWrap);
+    row.appendChild(info);
+    row.appendChild(right);
+
+    // Expandable detail panel
+    const detail = document.createElement('div');
+    detail.style.cssText = 'overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1)';
+
+    const detailInner = document.createElement('div');
+    detailInner.style.cssText = 'padding:0 4px 18px';
+    const livePriceDisp = lp ? fmtPrice(p) : '—';
+    const avgBuyDisp = bp > 0 ? fmtPrice(bp) : '—';
+    detailInner.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Live Price</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${livePriceDisp}</div>
         </div>
-      </td>
-      <td class="td-r">${h.amount.toLocaleString('en-US',{maximumFractionDigits:8})}</td>
-      <td class="td-r ${fl}">${lp?fmtPrice(p):'<span style="color:var(--muted);font-size:10px">…</span>'}</td>
-      <td class="td-r">${chg!=null
-        ?`<span class="${chg>=0?'pos':'neg'}">${chg>=0?'▲':'▼'} ${Math.abs(chg).toFixed(2)}%</span>`
-        :'<span style="color:var(--muted)">—</span>'}</td>
-      <td class="td-r">${fmt(val)}</td>
-      <td class="td-r ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${fmt(pnl)}<br>
-        <span style="font-size:9px;opacity:.7">${pnl>=0?'+':''}${pnlP.toFixed(2)}%</span></td>
-      <td>
-        <div class="alloc-w">
-          <div class="alloc-bg"><div class="alloc-fill" style="width:${alloc}%;background:${col}"></div></div>
-          <span class="alloc-p">${alloc.toFixed(1)}%</span>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Avg Buy Price</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${avgBuyDisp}</div>
         </div>
-      </td>
-      <td class="td-c">
-        <div class="row-actions">
-          <button class="btn-edit-row" title="Edit" onclick="openEditModal(${h.id})">✎</button>
-          <button class="btn-rm" title="Remove" onclick="removeH(${h.id})">✕</button>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Total Value</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">${fmt(val)}</div>
         </div>
-      </td>
-    </tr>`;
-  }).join('');
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Unrealised P&L</div>
+          <div style="font-size:16px;font-weight:700;color:${pnlH>=0?'var(--green)':'var(--red)'};font-variant-numeric:tabular-nums">${pnlH>=0?'+':''}${fmt(pnlH)}<br><span style="font-size:11px;opacity:.8">${pnlH>=0?'+':''}${pnlHP.toFixed(2)}%</span></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">Allocation</div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">${alloc.toFixed(1)}%</div>
+          <div style="height:4px;background:var(--border2);border-radius:2px;margin-top:8px;overflow:hidden"><div style="height:100%;width:${alloc}%;background:${col};border-radius:2px"></div></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:12px;padding:14px">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:6px">24h Change</div>
+          <div style="font-size:16px;font-weight:700;color:${chg!=null?(chg>=0?'var(--green)':'var(--red)'):'var(--muted)'}">${chg!=null?(chg>=0?'▲ ':'▼ ')+Math.abs(chg).toFixed(2)+'%':'—'}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="openEditModal(${h.id})" style="flex:1;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer">✎ Edit</button>
+        <button onclick="removeH(${h.id})" style="padding:12px 16px;background:var(--surface3);color:var(--red);border:none;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer">✕</button>
+      </div>
+    `;
+    detail.appendChild(detailInner);
+
+    // Toggle expand on row click
+    let expanded = false;
+    row.addEventListener('click', () => {
+      expanded = !expanded;
+      detail.style.maxHeight = expanded ? detail.scrollHeight + detailInner.scrollHeight + 300 + 'px' : '0';
+      row.style.opacity = '1';
+    });
+
+    wrapper.appendChild(row);
+    wrapper.appendChild(detail);
+    container.appendChild(wrapper);
+  });
 
   renderDonut(tv);
-  // DCA section hidden (replaced by new chart)
   $('dca-sec').style.display = 'none';
-  // Refresh budget investments card with latest portfolio value
+  // Sync invest tab with live portfolio value every time holdings render
+  try { renderInvestments(bgtLoad()); } catch(e) {}
   if (document.getElementById('view-budget') && document.getElementById('view-budget').style.display !== 'none') {
     renderBudget();
-  } else {
-    // update just the investments card without a full re-render
-    try {
-      const allBgtEntries = bgtLoad();
-      const loggedInvest = allBgtEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
-      const portfolioEur = tv * (eurRate || 0.92);
-      const investEl = document.getElementById('bgt-invest-total');
-      const fmtB = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      if (investEl) {
-        investEl.textContent = fmtB(loggedInvest + portfolioEur);
-        investEl.title = `Budget investments: ${fmtB(loggedInvest)} + Portfolio: ${fmtB(portfolioEur)}`;
-      }
-    } catch(e) {}
   }
 }
 
@@ -2865,7 +3095,7 @@ function confirmPurchase() {
     priceUsd: priceUsd,
     total:    total,
     date:     $('pm-date').value || new Date().toISOString().split('T')[0],
-    note:     $('pm-note').value.trim(),
+    note:     safeText($('pm-note').value, 100),
   };
   S.purchases.push(entry);
 
@@ -3660,6 +3890,9 @@ function switchMainTab(tab) {
   if (arp) arp.style.display = tab === 'portfolio' ? '' : 'none';
   if (arb) arb.style.display = tab === 'budget' ? '' : 'none';
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
+  // Show currency toggle only on portfolio tab
+  const curToggle = document.getElementById('ptf-cur-toggle');
+  if (curToggle) curToggle.style.display = tab === 'portfolio' ? 'flex' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
 
   // Show inline watchlist section only on portfolio (hidden — replaced by new chart)
@@ -3786,11 +4019,11 @@ function renderCatGrid(gridId, cats, varName, onSelect, activeCat) {
 }
 
 function addBgtEntry() {
-  const amt = parseFloat(document.getElementById('bgt-amount').value);
-  const desc = document.getElementById('bgt-desc').value.trim();
+  const amt = safeNum(document.getElementById('bgt-amount').value, 0.01, 1e9);
+  const desc = safeText(document.getElementById('bgt-desc').value, 100);
   const date = document.getElementById('bgt-date').value;
   if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
-  if (!date) { showToast('Select a date'); return; }
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Select a valid date'); return; }
   if (bgtType !== 'investment' && !bgtCat) { showToast('Select a category'); return; }
   const entries = bgtLoad();
   if (bgtType === 'investment') {
@@ -3851,12 +4084,12 @@ function closeEditTxModal() {
 }
 
 function saveEditTx() {
-  const amt = parseFloat(document.getElementById('etx-amount').value);
+  const amt = safeNum(document.getElementById('etx-amount').value, 0.01, 1e9);
   if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
   if (!_editTxCat) { showToast('Select a category'); return; }
   const date = document.getElementById('etx-date').value;
-  if (!date) { showToast('Select a date'); return; }
-  const desc = document.getElementById('etx-desc').value.trim();
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Select a valid date'); return; }
+  const desc = safeText(document.getElementById('etx-desc').value, 100);
   const entries = bgtLoad();
   const idx = entries.findIndex(e => e.id === _editTxId);
   if (idx === -1) { showToast('Entry not found'); return; }
@@ -3962,11 +4195,21 @@ function renderBudget() {
   }, 60);
 }
 
+// Rank-based bar colors: top spender → red-ish, mid → amber, low → green
+function _rankColor(rank, total) {
+  if (total <= 1) return 'var(--muted)';
+  const t = rank / (total - 1); // 0 = highest spend, 1 = lowest
+  if (t < 0.33) return '#e05555';      // top spenders: red
+  if (t < 0.66) return '#d4940a';      // mid: amber
+  return '#1a7a4a';                    // low: green
+}
+
 function renderBgtDonut(entries, mode) {
   mode = mode || 'expense';
   const filteredEntries = entries.filter(e => e.type === mode);
   const titleEl = document.getElementById('bgt-donut-title');
-  if (titleEl) titleEl.textContent = mode === 'expense' ? 'Expense Breakdown' : 'Income Breakdown';
+  if (titleEl) titleEl.textContent = mode === 'expense' ? 'Your Spendings' : 'Your Income';
+
   const byCat = {};
   const countByCat = {};
   filteredEntries.forEach(e => {
@@ -3974,82 +4217,151 @@ function renderBgtDonut(entries, mode) {
     countByCat[e.cat] = (countByCat[e.cat] || 0) + 1;
   });
   const total = Object.values(byCat).reduce((a, b) => a + b, 0);
-  const svg = document.getElementById('bgt-donut');
-  const legend = document.getElementById('bgt-legend');
-  svg.innerHTML = ''; legend.innerHTML = '';
+
+  // Update big total
+  const totalBigEl = document.getElementById('bgt-spend-total-big');
+  if (totalBigEl) totalBigEl.textContent = '€' + total.toLocaleString('en-EU', {maximumFractionDigits:0});
+
+  // Render mini monthly bar chart
+  _renderMiniBars(mode);
+
+  // Build previous-month lookup
+  const now = new Date();
+  const prevMonthKey = (() => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  })();
+  const allEntries = bgtLoad();
+  const prevByCat = {};
+  allEntries.filter(e => e.type === mode && e.date && e.date.startsWith(prevMonthKey))
+    .forEach(e => { prevByCat[e.cat] = (prevByCat[e.cat] || 0) + e.amount; });
+
+  // Render category list
+  const catList = document.getElementById('bgt-cat-list');
+  if (!catList) return;
+  catList.innerHTML = '';
   _donutSegments = [];
 
-  const R = 48, cx = 65, cy = 65, strokeW = 16;
-  const circ = 2 * Math.PI * R;
-
   if (!total) {
-    const bg = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    bg.setAttribute('cx',cx);bg.setAttribute('cy',cy);bg.setAttribute('r',R);
-    bg.setAttribute('fill','none');bg.setAttribute('stroke','#1e2235');bg.setAttribute('stroke-width',strokeW);
-    svg.appendChild(bg);
-    const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',cx);t.setAttribute('y',cy+4);t.setAttribute('text-anchor','middle');
-    t.setAttribute('fill','#444455');t.setAttribute('font-size','9');t.setAttribute('font-family','Outfit,sans-serif');
-    t.textContent='No data';svg.appendChild(t);
+    catList.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:24px 0">No ${mode} data yet.</div>`;
     return;
   }
 
   const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
-  let offset = 0;
-  let angleSoFar = 0;
+  const numCats = sorted.length;
 
-  sorted.forEach(([catId, val]) => {
+  sorted.forEach(([catId, val], idx) => {
     const cat = getCatById(catId);
     const pct = val / total;
-    const dash = pct * circ;
-    const gap  = circ - dash;
+    const count = countByCat[catId] || 0;
+    const rankColor = _rankColor(idx, numCats);
 
-    const segDeg = pct * 360;
-    _donutSegments.push({
-      startDeg: angleSoFar,
-      endDeg: angleSoFar + segDeg,
-      catId, val, pct,
-      label: cat.label,
-      icon: cat.icon,
-      color: cat.color,
-      count: countByCat[catId] || 0,
-    });
-    angleSoFar += segDeg;
+    // Previous month comparison
+    const prevVal = prevByCat[catId] || 0;
+    let diffHtml = '';
+    if (prevVal > 0) {
+      const diff = val - prevVal;
+      const diffPct = Math.round(Math.abs(diff) / prevVal * 100);
+      const isUp = diff > 0;
+      const arrow = isUp ? '▲' : '▼';
+      const diffColor = (mode === 'expense') ? (isUp ? '#e05555' : '#1a7a4a') : (isUp ? '#1a7a4a' : '#e05555');
+      diffHtml = `<span style="font-size:10px;font-weight:600;color:${diffColor};margin-left:5px">${arrow} ${diffPct}% vs last mo</span>`;
+    } else if (bgtPeriod === 'month') {
+      diffHtml = `<span style="font-size:10px;color:var(--muted);margin-left:5px">— new this month</span>`;
+    }
 
-    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx', cx);
-    circle.setAttribute('cy', cy);
-    circle.setAttribute('r', R);
-    circle.setAttribute('fill', 'none');
-    circle.setAttribute('stroke', cat.color);
-    circle.setAttribute('stroke-width', strokeW);
-    circle.setAttribute('stroke-dasharray', `${dash} ${gap}`);
-    circle.setAttribute('stroke-dashoffset', -offset);
-    circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
-    circle.setAttribute('stroke-linecap', 'butt');
-    circle.style.transition = 'stroke-width .15s, opacity .15s';
-    circle.addEventListener('mouseenter', () => { circle.setAttribute('stroke-width', strokeW + 4); circle.style.opacity = '0.9'; });
-    circle.addEventListener('mouseleave', () => { circle.setAttribute('stroke-width', strokeW); circle.style.opacity = '1'; });
-    svg.appendChild(circle);
+    _donutSegments.push({ catId, val, pct, label: cat.label, icon: cat.icon, color: cat.color, count });
 
-    offset += dash;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:14px;padding:13px 14px 18px;background:var(--surface2);border-radius:14px;transition:background .12s;cursor:default;animation:fadeUp .25s both;position:relative';
+    row.style.animationDelay = (idx * 0.04) + 's';
+    row.addEventListener('mouseenter', () => row.style.background = 'var(--surface3)');
+    row.addEventListener('mouseleave', () => row.style.background = 'var(--surface2)');
 
-    const li = document.createElement('div');
-    li.className = 'leg-item';
-    li.innerHTML = `<div class="leg-dot" style="background:${cat.color}"></div><span class="leg-name">${cat.label}</span><span class="leg-val">€${val.toFixed(0)} <span style="color:var(--muted)">${Math.round(pct*100)}%</span></span>`;
-    legend.appendChild(li);
+    const iconBox = document.createElement('div');
+    iconBox.style.cssText = `width:42px;height:42px;border-radius:50%;background:${cat.color}22;color:${cat.color};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;`;
+    iconBox.textContent = cat.icon;
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    info.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cat.label}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:2px">${count} transaction${count!==1?'s':''}${diffHtml}</div>`;
+
+    const right = document.createElement('div');
+    right.style.cssText = 'text-align:right;flex-shrink:0';
+    right.innerHTML = `<div style="font-size:15px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums">€${val.toLocaleString('en-EU',{maximumFractionDigits:0})}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${Math.round(pct*100)}%</div>`;
+
+    // Progress bar underneath — colored by rank
+    const barWrap = document.createElement('div');
+    barWrap.style.cssText = 'position:absolute;bottom:0;left:56px;right:14px;height:3px;background:var(--border2);border-radius:2px;overflow:hidden';
+    const barFill = document.createElement('div');
+    barFill.style.cssText = `height:100%;width:${Math.round(pct*100)}%;background:${rankColor};border-radius:2px;transition:width .4s ease`;
+    barWrap.appendChild(barFill);
+
+    row.appendChild(iconBox);
+    row.appendChild(info);
+    row.appendChild(right);
+    row.appendChild(barWrap);
+    catList.appendChild(row);
   });
+}
 
-  const centerLabel = mode === 'expense' ? 'expenses' : 'income';
-  const centerColor = mode === 'expense' ? 'var(--red)' : 'var(--green)';
-  const t1 = document.createElementNS('http://www.w3.org/2000/svg','text');
-  t1.setAttribute('x',cx);t1.setAttribute('y',cy-3);t1.setAttribute('text-anchor','middle');
-  t1.setAttribute('fill','#e2e5f0');t1.setAttribute('font-size','10');t1.setAttribute('font-family','Outfit,sans-serif');t1.setAttribute('font-weight','700');
-  t1.textContent='€'+total.toFixed(0);svg.appendChild(t1);
-  const t2 = document.createElementNS('http://www.w3.org/2000/svg','text');
-  t2.setAttribute('x',cx);t2.setAttribute('y',cy+11);t2.setAttribute('text-anchor','middle');
-  t2.setAttribute('fill','#5a6080');t2.setAttribute('font-size','8');t2.setAttribute('font-family','DM Mono,monospace');
-  t2.textContent=centerLabel;svg.appendChild(t2);
+function _renderMiniBars(mode) {
+  const container = document.getElementById('bgt-mini-bars');
+  if (!container) return;
+  container.innerHTML = '';
+  container.style.cssText = 'display:flex;align-items:flex-end;gap:8px;height:110px;margin:16px 0 18px;padding:0 2px;overflow-x:auto;scrollbar-width:none';
+
+  const allEntries = bgtLoad();
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleString('default', {month:'short'});
+    const val = allEntries.filter(e => e.type === mode && e.date && e.date.startsWith(key)).reduce((s,e)=>s+e.amount,0);
+    months.push({key, label, val});
+  }
+  const maxVal = Math.max(...months.map(m=>m.val), 1);
+  const currentKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  months.forEach(m => {
+    const isCurrent = m.key === currentKey;
+    // Height: scale between 38% and 100% of container so bars look substantial
+    const heightPct = m.val > 0 ? Math.round(38 + (m.val / maxVal) * 62) : 18;
+
+    const col = document.createElement('div');
+    col.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0';
+
+    const bar = document.createElement('div');
+    bar.style.cssText = `
+      width:100%;height:${heightPct}px;
+      border-radius:10px;
+      background:${isCurrent ? 'var(--accent)' : 'var(--surface3)'};
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      gap:2px;
+      transition:height .4s cubic-bezier(.34,1.1,.64,1), opacity .2s;
+      cursor:default;
+      min-height:28px;
+    `;
+    bar.addEventListener('mouseenter', () => { bar.style.opacity = '0.8'; });
+    bar.addEventListener('mouseleave', () => { bar.style.opacity = '1'; });
+
+    if (m.val > 0) {
+      const amt = document.createElement('div');
+      amt.style.cssText = `font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;color:${isCurrent ? 'var(--bg)' : 'var(--text2)'};white-space:nowrap;line-height:1`;
+      amt.textContent = '€' + (m.val >= 1000 ? (m.val/1000).toFixed(1)+'k' : m.val.toFixed(0));
+      bar.appendChild(amt);
+    }
+
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `font-size:10px;font-weight:${isCurrent?'700':'400'};color:${isCurrent?'var(--text)':'var(--muted)'};white-space:nowrap`;
+    lbl.textContent = m.label;
+
+    col.appendChild(bar);
+    col.appendChild(lbl);
+    container.appendChild(col);
+  });
 }
 
 function setDonutMode(mode) {
@@ -4059,11 +4371,11 @@ function setDonutMode(mode) {
   expBtn.classList.toggle('active', mode === 'expense');
   incBtn.classList.toggle('active', mode === 'income');
   if (mode === 'expense') {
-    expBtn.style.cssText = 'flex:1;padding:6px 10px;font-size:10px;background:var(--red);color:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(244,63,94,.3)';
-    incBtn.style.cssText = 'flex:1;padding:6px 10px;font-size:10px;border-radius:8px;background:none;color:var(--muted)';
+    expBtn.style.cssText = 'flex:1;padding:7px 10px;font-size:11px;background:var(--text);color:var(--bg);border-radius:10px;font-weight:600;border:none;cursor:pointer';
+    incBtn.style.cssText = 'flex:1;padding:7px 10px;font-size:11px;border-radius:10px;background:none;color:var(--muted);border:none;cursor:pointer';
   } else {
-    incBtn.style.cssText = 'flex:1;padding:6px 10px;font-size:10px;background:var(--green);color:#000;border-radius:8px;box-shadow:0 2px 8px rgba(34,211,160,.3)';
-    expBtn.style.cssText = 'flex:1;padding:6px 10px;font-size:10px;border-radius:8px;background:none;color:var(--muted)';
+    incBtn.style.cssText = 'flex:1;padding:7px 10px;font-size:11px;background:var(--text);color:var(--bg);border-radius:10px;font-weight:600;border:none;cursor:pointer';
+    expBtn.style.cssText = 'flex:1;padding:7px 10px;font-size:11px;border-radius:10px;background:none;color:var(--muted);border:none;cursor:pointer';
   }
   renderBgtDonut(getFilteredEntries(), mode);
 }
@@ -4287,24 +4599,80 @@ function renderBgtTransactions(entries, filter) {
   const all = [...entries].sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.id-a.id);
   const filtered = filter === 'all' ? all : all.filter(e => e.type === filter);
   if (!filtered.length) { list.innerHTML = `<div class="bgt-tx-empty">No ${filter === 'all' ? '' : filter + ' '}transactions yet.</div>`; return; }
-  list.innerHTML = '';
-  filtered.slice(0,50).forEach(e => {
-    let cat, iconStyle, amtClass, amtPrefix;
-    if (e.type === 'investment') {
-      const t = (typeof INVEST_TYPES !== 'undefined' && INVEST_TYPES[e.itype]) || { icon: '📈', color: '#fbbf24', label: 'Investment' };
-      cat = { icon: t.icon, color: t.color, label: t.label };
-      amtClass = ''; iconStyle = `background:${t.color}22;color:${t.color}`;
-      amtPrefix = '−';
-    } else {
-      cat = getCatById(e.cat);
-      iconStyle = `background:${cat.color}22;color:${cat.color}`;
-      amtClass = e.type; amtPrefix = e.type === 'income' ? '+' : '−';
+
+  const INITIAL_SHOW = 5;
+  let showingAll = false;
+
+  function renderRows(count) {
+    list.innerHTML = '';
+    filtered.slice(0, count).forEach(e => {
+      let cat, iconStyle, amtClass, amtPrefix;
+      if (e.type === 'investment') {
+        const t = (typeof INVEST_TYPES !== 'undefined' && INVEST_TYPES[e.itype]) || { icon: '📈', color: '#fbbf24', label: 'Investment' };
+        cat = { icon: t.icon, color: t.color, label: t.label };
+        amtClass = ''; iconStyle = `background:var(--surface3);color:var(--text2)`;
+        amtPrefix = '−';
+      } else {
+        cat = getCatById(e.cat);
+        iconStyle = `background:var(--surface3);color:var(--text2)`;
+        amtClass = e.type; amtPrefix = e.type === 'income' ? '+' : '−';
+      }
+
+      const item = document.createElement('div');
+      item.className = 'bgt-tx-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:16px;padding:14px 4px;background:none;border-radius:0;border-bottom:1px solid var(--border);transition:opacity .1s';
+      item.addEventListener('mouseenter', () => item.style.opacity = '0.75');
+      item.addEventListener('mouseleave', () => item.style.opacity = '1');
+
+      const iconWrap = document.createElement('div');
+      iconWrap.style.cssText = `width:46px;height:46px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;`;
+      iconWrap.textContent = cat.icon;
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = `<div style="font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(e.desc || cat.label)}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${count === 1 ? '' : ''}${esc(cat.label)} · ${esc(e.date)}</div>`;
+
+      const right = document.createElement('div');
+      right.style.cssText = 'text-align:right;flex-shrink:0';
+      const amtColor = e.type === 'income' ? 'var(--green)' : e.type === 'investment' ? 'var(--amber)' : 'var(--text)';
+      const pctOfMonthTotal = (() => {
+        try {
+          const monthEntries = bgtLoad().filter(en => en.type === e.type && en.date && en.date.slice(0,7) === (e.date||'').slice(0,7));
+          const mt = monthEntries.reduce((s,en)=>s+en.amount,0);
+          return mt > 0 ? Math.round(e.amount / mt * 100) : null;
+        } catch { return null; }
+      })();
+      right.innerHTML = `<div style="font-size:16px;font-weight:700;color:${amtColor};font-variant-numeric:tabular-nums">${amtPrefix}€${e.amount.toFixed(0)}</div>${pctOfMonthTotal !== null ? `<div style="font-size:12px;color:var(--muted);margin-top:2px">${pctOfMonthTotal}%</div>` : ''}`;
+
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:2px;align-items:center;flex-shrink:0;opacity:0;transition:opacity .15s';
+      actions.innerHTML = `<button class="btn-tx-edit" onclick="${e.type==='investment'?'openEditInvestModal':'openEditTxModal'}(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="${e.type==='investment'?'delInvestEntry':'delBgtEntry'}(${e.id})" title="Delete">✕</button>`;
+      item.addEventListener('mouseenter', () => actions.style.opacity = '1');
+      item.addEventListener('mouseleave', () => actions.style.opacity = '0');
+
+      item.appendChild(iconWrap);
+      item.appendChild(info);
+      item.appendChild(right);
+      item.appendChild(actions);
+      list.appendChild(item);
+    });
+
+    // Show more / Show less button
+    if (filtered.length > INITIAL_SHOW) {
+      const toggleBtn = document.createElement('button');
+      toggleBtn.style.cssText = 'width:100%;margin-top:14px;padding:14px;background:none;border:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:-.1px;transition:color .15s';
+      toggleBtn.textContent = showingAll ? 'Show less' : `See all (${filtered.length})`;
+      toggleBtn.addEventListener('mouseenter', () => toggleBtn.style.color = 'var(--text)');
+      toggleBtn.addEventListener('mouseleave', () => toggleBtn.style.color = 'var(--text2)');
+      toggleBtn.addEventListener('click', () => {
+        showingAll = !showingAll;
+        renderRows(showingAll ? filtered.length : INITIAL_SHOW);
+      });
+      list.appendChild(toggleBtn);
     }
-    const item = document.createElement('div');
-    item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="${iconStyle}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc||cat.label}</div><div class="bgt-tx-meta">${cat.label} · ${e.date}</div></div><div class="bgt-tx-amount ${amtClass}" style="${e.type==='investment'?'color:var(--amber)':''}">${amtPrefix}€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="${e.type==='investment'?'openEditInvestModal':'openEditTxModal'}(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="${e.type==='investment'?'delInvestEntry':'delBgtEntry'}(${e.id})" title="Delete">✕</button></div>`;
-    list.appendChild(item);
-  });
+  }
+
+  renderRows(INITIAL_SHOW);
 }
 
 // ── SAVINGS POT ──
@@ -4348,7 +4716,7 @@ function renderSavings(allEntries) {
   sorted.forEach(e => {
     const item = document.createElement('div');
     item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="background:rgba(56,189,248,.15);color:var(--accent2)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || 'Savings deposit'}</div><div class="bgt-tx-meta">${e.date} · Running total: €${runMap[e.id].toFixed(2)}</div></div><div class="bgt-tx-amount savings">+€${e.amount.toFixed(2)}</div><button class="btn-tx-del" onclick="delSavingsEntry(${e.id})">✕</button>`;
+    item.innerHTML = `<div class="bgt-tx-icon" style="background:rgba(56,189,248,.15);color:var(--accent2)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${esc(e.desc || 'Savings deposit')}</div><div class="bgt-tx-meta">${esc(e.date)} · Running total: €${runMap[e.id].toFixed(2)}</div></div><div class="bgt-tx-amount savings">+€${e.amount.toFixed(2)}</div><button class="btn-tx-del" onclick="delSavingsEntry(${e.id})">✕</button>`;
     list.appendChild(item);
   });
 }
@@ -4370,11 +4738,11 @@ function openSavingsModal() {
 }
 function closeSavingsModal() { document.getElementById('sav-modal').classList.add('hidden'); }
 function confirmAddSavings() {
-  const amt = parseFloat(document.getElementById('sav-amount').value);
-  const note = document.getElementById('sav-note').value.trim();
+  const amt = safeNum(document.getElementById('sav-amount').value, 0.01, 1e9);
+  const note = safeText(document.getElementById('sav-note')?.value, 100);
   const date = document.getElementById('sav-date').value;
   if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
-  if (!date) { showToast('Select a date'); return; }
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Select a valid date'); return; }
   const entries = bgtLoad();
   const _sid = Date.now();
   const _sdesc = note || 'Savings deposit';
@@ -4448,11 +4816,11 @@ function openInvestModal() {
 function closeInvestModal() { document.getElementById('invest-modal').classList.add('hidden'); }
 
 function confirmAddInvest() {
-  const amt = parseFloat(document.getElementById('invest-amount').value);
-  const desc = document.getElementById('invest-desc').value.trim();
+  const amt = safeNum(document.getElementById('invest-amount').value, 0.01, 1e9);
+  const desc = safeText(document.getElementById('invest-desc').value, 100);
   const date = document.getElementById('invest-date').value;
   if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
-  if (!date) { showToast('Select a date'); return; }
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Select a valid date'); return; }
   const entries = bgtLoad();
   const t = INVEST_TYPES[_investType] || INVEST_TYPES.other;
   const _iid = Date.now();
@@ -4487,11 +4855,11 @@ function openEditInvestModal(id) {
 function closeEditInvestModal() { document.getElementById('edit-invest-modal').classList.add('hidden'); _editInvestId = null; }
 
 function saveEditInvest() {
-  const amt = parseFloat(document.getElementById('einvest-amount').value);
+  const amt = safeNum(document.getElementById('einvest-amount').value, 0.01, 1e9);
   if (!amt || amt <= 0) { showToast('Enter a valid amount'); return; }
   const date = document.getElementById('einvest-date').value;
-  if (!date) { showToast('Select a date'); return; }
-  const desc = document.getElementById('einvest-desc').value.trim();
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast('Select a valid date'); return; }
+  const desc = safeText(document.getElementById('einvest-desc').value, 100);
   const entries = bgtLoad();
   const idx = entries.findIndex(e => e.id === _editInvestId);
   if (idx === -1) { showToast('Entry not found'); return; }
@@ -4512,12 +4880,29 @@ function delInvestEntry(id) {
 
 function renderInvestments(allEntries) {
   const invEntries = (allEntries || bgtLoad()).filter(e => e.type === 'investment');
-  const total = invEntries.reduce((s, e) => s + e.amount, 0);
-  const fmt = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const loggedTotal = invEntries.reduce((s, e) => s + e.amount, 0);
+  const fmtI = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const now = new Date();
   const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const monthTotal = invEntries.filter(e => e.date && e.date.startsWith(prefix)).reduce((s, e) => s + e.amount, 0);
   const largest = invEntries.reduce((max, e) => e.amount > max ? e.amount : max, 0);
+
+  // ── Compute live portfolio value in EUR ──
+  let portfolioLiveEur = 0;
+  try {
+    let tvUsd = 0;
+    if (typeof S !== 'undefined' && S.holdings) {
+      S.holdings.forEach(h => {
+        const lp = priceOf(h);
+        const p = lp ? lp.usd : (h.buyPrice || 0);
+        tvUsd += h.amount * p;
+      });
+    }
+    portfolioLiveEur = tvUsd * (eurRate || 0.92);
+  } catch(e) {}
+
+  // Combined total = logged investment entries + live portfolio value
+  const combinedTotal = loggedTotal + portfolioLiveEur;
 
   const totalEl = document.getElementById('invest-total');
   const countEl = document.getElementById('invest-count');
@@ -4525,25 +4910,102 @@ function renderInvestments(allEntries) {
   const monthEl = document.getElementById('invest-month');
   if (!totalEl) return;
 
-  totalEl.textContent = fmt(total);
-  countEl.textContent = invEntries.length;
-  largestEl.textContent = largest > 0 ? fmt(largest) : '—';
-  monthEl.textContent = fmt(monthTotal);
+  // Show combined total (logged + live portfolio)
+  totalEl.textContent = fmtI(combinedTotal);
+  totalEl.title = `Logged investments: ${fmtI(loggedTotal)} + Live portfolio: ${fmtI(portfolioLiveEur)}`;
+  countEl.textContent = invEntries.length + (S?.holdings?.length ? ` + ${S.holdings.length} holdings` : '');
+  largestEl.textContent = largest > 0 ? fmtI(largest) : '—';
+  monthEl.textContent = fmtI(monthTotal);
+
+  // ── Mirror updated totals to all cards ──
+  const invMirror = document.getElementById('inv-invest-total');
+  const savMirror = document.getElementById('inv-sav-total');
+  const savTotal = document.getElementById('sav-total');
+  const combinedEl = document.getElementById('inv-combined-total');
+  const bgtInvEl = document.getElementById('bgt-invest-total');
+  if (invMirror) { invMirror.textContent = fmtI(combinedTotal); invMirror.title = totalEl.title; }
+  if (bgtInvEl) { bgtInvEl.textContent = fmtI(combinedTotal); bgtInvEl.title = totalEl.title; }
+  if (savMirror && savTotal) savMirror.textContent = savTotal.textContent;
+  if (combinedEl) {
+    const parse = s => parseFloat((s||'0').replace(/[^0-9.-]/g,'')) || 0;
+    const savVal = parse(savTotal ? savTotal.textContent : '0');
+    combinedEl.textContent = fmtI(combinedTotal + savVal);
+  }
 
   const list = document.getElementById('invest-tx-list');
-  if (!invEntries.length) {
-    list.innerHTML = '<div class="bgt-tx-empty">No investments yet. Click "+ Add Investment" or use the "Invest" type in Add Entry.</div>';
-    return;
-  }
-  const sorted = [...invEntries].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
   list.innerHTML = '';
-  sorted.forEach(e => {
-    const t = INVEST_TYPES[e.itype] || INVEST_TYPES.other;
-    const item = document.createElement('div');
-    item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || t.label}</div><div class="bgt-tx-meta">${t.label} · ${e.date}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
-    list.appendChild(item);
-  });
+
+  // ── Portfolio holdings as live rows at the top ──
+  if (typeof S !== 'undefined' && S.holdings && S.holdings.length) {
+    const holdingHeader = document.createElement('div');
+    holdingHeader.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:2px 0 8px;margin-top:4px';
+    holdingHeader.textContent = 'Live Portfolio Holdings';
+    list.appendChild(holdingHeader);
+
+    S.holdings.forEach(h => {
+      const lp = priceOf(h);
+      const p = lp ? lp.usd : (h.buyPrice || 0);
+      const valEur = h.amount * p * (eurRate || 0.92);
+      const chg = lp ? lp.change24 : null;
+      const coin = (typeof COIN_BY_ID !== 'undefined' ? COIN_BY_ID[h.coinId] : null) || (typeof COIN_BY_SYM !== 'undefined' ? COIN_BY_SYM[h.symbol] : null);
+      const url = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
+      const col = (typeof coinColor !== 'undefined') ? coinColor(h.symbol) : '#fbbf24';
+      const chgStr = chg != null ? `<span style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'};margin-left:4px">${chg>=0?'▲':'▼'}${Math.abs(chg).toFixed(2)}%</span>` : '';
+
+      const item = document.createElement('div');
+      item.className = 'bgt-tx-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 4px;background:none;border-radius:0;border-bottom:1px solid var(--border)';
+
+      const iconWrap = document.createElement('div');
+      iconWrap.style.cssText = `width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${col}22`;
+      if (url) {
+        const img = document.createElement('img');
+        img.src = url; img.width = 38; img.height = 38;
+        img.style.cssText = 'border-radius:50%;object-fit:cover';
+        const fb = document.createElement('div');
+        fb.style.cssText = `width:38px;height:38px;border-radius:50%;background:${col}22;color:${col};display:none;align-items:center;justify-content:center;font-size:13px;font-weight:800`;
+        fb.textContent = h.symbol.slice(0,2).toUpperCase();
+        img.onerror = function(){ this.style.display='none'; fb.style.display='flex'; };
+        iconWrap.appendChild(img); iconWrap.appendChild(fb);
+      } else {
+        iconWrap.style.color = col; iconWrap.style.fontSize = '13px'; iconWrap.style.fontWeight = '800';
+        iconWrap.textContent = h.symbol.slice(0,2).toUpperCase();
+      }
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--text)">${esc(h.name)}${chgStr}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${h.amount.toLocaleString('en-US',{maximumFractionDigits:6})} ${esc(h.symbol)} · Live</div>`;
+
+      const right = document.createElement('div');
+      right.style.cssText = 'text-align:right;flex-shrink:0';
+      right.innerHTML = `<div style="font-size:14px;font-weight:700;color:var(--amber);font-variant-numeric:tabular-nums">${fmtI(valEur)}</div>`;
+
+      item.appendChild(iconWrap); item.appendChild(info); item.appendChild(right);
+      list.appendChild(item);
+    });
+  }
+
+  // ── Logged investment entries ──
+  if (invEntries.length) {
+    const logHeader = document.createElement('div');
+    logHeader.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:12px 0 8px';
+    logHeader.textContent = 'Logged Investments';
+    list.appendChild(logHeader);
+
+    const sorted = [...invEntries].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
+    sorted.forEach(e => {
+      const t = INVEST_TYPES[e.itype] || INVEST_TYPES.other;
+      const item = document.createElement('div');
+      item.className = 'bgt-tx-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 4px;background:none;border-radius:0;border-bottom:1px solid var(--border)';
+      item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color};border-radius:50%;width:38px;height:38px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${esc(e.desc || t.label)}</div><div class="bgt-tx-meta">${esc(t.label)} · ${esc(e.date)}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+${fmtI(e.amount)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
+      list.appendChild(item);
+    });
+  }
+
+  if (!invEntries.length && !(S?.holdings?.length)) {
+    list.innerHTML = '<div class="bgt-tx-empty">No investments yet. Add a holding in the Portfolio tab or click "+ Add Investment".</div>';
+  }
 }
 
 document.getElementById('invest-modal').addEventListener('click', e => { if (e.target === document.getElementById('invest-modal')) closeInvestModal(); });
@@ -4561,147 +5023,189 @@ function renderInvestChart(allEntries, mode) {
   if (!canvas || !canvas.offsetWidth) return;
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const ctx = canvas.getContext('2d');
-  const W = canvas.offsetWidth, H = 220;
+  const W = canvas.offsetWidth, H = 240;
   canvas.width = W * devicePixelRatio; canvas.height = H * devicePixelRatio;
   canvas.style.height = H + 'px';
   ctx.scale(devicePixelRatio, devicePixelRatio);
 
   const invEntries = allEntries.filter(e => e.type === 'investment');
-
-  // Build period buckets
-  let buckets = [];
   const now = new Date();
+
+  // Build buckets (cumulative running total per period)
+  let buckets = [];
   if (mode === 'month') {
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      buckets.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('en',{month:'short'}), byType: {} });
+      buckets.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleDateString('en',{month:'short'}), total: 0 });
     }
     invEntries.forEach(e => {
       const b = buckets.find(b => e.date && e.date.startsWith(b.key));
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      if (b) b.total += e.amount;
     });
   } else {
-    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].sort();
+    const years = [...new Set(invEntries.map(e => (e.date||'').slice(0,4)))].filter(Boolean).sort();
     if (!years.length) years.push(String(now.getFullYear()));
-    years.forEach(y => buckets.push({ key: y, label: y, byType: {} }));
+    years.forEach(y => buckets.push({ key: y, label: y, total: 0 }));
     invEntries.forEach(e => {
-      const y = (e.date||'').slice(0,4);
-      const b = buckets.find(b => b.key === y);
-      if (!b) return;
-      const itype = e.itype || 'other';
-      b.byType[itype] = (b.byType[itype] || 0) + e.amount;
+      const b = buckets.find(b => b.key === (e.date||'').slice(0,4));
+      if (b) b.total += e.amount;
     });
   }
 
-  const allItypes = [...new Set(invEntries.map(e => e.itype || 'other'))];
-  // Cleaner color palette matching the budget chart aesthetic
-  const INVEST_COLORS = {
-    stocks:     isDark ? 'rgba(99,148,245,0.85)'  : 'rgba(79,128,225,0.9)',
-    etf:        isDark ? 'rgba(39,174,110,0.85)'  : 'rgba(39,174,110,0.9)',
-    crypto:     isDark ? 'rgba(245,190,80,0.85)'  : 'rgba(230,170,50,0.9)',
-    bonds:      isDark ? 'rgba(100,210,170,0.85)' : 'rgba(70,190,150,0.9)',
-    realestate: isDark ? 'rgba(220,130,180,0.85)' : 'rgba(200,100,160,0.9)',
-    other:      isDark ? 'rgba(160,140,220,0.85)' : 'rgba(140,120,200,0.9)',
-  };
+  // Convert to cumulative
+  let cum = 0;
+  const pts = buckets.map(b => { cum += b.total; return { label: b.label, v: cum }; });
 
-  const bucketTotals = buckets.map(b => Object.values(b.byType).reduce((s,v)=>s+v,0));
-  let cumulative = 0;
-  const cumulativeVals = bucketTotals.map(v => { cumulative += v; return cumulative; });
+  const lineColor = isDark ? '#e0e0dc' : '#111111';
+  const mutedColor = isDark ? '#505058' : '#bbbbbb';
+  const labelColor = isDark ? '#707078' : '#aaaaaa';
+  const bgColor    = isDark ? '#1e1e22' : '#ffffff';
 
-  const maxVal = Math.max(...cumulativeVals, 1);
-  const pad = { t: 24, b: 36, l: 48, r: 16 };
-  const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
-  const groupW = iW / buckets.length;
-  const barW = Math.min(16, groupW * 0.4);
+  const pad = { t: 40, b: 38, l: 16, r: 16 };
+  const iW = W - pad.l - pad.r;
+  const iH = H - pad.t - pad.b;
+  const n = pts.length;
 
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const labelColor = isDark ? '#606070' : '#aaaabc';
-  const textColor  = isDark ? '#a0a0b0' : '#666680';
+  const maxV = Math.max(...pts.map(p => p.v), 1);
+  const minV = 0;
+  const range = maxV - minV || 1;
+
+  const xOf = i => pad.l + (i / (n - 1)) * iW;
+  const yOf = v => pad.t + iH - ((v - minV) / range) * iH;
 
   ctx.clearRect(0, 0, W, H);
 
-  // Subtle horizontal grid lines
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + iH * (1 - i / 4);
-    ctx.strokeStyle = gridColor; ctx.lineWidth = 1; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iW, y); ctx.stroke();
-    const val = maxVal * i / 4;
+  if (pts.every(p => p.v === 0)) {
     ctx.fillStyle = labelColor;
-    ctx.font = '600 9px -apple-system,sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(val >= 1000 ? (val/1000).toFixed(1)+'k' : val.toFixed(0), pad.l - 6, y + 3.5);
+    ctx.font = '13px -apple-system,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No investment data yet', W / 2, H / 2);
+    const legendEl = document.getElementById('invest-chart-legend');
+    if (legendEl) legendEl.innerHTML = '';
+    return;
   }
 
-  // Stacked bars — rounded tops, clean
-  buckets.forEach((b, i) => {
-    const gx = pad.l + i * groupW + groupW / 2;
-    let stackY = pad.t + iH;
-    allItypes.forEach(itype => {
-      const val = b.byType[itype] || 0;
-      if (!val) return;
-      const bh = (val / maxVal) * iH;
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const isTop = stackY - bh <= pad.t + 4;
-      ctx.fillStyle = col;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(gx - barW/2, stackY - bh, barW, bh, isTop ? [4,4,0,0] : 0);
-      else ctx.rect(gx - barW/2, stackY - bh, barW, bh);
-      ctx.fill();
-      stackY -= bh;
-    });
-    // Month label
-    ctx.fillStyle = labelColor;
-    ctx.font = '500 10px -apple-system,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(b.label, gx, pad.t + iH + 20);
+  // ── Smooth bezier helper ──
+  function smoothLine(points) {
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 0; i < points.length - 1; i++) {
+      const cp1x = points[i].x + (points[i+1].x - points[i].x) * 0.45;
+      const cp1y = points[i].y;
+      const cp2x = points[i+1].x - (points[i+1].x - points[i].x) * 0.45;
+      const cp2y = points[i+1].y;
+      ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, points[i+1].x, points[i+1].y);
+    }
+  }
+
+  const coords = pts.map((p, i) => ({ x: xOf(i), y: yOf(p.v) }));
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
+  grad.addColorStop(0, isDark ? 'rgba(224,224,220,0.15)' : 'rgba(17,17,17,0.10)');
+  grad.addColorStop(1, isDark ? 'rgba(224,224,220,0)' : 'rgba(17,17,17,0)');
+  ctx.beginPath();
+  smoothLine(coords);
+  ctx.lineTo(coords[n-1].x, pad.t + iH);
+  ctx.lineTo(coords[0].x, pad.t + iH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  smoothLine(coords);
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.setLineDash([]);
+  ctx.stroke();
+
+  // X-axis labels
+  ctx.fillStyle = labelColor;
+  ctx.font = '11px -apple-system,sans-serif';
+  ctx.textAlign = 'center';
+  pts.forEach((p, i) => {
+    ctx.fillText(p.label, xOf(i), H - 10);
   });
 
-  // Cumulative growth line — clean, matches budget bar style
-  if (cumulativeVals.some(v => v > 0)) {
-    const pts = cumulativeVals.map((v, i) => ({
-      x: pad.l + i * groupW + groupW / 2,
-      y: pad.t + iH * (1 - v / maxVal)
-    }));
+  // ── Hover tooltip ──
+  canvas._invPts = coords;
+  canvas._invVals = pts;
+  canvas._invPad = pad;
+  canvas._invIW = iW;
 
-    // Smooth gradient fill under line
-    const lineColor = isDark ? 'rgba(99,148,245,1)' : 'rgba(79,128,225,1)';
-    const gradTop   = isDark ? 'rgba(99,148,245,0.15)' : 'rgba(79,128,225,0.12)';
-    const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t + iH);
-    grad.addColorStop(0, gradTop);
-    grad.addColorStop(1, 'rgba(99,148,245,0)');
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pad.t + iH);
-    pts.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(pts[pts.length-1].x, pad.t + iH);
-    ctx.closePath();
-    ctx.fillStyle = grad; ctx.fill();
+  if (!canvas._invBound) {
+    canvas._invBound = true;
 
-    // Line
-    ctx.beginPath();
-    ctx.strokeStyle = lineColor; ctx.lineWidth = 2;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-    ctx.stroke();
+    function drawTooltip(idx) {
+      // Redraw base chart
+      renderInvestChart(allEntries, mode);
+      const p = canvas._invPts[idx];
+      const v = canvas._invVals[idx];
+      const pad2 = canvas._invPad;
 
-    // Clean dots
-    pts.forEach(p => {
-      ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
-      ctx.fillStyle = lineColor; ctx.fill();
-      const bgColor = isDark ? '#111' : '#fff';
-      ctx.strokeStyle = bgColor; ctx.lineWidth = 1.5; ctx.stroke();
-    });
+      // Dashed vertical line
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(p.x, pad2.t);
+      ctx.lineTo(p.x, pad2.t + (H - pad2.t - pad2.b));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Circle on line
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = bgColor;
+      ctx.fill();
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.restore();
+
+      // Tooltip bubble
+      const label = `€${v.v.toLocaleString('en-EU', {maximumFractionDigits:0})}`;
+      ctx.font = 'bold 12px -apple-system,sans-serif';
+      const tw = ctx.measureText(label).width;
+      const bw = tw + 22, bh = 30, br = 8;
+      let bx = p.x - bw / 2;
+      const by = p.y - bh - 14;
+      bx = Math.max(pad2.l, Math.min(W - pad2.r - bw, bx));
+      ctx.beginPath();
+      ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, br) : ctx.rect(bx, by, bw, bh);
+      ctx.fillStyle = isDark ? '#e0e0dc' : '#111111';
+      ctx.fill();
+      ctx.fillStyle = isDark ? '#111111' : '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx + bw / 2, by + bh / 2);
+      ctx.textBaseline = 'alphabetic';
+    }
+
+    function getIdx(e) {
+      const rect = canvas.getBoundingClientRect();
+      const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const pts2 = canvas._invPts;
+      if (!pts2 || !pts2.length) return -1;
+      let best = 0, bestD = Infinity;
+      pts2.forEach((p, i) => { const d = Math.abs(p.x - cx); if (d < bestD) { bestD = d; best = i; } });
+      return best;
+    }
+
+    canvas.addEventListener('mousemove', e => { const i = getIdx(e); if (i >= 0) drawTooltip(i); });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); const i = getIdx(e); if (i >= 0) drawTooltip(i); }, { passive: false });
+    canvas.addEventListener('mouseleave', () => renderInvestChart(allEntries, mode));
+    canvas.addEventListener('touchend', () => renderInvestChart(allEntries, mode));
   }
 
-  // Legend — inline below canvas (top-right style matching budget bar)
+  // Legend
   const legendEl = document.getElementById('invest-chart-legend');
   if (legendEl) {
-    const INVEST_LABELS = { stocks:'Stocks', etf:'ETF', crypto:'Crypto', bonds:'Bonds', realestate:'Real Estate', other:'Other' };
-    legendEl.innerHTML = allItypes.map(itype => {
-      const col = INVEST_COLORS[itype] || 'rgba(160,140,220,0.85)';
-      const label = INVEST_LABELS[itype] || itype;
-      const total = invEntries.filter(e => (e.itype||'other') === itype).reduce((s,e)=>s+e.amount,0);
-      return `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:${col};flex-shrink:0"></div>${label} <span style="font-weight:700;color:var(--text)">€${total.toFixed(0)}</span></div>`;
-    }).join('') + (cumulativeVals.some(v=>v>0) ? `<div style="display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text2)"><div style="width:18px;height:2px;border-radius:1px;background:${isDark?'rgba(99,148,245,1)':'rgba(79,128,225,1)'};flex-shrink:0"></div>Total Growth <span style="font-weight:700;color:var(--text)">€${(cumulativeVals[cumulativeVals.length-1]||0).toFixed(0)}</span></div>` : '');
+    const lastVal = pts[pts.length - 1]?.v || 0;
+    legendEl.innerHTML = `<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)">Total invested <span style="font-weight:700;color:var(--text);margin-left:4px">€${lastVal.toLocaleString('en-EU',{maximumFractionDigits:0})}</span></div>`;
   }
 }
 
@@ -5141,7 +5645,7 @@ function toggleTheme() {
 let _ptfActiveCoin = null;
 let _ptfRange = '1W';
 let _ptfChartData = [];
-let _ptfPad = { top: 16, right: 16, bottom: 32, left: 16 };
+let _ptfPad = { top: 16, right: 16, bottom: 44, left: 16 };
 let _ptfDims = { W: 0, H: 0, w: 0, h: 0 };
 let _ptfMin = 0, _ptfMax = 1;
 let _ptfHoveredMarker = null;
@@ -5542,6 +6046,10 @@ async function init(){
   const hU=$('hero-btn-usd'); const hE=$('hero-btn-eur');
   if(hU) hU.classList.toggle('active',S.currency==='USD');
   if(hE) hE.classList.toggle('active',S.currency==='EUR');
+  // Sync portfolio tab currency toggle
+  const pU=$('ptf-btn-usd'); const pE=$('ptf-btn-eur');
+  if(pU) { pU.style.background = S.currency==='USD' ? 'var(--text)' : 'none'; pU.style.color = S.currency==='USD' ? 'var(--bg)' : 'var(--muted)'; }
+  if(pE) { pE.style.background = S.currency==='EUR' ? 'var(--text)' : 'none'; pE.style.color = S.currency==='EUR' ? 'var(--bg)' : 'var(--muted)'; }
   // Sync menu theme icon
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const menuIcon=$('menu-theme-icon');
@@ -5560,6 +6068,65 @@ async function init(){
   setInterval(async()=>{ await fetchPrices(); await fetchTicker(); }, REFRESH_MS);
   initBudget();
 }
+
+// ── BUTTON PRESS ANIMATION ──
+(function(){
+  function triggerPressAnim(el) {
+    // Find the animatable target: for nav-tabs use the icon div, else the element itself
+    const icon = el.querySelector('.nav-tab-icon') || el.querySelector('svg') || el.querySelector('img') || el;
+    icon.classList.remove('btn-press-anim');
+    // Force reflow to restart animation
+    void icon.offsetWidth;
+    icon.classList.add('btn-press-anim');
+    icon.addEventListener('animationend', () => icon.classList.remove('btn-press-anim'), { once: true });
+  }
+
+  function attachPressAnim(selector) {
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('pointerdown', () => triggerPressAnim(el), { passive: true });
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    attachPressAnim('.nav-tab');
+    attachPressAnim('.action-btn');
+    attachPressAnim('.tab-btn');
+    attachPressAnim('.bgt-type-btn');
+    attachPressAnim('.btn-primary');
+    attachPressAnim('.btn-cancel');
+    attachPressAnim('.cur-btn');
+    attachPressAnim('.hamburger-btn');
+    attachPressAnim('.auth-btn');
+    attachPressAnim('.modal-x');
+    attachPressAnim('.hero-cur-btn');
+    attachPressAnim('.logo-home-btn');
+
+    // Also handle dynamically added buttons via event delegation
+    document.body.addEventListener('pointerdown', (e) => {
+      const btn = e.target.closest('.btn-primary, .btn-cancel, .action-btn, .bgt-type-btn, .tab-btn, .cur-btn');
+      if (btn && !btn._pressAnimAttached) {
+        triggerPressAnim(btn);
+      }
+    }, { passive: true });
+  });
+})();
+
+
+// ── MONSTER CAN COLOR CYCLE ──
+(function(){
+  const flavors = ['green','white','purple','rose','blue','orange','red','black'];
+  let idx = 0;
+  window.addEventListener('DOMContentLoaded', () => {
+    const btn = document.querySelector('.monster-btn');
+    if (!btn) return;
+    btn.setAttribute('data-flavor', flavors[0]);
+    btn.addEventListener('mouseenter', () => {
+      idx = (idx + 1) % flavors.length;
+      btn.setAttribute('data-flavor', flavors[idx]);
+    });
+  });
+})();
+
 init();
 </script>
 
