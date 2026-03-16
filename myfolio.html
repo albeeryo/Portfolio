@@ -1290,6 +1290,12 @@ html, body { overscroll-behavior-x: none; }
     <div class="hero-sub">
       <span class="hero-pnl" id="hero-pnl" style="display:none"></span>
     </div>
+    <div id="ptf-cur-toggle" style="display:none;justify-content:center;margin-top:12px">
+      <div style="display:flex;background:var(--surface2);border-radius:20px;padding:2px;gap:1px">
+        <button id="ptf-btn-usd" onclick="setCur('USD')" style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;background:none;color:var(--muted)">USD</button>
+        <button id="ptf-btn-eur" onclick="setCur('EUR')" style="padding:5px 14px;font-size:11px;font-weight:600;border:none;border-radius:16px;cursor:pointer;transition:all .15s;background:var(--text);color:var(--bg)">EUR</button>
+      </div>
+    </div>
   </div>
 
   <!-- ACTION BUTTONS — switches per tab -->
@@ -1365,9 +1371,16 @@ html, body { overscroll-behavior-x: none; }
   <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
 
   <!-- STATS -->
-  <div class="stats-bar" style="margin-bottom:16px;grid-template-columns:repeat(2,1fr)">
-    <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
+  <div class="bgt-hero-row" style="margin-bottom:16px">
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Total Value</div>
+      <div class="bgt-hero-val" id="sv">—</div>
+    </div>
+    <div class="bgt-hero-divider"></div>
+    <div class="bgt-hero-card">
+      <div class="bgt-hero-lbl">Cost Basis</div>
+      <div class="bgt-hero-val" id="si">—</div>
+    </div>
     <!-- hidden for JS compat -->
     <div style="display:none"><div class="stat-val" id="spnl"></div><div class="stat-val" id="s24"></div></div>
   </div>
@@ -2211,6 +2224,10 @@ function setCur(c) {
   const hU=$('hero-btn-usd'); const hE=$('hero-btn-eur');
   if(hU) hU.classList.toggle('active',c==='USD');
   if(hE) hE.classList.toggle('active',c==='EUR');
+  // Portfolio tab currency toggle
+  const pU=$('ptf-btn-usd'); const pE=$('ptf-btn-eur');
+  if(pU) { pU.style.background = c==='USD' ? 'var(--text)' : 'none'; pU.style.color = c==='USD' ? 'var(--bg)' : 'var(--muted)'; }
+  if(pE) { pE.style.background = c==='EUR' ? 'var(--text)' : 'none'; pE.style.color = c==='EUR' ? 'var(--bg)' : 'var(--muted)'; }
   renderHoldings(false); renderWL(); rebuildTicker();
 }
 
@@ -3764,6 +3781,9 @@ function switchMainTab(tab) {
   if (arp) arp.style.display = tab === 'portfolio' ? '' : 'none';
   if (arb) arb.style.display = tab === 'budget' ? '' : 'none';
   if (ari) ari.style.display = tab === 'invest' ? '' : 'none';
+  // Show currency toggle only on portfolio tab
+  const curToggle = document.getElementById('ptf-cur-toggle');
+  if (curToggle) curToggle.style.display = tab === 'portfolio' ? 'flex' : 'none';
   if (tab === 'budget' || tab === 'invest') { renderBudget(); }
 
   // Show inline watchlist section only on portfolio (hidden — replaced by new chart)
@@ -5917,6 +5937,10 @@ async function init(){
   const hU=$('hero-btn-usd'); const hE=$('hero-btn-eur');
   if(hU) hU.classList.toggle('active',S.currency==='USD');
   if(hE) hE.classList.toggle('active',S.currency==='EUR');
+  // Sync portfolio tab currency toggle
+  const pU=$('ptf-btn-usd'); const pE=$('ptf-btn-eur');
+  if(pU) { pU.style.background = S.currency==='USD' ? 'var(--text)' : 'none'; pU.style.color = S.currency==='USD' ? 'var(--bg)' : 'var(--muted)'; }
+  if(pE) { pE.style.background = S.currency==='EUR' ? 'var(--text)' : 'none'; pE.style.color = S.currency==='EUR' ? 'var(--bg)' : 'var(--muted)'; }
   // Sync menu theme icon
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
   const menuIcon=$('menu-theme-icon');
