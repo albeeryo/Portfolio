@@ -396,7 +396,7 @@ h1{font-size:15px;font-weight:600;letter-spacing:-.2px;color:var(--text);}
 /* ─────────────────────────────────
    SECTION HEADERS
 ───────────────────────────────── */
-.holdings-sec{animation:fadeUp .4s .1s ease both;}
+.holdings-sec{animation:fadeUp .4s .1s ease both;background:var(--surface);border-radius:var(--radius);padding:20px;margin-top:16px;margin-bottom:16px;box-shadow:var(--card-shadow);}
 .sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .sec-title{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
 .sec-actions{display:flex;gap:6px;align-items:center;}
@@ -736,7 +736,7 @@ html, body { overscroll-behavior-x: none; }
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* ── PORTFOLIO PRICE CHART ── */
-.ptf-chart-sec{animation:fadeUp .35s ease both;margin-top:4px;}
+.ptf-chart-sec{animation:fadeUp .35s ease both;margin-top:16px;margin-bottom:16px;}
 .ptf-coin-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .ptf-coin-pill{display:flex;align-items:center;gap:7px;background:var(--surface);border:1.5px solid transparent;border-radius:22px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);transition:all .15s;box-shadow:var(--card-shadow);}
 .ptf-coin-pill:hover{background:var(--surface2);}
@@ -757,7 +757,7 @@ html, body { overscroll-behavior-x: none; }
 .ptf-range-btn:hover{color:var(--text);}
 .ptf-range-btn.active{background:var(--text);color:var(--bg);}
 
-.ptf-canvas-wrap{position:relative;height:260px;padding:16px 0 0;}
+.ptf-canvas-wrap{position:relative;height:290px;padding:16px 0 0;}
 #ptf-chart-canvas{width:100%;height:100%;cursor:crosshair;display:block;}
 .ptf-chart-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
 
@@ -1381,7 +1381,7 @@ html, body { overscroll-behavior-x: none; }
   <div id="wl-inline-sec" style="display:none"><div id="wl-inline-body"></div></div>
   <div style="display:none"><table><tbody id="purchase-log-body"></tbody></table></div>
 
-  <!-- STATS (above chart) -->
+  <!-- STATS -->
   <div class="stats-bar" style="margin-top:0;margin-bottom:16px">
     <div class="stat-card"><div class="stat-lbl">Total Value</div><div class="stat-val" id="sv">—</div></div>
     <div class="stat-card"><div class="stat-lbl">Cost Basis</div><div class="stat-val" id="si">—</div></div>
@@ -1389,9 +1389,23 @@ html, body { overscroll-behavior-x: none; }
     <div class="stat-card"><div class="stat-lbl">24h Change</div><div class="stat-val" id="s24">—</div></div>
   </div>
 
+  <!-- HOLDINGS -->
+  <div class="holdings-sec">
+    <div class="sec-hdr">
+      <div class="sec-title">Holdings</div>
+      <div class="sec-actions">
+        <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
+        <button class="btn-add-holding" onclick="openAddModal()">+ Add</button>
+        <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
+        <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
+      </div>
+    </div>
+    <div id="holdings-body" style="display:flex;flex-direction:column;gap:0"></div>
+    <table style="display:none"><tbody id="holdings-body-table"></tbody></table>
+  </div>
+
   <!-- ══════ PRICE CHART SECTION ══════ -->
   <div class="ptf-chart-sec" id="ptf-chart-sec" style="display:none">
-    <div class="ptf-coin-pills" id="ptf-coin-pills"></div>
     <div class="ptf-chart-card">
       <div class="ptf-chart-header">
         <div>
@@ -1423,46 +1437,9 @@ html, body { overscroll-behavior-x: none; }
           <div class="ptf-mt-date" id="ptf-mt-date"></div>
         </div>
       </div>
-      <div class="ptf-action-bar">
-        <button class="ptf-action-btn" onclick="showToast('Send coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></div>
-          <span>Send</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Receive coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></div>
-          <span>Receive</span>
-        </button>
-        <button class="ptf-action-btn" onclick="openPurchaseModal()">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-          <span>Buy</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Swap coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
-          <span>Swap</span>
-        </button>
-        <button class="ptf-action-btn" onclick="showToast('Earn coming soon')">
-          <div class="ptf-ab-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-          <span>Earn</span>
-        </button>
-      </div>
     </div>
-  </div>
-
-  <!-- HOLDINGS -->
-  <div class="holdings-sec">
-    <div class="sec-hdr">
-      <div class="sec-title">Holdings</div>
-      <div class="sec-actions">
-        <button class="btn-edit-bp" onclick="openBP()">Buy Prices</button>
-        <button class="btn-add-holding" onclick="openAddModal()">+ Add</button>
-        <button class="btn-add-holding" onclick="openPurchaseHistory()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:var(--card-shadow)">📋 History</button>
-        <button class="btn-clear-all" onclick="clearAll()">Clear All</button>
-      </div>
-    </div>
-    <!-- Card-style holdings list -->
-    <div id="holdings-body" style="display:flex;flex-direction:column;gap:0"></div>
-    <!-- Hidden table kept for any legacy JS that might target tbody -->
-    <table style="display:none"><tbody id="holdings-body-table"></tbody></table>
+    <!-- Coin selector rows -->
+    <div id="ptf-coin-pills" style="margin-top:4px"></div>
   </div>
 
   </div><!-- end view-portfolio -->
@@ -2753,20 +2730,10 @@ function renderHoldings(changed){
 
   renderDonut(tv);
   $('dca-sec').style.display = 'none';
+  // Sync invest tab with live portfolio value every time holdings render
+  try { renderInvestments(bgtLoad()); } catch(e) {}
   if (document.getElementById('view-budget') && document.getElementById('view-budget').style.display !== 'none') {
     renderBudget();
-  } else {
-    try {
-      const allBgtEntries = bgtLoad();
-      const loggedInvest = allBgtEntries.filter(e => e.type === 'investment').reduce((s, e) => s + e.amount, 0);
-      const portfolioEur = tv * (eurRate || 0.92);
-      const investEl = document.getElementById('bgt-invest-total');
-      const fmtB = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      if (investEl) {
-        investEl.textContent = fmtB(loggedInvest + portfolioEur);
-        investEl.title = `Budget investments: ${fmtB(loggedInvest)} + Portfolio: ${fmtB(portfolioEur)}`;
-      }
-    } catch(e) {}
   }
 }
 
@@ -4776,12 +4743,29 @@ function delInvestEntry(id) {
 
 function renderInvestments(allEntries) {
   const invEntries = (allEntries || bgtLoad()).filter(e => e.type === 'investment');
-  const total = invEntries.reduce((s, e) => s + e.amount, 0);
-  const fmt = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const loggedTotal = invEntries.reduce((s, e) => s + e.amount, 0);
+  const fmtI = v => '€' + v.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const now = new Date();
   const prefix = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const monthTotal = invEntries.filter(e => e.date && e.date.startsWith(prefix)).reduce((s, e) => s + e.amount, 0);
   const largest = invEntries.reduce((max, e) => e.amount > max ? e.amount : max, 0);
+
+  // ── Compute live portfolio value in EUR ──
+  let portfolioLiveEur = 0;
+  try {
+    let tvUsd = 0;
+    if (typeof S !== 'undefined' && S.holdings) {
+      S.holdings.forEach(h => {
+        const lp = priceOf(h);
+        const p = lp ? lp.usd : (h.buyPrice || 0);
+        tvUsd += h.amount * p;
+      });
+    }
+    portfolioLiveEur = tvUsd * (eurRate || 0.92);
+  } catch(e) {}
+
+  // Combined total = logged investment entries + live portfolio value
+  const combinedTotal = loggedTotal + portfolioLiveEur;
 
   const totalEl = document.getElementById('invest-total');
   const countEl = document.getElementById('invest-count');
@@ -4789,25 +4773,102 @@ function renderInvestments(allEntries) {
   const monthEl = document.getElementById('invest-month');
   if (!totalEl) return;
 
-  totalEl.textContent = fmt(total);
-  countEl.textContent = invEntries.length;
-  largestEl.textContent = largest > 0 ? fmt(largest) : '—';
-  monthEl.textContent = fmt(monthTotal);
+  // Show combined total (logged + live portfolio)
+  totalEl.textContent = fmtI(combinedTotal);
+  totalEl.title = `Logged investments: ${fmtI(loggedTotal)} + Live portfolio: ${fmtI(portfolioLiveEur)}`;
+  countEl.textContent = invEntries.length + (S?.holdings?.length ? ` + ${S.holdings.length} holdings` : '');
+  largestEl.textContent = largest > 0 ? fmtI(largest) : '—';
+  monthEl.textContent = fmtI(monthTotal);
+
+  // ── Mirror updated totals to all cards ──
+  const invMirror = document.getElementById('inv-invest-total');
+  const savMirror = document.getElementById('inv-sav-total');
+  const savTotal = document.getElementById('sav-total');
+  const combinedEl = document.getElementById('inv-combined-total');
+  const bgtInvEl = document.getElementById('bgt-invest-total');
+  if (invMirror) { invMirror.textContent = fmtI(combinedTotal); invMirror.title = totalEl.title; }
+  if (bgtInvEl) { bgtInvEl.textContent = fmtI(combinedTotal); bgtInvEl.title = totalEl.title; }
+  if (savMirror && savTotal) savMirror.textContent = savTotal.textContent;
+  if (combinedEl) {
+    const parse = s => parseFloat((s||'0').replace(/[^0-9.-]/g,'')) || 0;
+    const savVal = parse(savTotal ? savTotal.textContent : '0');
+    combinedEl.textContent = fmtI(combinedTotal + savVal);
+  }
 
   const list = document.getElementById('invest-tx-list');
-  if (!invEntries.length) {
-    list.innerHTML = '<div class="bgt-tx-empty">No investments yet. Click "+ Add Investment" or use the "Invest" type in Add Entry.</div>';
-    return;
-  }
-  const sorted = [...invEntries].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
   list.innerHTML = '';
-  sorted.forEach(e => {
-    const t = INVEST_TYPES[e.itype] || INVEST_TYPES.other;
-    const item = document.createElement('div');
-    item.className = 'bgt-tx-item';
-    item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || t.label}</div><div class="bgt-tx-meta">${t.label} · ${e.date}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+€${e.amount.toFixed(2)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
-    list.appendChild(item);
-  });
+
+  // ── Portfolio holdings as live rows at the top ──
+  if (typeof S !== 'undefined' && S.holdings && S.holdings.length) {
+    const holdingHeader = document.createElement('div');
+    holdingHeader.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:2px 0 8px;margin-top:4px';
+    holdingHeader.textContent = 'Live Portfolio Holdings';
+    list.appendChild(holdingHeader);
+
+    S.holdings.forEach(h => {
+      const lp = priceOf(h);
+      const p = lp ? lp.usd : (h.buyPrice || 0);
+      const valEur = h.amount * p * (eurRate || 0.92);
+      const chg = lp ? lp.change24 : null;
+      const coin = (typeof COIN_BY_ID !== 'undefined' ? COIN_BY_ID[h.coinId] : null) || (typeof COIN_BY_SYM !== 'undefined' ? COIN_BY_SYM[h.symbol] : null);
+      const url = coin ? `https://assets.coingecko.com/coins/images/${coin.img}/thumb.png` : '';
+      const col = (typeof coinColor !== 'undefined') ? coinColor(h.symbol) : '#fbbf24';
+      const chgStr = chg != null ? `<span style="font-size:10px;color:${chg>=0?'var(--green)':'var(--red)'};margin-left:4px">${chg>=0?'▲':'▼'}${Math.abs(chg).toFixed(2)}%</span>` : '';
+
+      const item = document.createElement('div');
+      item.className = 'bgt-tx-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 4px;background:none;border-radius:0;border-bottom:1px solid var(--border)';
+
+      const iconWrap = document.createElement('div');
+      iconWrap.style.cssText = `width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:${col}22`;
+      if (url) {
+        const img = document.createElement('img');
+        img.src = url; img.width = 38; img.height = 38;
+        img.style.cssText = 'border-radius:50%;object-fit:cover';
+        const fb = document.createElement('div');
+        fb.style.cssText = `width:38px;height:38px;border-radius:50%;background:${col}22;color:${col};display:none;align-items:center;justify-content:center;font-size:13px;font-weight:800`;
+        fb.textContent = h.symbol.slice(0,2).toUpperCase();
+        img.onerror = function(){ this.style.display='none'; fb.style.display='flex'; };
+        iconWrap.appendChild(img); iconWrap.appendChild(fb);
+      } else {
+        iconWrap.style.color = col; iconWrap.style.fontSize = '13px'; iconWrap.style.fontWeight = '800';
+        iconWrap.textContent = h.symbol.slice(0,2).toUpperCase();
+      }
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0';
+      info.innerHTML = `<div style="font-size:13px;font-weight:600;color:var(--text)">${h.name}${chgStr}</div><div style="font-size:10px;color:var(--muted);margin-top:2px">${h.amount.toLocaleString('en-US',{maximumFractionDigits:6})} ${h.symbol} · Live</div>`;
+
+      const right = document.createElement('div');
+      right.style.cssText = 'text-align:right;flex-shrink:0';
+      right.innerHTML = `<div style="font-size:14px;font-weight:700;color:var(--amber);font-variant-numeric:tabular-nums">${fmtI(valEur)}</div>`;
+
+      item.appendChild(iconWrap); item.appendChild(info); item.appendChild(right);
+      list.appendChild(item);
+    });
+  }
+
+  // ── Logged investment entries ──
+  if (invEntries.length) {
+    const logHeader = document.createElement('div');
+    logHeader.style.cssText = 'font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:12px 0 8px';
+    logHeader.textContent = 'Logged Investments';
+    list.appendChild(logHeader);
+
+    const sorted = [...invEntries].sort((a, b) => (b.date || '').localeCompare(a.date || '') || b.id - a.id);
+    sorted.forEach(e => {
+      const t = INVEST_TYPES[e.itype] || INVEST_TYPES.other;
+      const item = document.createElement('div');
+      item.className = 'bgt-tx-item';
+      item.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 4px;background:none;border-radius:0;border-bottom:1px solid var(--border)';
+      item.innerHTML = `<div class="bgt-tx-icon" style="background:${t.color}22;color:${t.color};border-radius:50%;width:38px;height:38px"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div><div class="bgt-tx-info"><div class="bgt-tx-name">${e.desc || t.label}</div><div class="bgt-tx-meta">${t.label} · ${e.date}</div></div><div class="bgt-tx-amount" style="color:var(--amber)">+${fmtI(e.amount)}</div><div class="bgt-tx-actions"><button class="btn-tx-edit" onclick="openEditInvestModal(${e.id})" title="Edit" style="font-size:11px">Edit</button><button class="btn-tx-del" onclick="delInvestEntry(${e.id})" title="Delete">✕</button></div>`;
+      list.appendChild(item);
+    });
+  }
+
+  if (!invEntries.length && !(S?.holdings?.length)) {
+    list.innerHTML = '<div class="bgt-tx-empty">No investments yet. Add a holding in the Portfolio tab or click "+ Add Investment".</div>';
+  }
 }
 
 document.getElementById('invest-modal').addEventListener('click', e => { if (e.target === document.getElementById('invest-modal')) closeInvestModal(); });
@@ -5405,7 +5466,7 @@ function toggleTheme() {
 let _ptfActiveCoin = null;
 let _ptfRange = '1W';
 let _ptfChartData = [];
-let _ptfPad = { top: 16, right: 16, bottom: 32, left: 16 };
+let _ptfPad = { top: 16, right: 16, bottom: 44, left: 16 };
 let _ptfDims = { W: 0, H: 0, w: 0, h: 0 };
 let _ptfMin = 0, _ptfMax = 1;
 let _ptfHoveredMarker = null;
