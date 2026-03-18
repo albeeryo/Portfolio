@@ -4652,7 +4652,6 @@ function confirmAddSavings() {
   const _sid = Date.now();
   const _sdesc = note || 'Savings deposit';
   entries.push({ id: _sid, type: 'savings', amount: amt, desc: _sdesc, cat: 'savings', date });
-  entries.push({ id: _sid+1, type: 'expense', amount: amt, desc: _sdesc + ' (saved)', cat: 'savings-expense', date, linkedSaving: true });
   bgtSave(entries);
   closeSavingsModal();
   showToast('Added to savings ✓');
@@ -4660,7 +4659,7 @@ function confirmAddSavings() {
 }
 function delSavingsEntry(id) {
   // Also remove the linked expense entry (id+1)
-  bgtSave(bgtLoad().filter(e => e.id !== id && !(e.linkedSaving && e.id === id+1)));
+  bgtSave(bgtLoad().filter(e => e.id !== id));
   renderBudget();
   showToast('Savings entry removed ✓');
 }
