@@ -1185,7 +1185,7 @@ html, body { overscroll-behavior-x: none; }
         <svg id="lf-sav-svg" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" fill="none">
           <defs>
             <style>
-              @keyframes lf2-fill{0%{transform:translateY(0)}100%{transform:translateY(-255px)}}
+              @keyframes lf2-fill{0%{transform:translateY(0)}100%{transform:translateY(-260px)}}
               @keyframes lf2-wave{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
               .lf2-fill-g{animation:lf2-fill 3s .3s cubic-bezier(.4,0,.2,1) both}
               .lf2-wf{animation:lf2-wave 1.8s linear infinite}
@@ -1197,12 +1197,12 @@ html, body { overscroll-behavior-x: none; }
           <g clip-path="url(#lf2-clip)">
             <g class="lf2-fill-g">
               <path class="lf2-ws"
-                d="M-440,270 Q-410,260 -380,270 Q-350,280 -320,270 Q-290,260 -260,270 Q-230,280 -200,270 Q-170,260 -140,270 Q-110,280 -80,270 Q-50,260 -20,270 Q10,280 40,270 Q70,260 100,270 Q130,280 160,270 Q190,260 220,270 Q250,280 280,270 Q310,260 340,270 Q370,280 400,270 Q430,260 460,270 L460,380 L-440,380Z"
+                d="M-440,186 Q-410,176 -380,186 Q-350,196 -320,186 Q-290,176 -260,186 Q-230,196 -200,186 Q-170,176 -140,186 Q-110,196 -80,186 Q-50,176 -20,186 Q10,196 40,186 Q70,176 100,186 Q130,196 160,186 Q190,176 220,186 Q250,196 280,186 Q310,176 340,186 Q370,196 400,186 Q430,176 460,186 L460,400 L-440,400Z"
                 fill="#111" opacity="0.09"/>
               <path class="lf2-wf"
-                d="M-440,270 Q-410,263 -380,270 Q-350,277 -320,270 Q-290,263 -260,270 Q-230,277 -200,270 Q-170,263 -140,270 Q-110,277 -80,270 Q-50,263 -20,270 Q10,277 40,270 Q70,263 100,270 Q130,277 160,270 Q190,263 220,270 Q250,277 280,270 Q310,263 340,270 Q370,277 400,270 Q430,263 460,270 L460,380 L-440,380Z"
+                d="M-440,186 Q-410,180 -380,186 Q-350,192 -320,186 Q-290,180 -260,186 Q-230,192 -200,186 Q-170,180 -140,186 Q-110,192 -80,186 Q-50,180 -20,186 Q10,192 40,186 Q70,180 100,186 Q130,192 160,186 Q190,180 220,186 Q250,192 280,186 Q310,180 340,186 Q370,192 400,186 Q430,180 460,186 L460,400 L-440,400Z"
                 fill="#111" opacity="0.18"/>
-              <rect x="-440" y="278" width="900" height="110" fill="#111" opacity="0.12"/>
+              <rect x="-440" y="192" width="900" height="220" fill="#111" opacity="0.12"/>
             </g>
           </g>
           <circle cx="110" cy="100" r="82" fill="none" stroke="#111" stroke-width="5"/>
@@ -1223,7 +1223,10 @@ html, body { overscroll-behavior-x: none; }
           <div class="lf-dot" style="width:8px"></div>
         </div>
         <button class="lf-btn" onclick="lfNext()">Continue</button>
-        <button class="lf-skip" onclick="lfDone()">Skip</button>
+        <div style="display:flex;gap:10px">
+          <button class="lf-skip" onclick="lfBack()" style="flex:1;text-align:center">← Back</button>
+          <button class="lf-skip" onclick="lfDone()" style="flex:1;text-align:center">Skip</button>
+        </div>
       </div>
     </div>
 
@@ -1275,7 +1278,10 @@ html, body { overscroll-behavior-x: none; }
           <div class="lf-dot a" style="width:20px"></div>
         </div>
         <button class="lf-btn" onclick="lfDone()">Get Started</button>
-        <button class="lf-skip" onclick="lfDone()">Skip</button>
+        <div style="display:flex;gap:10px">
+          <button class="lf-skip" onclick="lfBack()" style="flex:1;text-align:center">← Back</button>
+          <button class="lf-skip" onclick="lfDone()" style="flex:1;text-align:center">Skip</button>
+        </div>
       </div>
     </div>
 
@@ -1371,6 +1377,11 @@ html, body { overscroll-behavior-x: none; }
       }, 700);
     }, 550);
   }
+
+  window.lfBack=function(){
+    stopTimer();
+    if(cur>0){ setSlide(cur-1); startTimer(); }
+  };
 
   window.lfNext=function(){
     stopTimer();
@@ -1846,9 +1857,8 @@ html, body { overscroll-behavior-x: none; }
         <button class="auth-btn" id="auth-header-btn" onclick="openAuthModal()" style="padding:6px 8px;gap:4px">
           <div class="sync-dot offline" id="sync-indicator"></div>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span id="auth-header-label" style="display:none">Sign In</span>
+          <span id="auth-header-label" style="display:inline;font-size:12px;font-weight:600">Sign In</span>
         </button>
-        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
         <button class="hamburger-btn" id="hamburger-btn" onclick="openMenu()" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
@@ -2290,16 +2300,16 @@ html, body { overscroll-behavior-x: none; }
             <!-- ══ WATER FILL clipped to circle ══ -->
             <g clip-path="url(#pig-body-clip)">
               <rect id="pig-water-rect" x="10" y="190" width="180" height="100"
-                    fill="var(--text)" opacity="0.12"/>
+                    fill="#4b6cb7" opacity="0.55"/>
               <g id="pig-wave-back-g">
                 <path class="pig-wave-slow" id="pig-wave-back"
                   d="M-400,190 Q-370,180 -340,190 Q-310,200 -280,190 Q-250,180 -220,190 Q-190,200 -160,190 Q-130,180 -100,190 Q-70,200 -40,190 Q-10,180 20,190 Q50,200 80,190 Q110,180 140,190 Q170,200 200,190 Q230,180 260,190 Q290,200 320,190 Q350,180 380,190 Q410,200 440,190 L440,300 L-400,300 Z"
-                  fill="var(--text)" opacity="0.09"/>
+                  fill="#7b9ed9" opacity="0.5"/>
               </g>
               <g id="pig-wave-front-g">
                 <path class="pig-wave" id="pig-wave-front"
                   d="M-400,190 Q-370,183 -340,190 Q-310,197 -280,190 Q-250,183 -220,190 Q-190,197 -160,190 Q-130,183 -100,190 Q-70,197 -40,190 Q-10,183 20,190 Q50,197 80,190 Q110,183 140,190 Q170,197 200,190 Q230,183 260,190 Q290,197 320,190 Q350,183 380,190 Q410,197 440,190 L440,300 L-400,300 Z"
-                  fill="var(--text)" opacity="0.18"/>
+                  fill="#a8c4e8" opacity="0.6"/>
               </g>
             </g>
 
@@ -5399,7 +5409,8 @@ function _updatePigWater(pct) {
   if (!rect) return;
 
   // Smooth transition on the rect y
-  rect.style.transition = 'none'; // SVG attr changes — use JS interpolation below
+  // Animate water level smoothly
+  rect.style.transition = 'y 1.2s cubic-bezier(.4,0,.2,1)';
   rect.setAttribute('y', waterY);
   rect.setAttribute('height', 300);
 
@@ -5411,7 +5422,7 @@ function _updatePigWater(pct) {
     label.textContent = pct + '%';
     // Centre of body is around y=118; if water is above that, invert label colour
     const centrY = 100;
-    label.setAttribute('fill', waterY < centrY - 10 ? 'var(--surface)' : 'var(--text)');
+    label.setAttribute('fill', waterY < centrY + 20 ? '#ffffff' : 'var(--text)');
   }
 }
 
