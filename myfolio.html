@@ -1342,6 +1342,12 @@ html, body { overscroll-behavior-x: none; }
       </div>
       <span class="action-label">Add Invest</span>
     </button>
+    <button class="action-btn" onclick="openSavingsGoalModal()">
+      <div class="action-icon" style="background:rgba(160,96,16,.1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <span class="action-label">Set Goal</span>
+    </button>
   </div>
   <div class="action-row" id="action-row-budget">
     <button class="action-btn" onclick="openBgtModal('income')">
@@ -1541,7 +1547,7 @@ html, body { overscroll-behavior-x: none; }
   </div><!-- end view-budget -->
 
 <!-- ══════════ INVEST & SAVINGS VIEW ══════════ -->
-<div id="view-invest" style="display:none;padding-top:8px">
+<div id="view-invest" style="display:none;padding-top:8px;overflow:visible">
   <!-- Summary hero row -->
   <div class="bgt-hero-row" style="grid-template-columns:repeat(3,1fr)">
     <div class="bgt-hero-card">
@@ -1601,50 +1607,107 @@ html, body { overscroll-behavior-x: none; }
       </div>
 
       <!-- Investment transactions -->
-      <div id="invest-tx-list" class="bgt-tx-list" style="max-height:280px"></div>
+      <div id="invest-tx-list" class="bgt-tx-list"></div>
     </div>
 
     <!-- ══ SAVINGS POT ══ -->
     <div class="bgt-savings-section" style="margin-bottom:24px">
       <div class="sec-hdr" style="margin-bottom:14px">
         <div class="sec-title">Savings Pot</div>
-        <button class="btn-add-holding" onclick="openSavingsModal()" style="font-size:10px;padding:6px 12px">+ Add Savings</button>
-      </div>
-
-      <!-- Savings overview -->
-      <div class="bgt-savings-overview">
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Total Saved</div>
-          <div class="bgt-savings-big" id="sav-total">€0.00</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">Goal</div>
-          <div class="bgt-savings-big" id="sav-goal-display">—</div>
-        </div>
-        <div class="bgt-savings-stat">
-          <div class="bgt-card-lbl">To Goal</div>
-          <div class="bgt-savings-big" id="sav-remaining">—</div>
-        </div>
-        <div>
-          <div class="bgt-card-lbl" style="margin-bottom:6px">Progress</div>
-          <div class="bgt-progress-bg" style="height:8px">
-            <div class="bgt-progress-fill" id="sav-progress-fill" style="width:0%;background:var(--text)"></div>
+        <div style="position:relative">
+          <button class="btn-more" id="sav-menu-btn" onclick="toggleSavMenu(event)" style="width:32px;height:32px;border-radius:10px;background:var(--surface2);border:none;color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;letter-spacing:1px">···</button>
+          <div class="dropdown-menu" id="sav-menu" style="display:none;position:absolute;right:0;top:38px;background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:6px;min-width:160px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.14);animation:modalIn .15s ease">
+            <button onclick="openSavingsModal();closeSavMenu()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;text-align:left" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Savings
+            </button>
+            <button onclick="openSavingsGoalModal();closeSavMenu()" style="display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer;text-align:left" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background='none'">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Set Goal
+            </button>
           </div>
-          <div style="font-size:10px;color:var(--muted);margin-top:4px" id="sav-progress-pct">0% of goal</div>
         </div>
       </div>
 
-      <!-- Savings goal input -->
-      <div style="display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;flex-wrap:wrap">
-        <div class="f-group" style="flex:1;min-width:140px;margin:0">
-          <label class="f-label">Savings Goal (€)</label>
-          <input class="f-input" id="sav-goal-inp" type="number" step="1" min="0" placeholder="e.g. 5000">
+      <!-- Animated Piggy Bank -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:8px 0 4px">
+        <!-- Pig SVG with water fill -->
+        <div style="position:relative;width:200px;height:200px" id="sav-pig-wrap">
+          <svg id="sav-pig-svg" viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <style>
+                @keyframes wave-move {
+                  0%   { transform: translateX(0); }
+                  100% { transform: translateX(-50%); }
+                }
+                .pig-wave      { animation: wave-move 2.4s linear infinite; }
+                .pig-wave-slow { animation: wave-move 3.8s linear infinite; }
+                @keyframes pig-fill-in {
+                  from { opacity:0; transform:translateY(8px); }
+                  to   { opacity:1; transform:translateY(0); }
+                }
+                #sav-pig-svg { animation: pig-fill-in .5s ease both; }
+              </style>
+              <clipPath id="pig-body-clip">
+                <circle cx="100" cy="100" r="88"/>
+              </clipPath>
+            </defs>
+
+            <!-- ══ WATER FILL clipped to circle ══ -->
+            <g clip-path="url(#pig-body-clip)">
+              <rect id="pig-water-rect" x="10" y="190" width="180" height="100"
+                    fill="var(--text)" opacity="0.12"/>
+              <g id="pig-wave-back-g">
+                <path class="pig-wave-slow" id="pig-wave-back"
+                  d="M-400,190 Q-370,180 -340,190 Q-310,200 -280,190 Q-250,180 -220,190 Q-190,200 -160,190 Q-130,180 -100,190 Q-70,200 -40,190 Q-10,180 20,190 Q50,200 80,190 Q110,180 140,190 Q170,200 200,190 Q230,180 260,190 Q290,200 320,190 Q350,180 380,190 Q410,200 440,190 L440,300 L-400,300 Z"
+                  fill="var(--text)" opacity="0.09"/>
+              </g>
+              <g id="pig-wave-front-g">
+                <path class="pig-wave" id="pig-wave-front"
+                  d="M-400,190 Q-370,183 -340,190 Q-310,197 -280,190 Q-250,183 -220,190 Q-190,197 -160,190 Q-130,183 -100,190 Q-70,197 -40,190 Q-10,183 20,190 Q50,197 80,190 Q110,183 140,190 Q170,197 200,190 Q230,183 260,190 Q290,197 320,190 Q350,183 380,190 Q410,197 440,190 L440,300 L-400,300 Z"
+                  fill="var(--text)" opacity="0.18"/>
+              </g>
+            </g>
+
+            <!-- ══ CIRCLE OUTLINE ══ -->
+            <circle cx="100" cy="100" r="88"
+                    fill="none" stroke="var(--text)" stroke-width="5.5"/>
+
+            <!-- ══ % LABEL ══ -->
+            <text id="pig-pct-label"
+                  x="100" y="110"
+                  text-anchor="middle"
+                  font-family="-apple-system,BlinkMacSystemFont,sans-serif"
+                  font-size="34" font-weight="700"
+                  fill="var(--text)">0%</text>
+          </svg>
         </div>
-        <button class="btn-primary" style="padding:9px 16px;font-size:10px;white-space:nowrap" onclick="setSavingsGoal()">Set Goal</button>
+
+        <!-- Stats row below pig -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;width:100%;background:var(--surface2);border-radius:14px;overflow:hidden">
+          <div style="padding:14px 10px;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">Saved</div>
+            <div class="bgt-savings-big" id="sav-total" style="font-size:14px">€0.00</div>
+          </div>
+          <div style="padding:14px 10px;text-align:center;border-right:1px solid var(--border)">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">Goal</div>
+            <div class="bgt-savings-big" id="sav-goal-display" style="font-size:14px">—</div>
+          </div>
+          <div style="padding:14px 10px;text-align:center">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;margin-bottom:4px">To Go</div>
+            <div class="bgt-savings-big" id="sav-remaining" style="font-size:14px">—</div>
+          </div>
+        </div>
+
+        <!-- Hidden elements for JS compat -->
+        <div style="display:none">
+          <div id="sav-progress-fill" style="width:0%"></div>
+          <div id="sav-progress-pct">0% of goal</div>
+        </div>
       </div>
 
       <!-- Savings transactions -->
-      <div id="sav-tx-list" class="bgt-tx-list" style="max-height:260px"></div>
+      <div id="sav-tx-list" class="bgt-tx-list"></div>
     </div>
 
 </div><!-- end view-invest -->
@@ -1756,6 +1819,24 @@ html, body { overscroll-behavior-x: none; }
   </div>
 </div>
 
+<div class="overlay hidden" id="sav-goal-modal">
+  <div class="modal" style="max-width:340px">
+    <div class="modal-hd">
+      <span class="modal-title">🎯 Set Savings Goal</span>
+      <button class="modal-x" onclick="closeSavingsGoalModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="f-group" style="margin-bottom:10px">
+        <label class="f-label">Goal Amount (€)</label>
+        <input class="f-input" id="sav-goal-modal-inp" type="number" step="1" min="0" placeholder="e.g. 5000">
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeSavingsGoalModal()">Cancel</button>
+      <button class="btn-primary" onclick="confirmSetSavingsGoal()">Set Goal</button>
+    </div>
+  </div>
+</div>
 
 <div class="overlay hidden" id="bgt-goal-modal">
   <div class="modal" style="max-width:400px">
@@ -4597,16 +4678,17 @@ function renderSavings(allEntries) {
     const pct = Math.min(100, Math.round((total / goal) * 100));
     document.getElementById('sav-goal-display').textContent = fmt(goal);
     const remaining = goal - total;
-    document.getElementById('sav-remaining').textContent = remaining > 0 ? fmt(remaining) : 'Goal reached!';
-    document.getElementById('sav-remaining').style.color = remaining <= 0 ? 'var(--accent)' : 'var(--muted)';
+    document.getElementById('sav-remaining').textContent = remaining > 0 ? fmt(remaining) : '🎉 Done!';
+    document.getElementById('sav-remaining').style.color = remaining <= 0 ? 'var(--green)' : 'var(--muted)';
     document.getElementById('sav-progress-fill').style.width = pct + '%';
     document.getElementById('sav-progress-pct').textContent = pct + '% of goal';
-    if (document.getElementById('sav-goal-inp').value === '') document.getElementById('sav-goal-inp').placeholder = goal;
+    _updatePigWater(pct);
   } else {
     document.getElementById('sav-goal-display').textContent = '—';
     document.getElementById('sav-remaining').textContent = '—';
     document.getElementById('sav-progress-fill').style.width = '0%';
     document.getElementById('sav-progress-pct').textContent = 'No goal set';
+    _updatePigWater(0);
   }
 
   // Render transaction list
@@ -4626,6 +4708,40 @@ function renderSavings(allEntries) {
   });
 }
 
+function _updatePigWater(pct) {
+  // Circle: cx=100 cy=100 r=88 => top=12, bottom=188
+  const bodyTop    = 12;
+  const bodyBottom = 188;
+  const totalHeight = bodyBottom - bodyTop; // 176
+
+  const waterY = bodyBottom - (pct / 100) * totalHeight;
+  const waveBase = 190;
+  const offset   = waterY - waveBase;
+
+  const rect    = document.getElementById('pig-water-rect');
+  const frontG  = document.getElementById('pig-wave-front-g');
+  const backG   = document.getElementById('pig-wave-back-g');
+  const label   = document.getElementById('pig-pct-label');
+
+  if (!rect) return;
+
+  // Smooth transition on the rect y
+  rect.style.transition = 'none'; // SVG attr changes — use JS interpolation below
+  rect.setAttribute('y', waterY);
+  rect.setAttribute('height', 300);
+
+  const shiftStr = `translateY(${offset}px)`;
+  if (frontG) { frontG.style.transition = 'transform 1.2s cubic-bezier(.4,0,.2,1)'; frontG.style.transform = shiftStr; }
+  if (backG)  { backG.style.transition  = 'transform 1.2s cubic-bezier(.4,0,.2,1)'; backG.style.transform  = shiftStr; }
+
+  if (label) {
+    label.textContent = pct + '%';
+    // Centre of body is around y=118; if water is above that, invert label colour
+    const centrY = 100;
+    label.setAttribute('fill', waterY < centrY - 10 ? 'var(--surface)' : 'var(--text)');
+  }
+}
+
 function setSavingsGoal() {
   const val = parseFloat(document.getElementById('sav-goal-inp').value);
   if (!val || val <= 0) { showToast('Enter a valid goal amount'); return; }
@@ -4642,6 +4758,37 @@ function openSavingsModal() {
   document.getElementById('sav-modal').classList.remove('hidden');
 }
 function closeSavingsModal() { document.getElementById('sav-modal').classList.add('hidden'); }
+
+function openSavingsGoalModal() {
+  const g = savingsGoalLoad();
+  const inp = document.getElementById('sav-goal-modal-inp');
+  if (inp) inp.value = g > 0 ? g : '';
+  document.getElementById('sav-goal-modal').classList.remove('hidden');
+}
+function closeSavingsGoalModal() { document.getElementById('sav-goal-modal').classList.add('hidden'); }
+function confirmSetSavingsGoal() {
+  const val = parseFloat(document.getElementById('sav-goal-modal-inp').value);
+  if (!val || val <= 0) { showToast('Enter a valid goal amount'); return; }
+  savingsGoalSave(val);
+  closeSavingsGoalModal();
+  renderSavings();
+  showToast('Savings goal set ✓');
+}
+
+function toggleSavMenu(e) {
+  e.stopPropagation();
+  const m = document.getElementById('sav-menu');
+  if (!m) return;
+  const isOpen = m.style.display !== 'none';
+  m.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    setTimeout(() => document.addEventListener('click', closeSavMenu, { once: true }), 0);
+  }
+}
+function closeSavMenu() {
+  const m = document.getElementById('sav-menu');
+  if (m) m.style.display = 'none';
+}
 function confirmAddSavings() {
   const amt = parseFloat(document.getElementById('sav-amount').value);
   const note = document.getElementById('sav-note').value.trim();
@@ -5344,7 +5491,7 @@ function initBudget() {
   setTimeout(() => { if(window._attachBarTooltip) window._attachBarTooltip(); }, 300);
   // Show saved goal in placeholder
   const g = savingsGoalLoad();
-  if (g > 0) document.getElementById('sav-goal-inp').placeholder = g;
+  // goal set via modal
   // Attach donut tooltip
   setTimeout(attachDonutTooltip, 400);
 }
