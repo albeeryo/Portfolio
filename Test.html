@@ -879,6 +879,19 @@ html, body { overscroll-behavior-x: none; }
 
 
 /* ══════════ ONBOARDING ══════════ */
+
+/* entrance keyframes */
+@keyframes ob-fade-up   { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
+@keyframes ob-fade-down { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
+@keyframes ob-scale-in  { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:scale(1)} }
+@keyframes ob-float     { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-10px)} }
+@keyframes ob-float-slow{ 0%,100%{transform:translateY(0px) rotate(-2deg)} 50%{transform:translateY(-7px) rotate(2deg)} }
+@keyframes ob-pulse-dot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:.6} }
+@keyframes ob-draw-line { from{stroke-dashoffset:300} to{stroke-dashoffset:0} }
+@keyframes ob-bar-grow  { from{transform:scaleY(0);transform-origin:bottom} to{transform:scaleY(1);transform-origin:bottom} }
+@keyframes ob-spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+@keyframes ob-shimmer   { 0%,100%{opacity:.7} 50%{opacity:1} }
+
 #ob-overlay {
   position: fixed;
   inset: 0;
@@ -918,11 +931,24 @@ html, body { overscroll-behavior-x: none; }
   align-items: center;
   justify-content: center;
   position: relative;
+  animation: ob-scale-in 0.55s cubic-bezier(0.34,1.2,0.64,1) both;
 }
 .ob-visual svg {
   width: min(220px, 56vw);
   height: auto;
 }
+/* SVG illustration animations */
+.ob-visual .ob-line      { stroke-dasharray:300; animation: ob-draw-line 1.2s 0.4s ease both; }
+.ob-visual .ob-float     { animation: ob-float 3s ease-in-out infinite; }
+.ob-visual .ob-float-b   { animation: ob-float-slow 4s ease-in-out infinite; }
+.ob-visual .ob-bar1      { animation: ob-bar-grow 0.6s 0.5s ease both; }
+.ob-visual .ob-bar2      { animation: ob-bar-grow 0.6s 0.65s ease both; }
+.ob-visual .ob-bar3      { animation: ob-bar-grow 0.6s 0.8s ease both; }
+.ob-visual .ob-bar4      { animation: ob-bar-grow 0.6s 0.95s ease both; }
+.ob-visual .ob-bar5      { animation: ob-bar-grow 0.6s 1.1s ease both; }
+.ob-visual .ob-dot-pulse { animation: ob-pulse-dot 1.4s 0.8s ease-in-out infinite; }
+.ob-visual .ob-donut     { animation: ob-spin-slow 12s linear infinite; transform-origin:50% 50%; }
+.ob-visual .ob-shimmer   { animation: ob-shimmer 2s 0.5s ease-in-out infinite; }
 
 /* text + controls zone */
 .ob-body {
@@ -931,6 +957,7 @@ html, body { overscroll-behavior-x: none; }
   flex-direction: column;
   padding: 0 32px;
   min-height: 0;
+  animation: ob-fade-up 0.5s 0.2s cubic-bezier(0.4,0,0.2,1) both;
 }
 .ob-step {
   font-size: 10px;
@@ -967,6 +994,7 @@ html, body { overscroll-behavior-x: none; }
   flex-direction: column;
   gap: 12px;
   flex-shrink: 0;
+  animation: ob-fade-up 0.5s 0.35s cubic-bezier(0.4,0,0.2,1) both;
 }
 .ob-dots {
   display: flex;
@@ -1032,6 +1060,7 @@ html, body { overscroll-behavior-x: none; }
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  animation: ob-fade-down 0.5s 0.1s cubic-bezier(0.4,0,0.2,1) both;
 }
 .ob-auth-logo {
   width: 56px;
@@ -1063,6 +1092,7 @@ html, body { overscroll-behavior-x: none; }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  animation: ob-fade-up 0.5s 0.25s cubic-bezier(0.4,0,0.2,1) both;
 }
 .ob-tabs {
   display: flex;
@@ -1169,6 +1199,7 @@ html, body { overscroll-behavior-x: none; }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  animation: ob-fade-up 0.5s 0.4s cubic-bezier(0.4,0,0.2,1) both;
 }
 .ob-auth-submit {
   width: 100%;
@@ -1201,6 +1232,180 @@ html, body { overscroll-behavior-x: none; }
 </head>
 <body>
 
+<!-- ══════════ ONBOARDING ══════════ -->
+<div id="ob-overlay">
+  <div class="ob-track" id="ob-track">
+
+    <!-- Slide 1 -->
+    <div class="ob-slide">
+      <div class="ob-visual">
+        <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect x="20" y="30" width="180" height="130" rx="18" fill="#ffffff" stroke="rgba(0,0,0,.06)" stroke-width="1"/>
+          <line x1="40" y1="80" x2="180" y2="80" stroke="rgba(0,0,0,.05)" stroke-width="1"/>
+          <line x1="40" y1="105" x2="180" y2="105" stroke="rgba(0,0,0,.05)" stroke-width="1"/>
+          <line x1="40" y1="130" x2="180" y2="130" stroke="rgba(0,0,0,.05)" stroke-width="1"/>
+          <path class="ob-shimmer" d="M40,145 L65,122 L90,130 L115,100 L140,88 L165,68 L190,55 L190,155 L40,155Z" fill="rgba(17,17,17,.06)"/>
+          <path class="ob-line" d="M40,145 L65,122 L90,130 L115,100 L140,88 L165,68 L190,55" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="300"/>
+          <circle class="ob-dot-pulse" cx="190" cy="55" r="4" fill="#111111"/>
+          <rect x="60" y="46" width="66" height="18" rx="9" fill="rgba(0,0,0,.06)"/>
+          <text x="93" y="58" text-anchor="middle" font-size="8" fill="#555555" font-weight="600" font-family="system-ui">+4.2% today</text>
+          <g class="ob-float">
+            <circle cx="65" cy="185" r="14" fill="#f5f3ef" stroke="rgba(0,0,0,.08)" stroke-width="1"/>
+            <text x="65" y="190" text-anchor="middle" font-size="11" fill="#888">₿</text>
+          </g>
+          <g class="ob-float-b">
+            <circle cx="110" cy="185" r="14" fill="#f5f3ef" stroke="rgba(0,0,0,.08)" stroke-width="1"/>
+            <text x="110" y="190" text-anchor="middle" font-size="11" fill="#888">Ξ</text>
+          </g>
+          <g class="ob-float" style="animation-delay:.6s">
+            <circle cx="155" cy="185" r="14" fill="#f5f3ef" stroke="rgba(0,0,0,.08)" stroke-width="1"/>
+            <text x="155" y="190" text-anchor="middle" font-size="11" fill="#888">◎</text>
+          </g>
+        </svg>
+      </div>
+      <div class="ob-body">
+        <div class="ob-step">1 of 3</div>
+        <div class="ob-title">Track your crypto portfolio</div>
+        <div class="ob-desc">Live prices, P&L and charts — all your holdings in one clean view.</div>
+      </div>
+      <div class="ob-foot">
+        <div class="ob-dots">
+          <div class="ob-dot on" style="width:20px"></div>
+          <div class="ob-dot" style="width:8px"></div>
+          <div class="ob-dot" style="width:8px"></div>
+        </div>
+        <button class="ob-btn-main" onclick="obNext()">Continue</button>
+        <button class="ob-btn-skip" onclick="obToAuth()">Skip</button>
+      </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="ob-slide">
+      <div class="ob-visual">
+        <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <g class="ob-float" style="animation-duration:3.5s">
+            <rect x="20" y="24" width="180" height="70" rx="16" fill="#ffffff" stroke="rgba(0,0,0,.06)" stroke-width="1"/>
+            <text x="40" y="50" font-size="9" fill="#aaaaaa" font-weight="600" font-family="system-ui" letter-spacing="1">MONTHLY BUDGET</text>
+            <text x="40" y="68" font-size="20" fill="#111111" font-weight="700" font-family="system-ui">€ 3,200</text>
+            <rect x="40" y="76" width="140" height="5" rx="2.5" fill="#eeeeee"/>
+            <rect x="40" y="76" width="92" height="5" rx="2.5" fill="#111111"/>
+          </g>
+          <g class="ob-float-b" style="animation-delay:.3s">
+            <rect x="20" y="108" width="84" height="52" rx="14" fill="#ffffff" stroke="rgba(0,0,0,.06)" stroke-width="1"/>
+            <text x="36" y="130" font-size="14" font-family="system-ui">🍔</text>
+            <text x="54" y="128" font-size="8" fill="#aaaaaa" font-weight="600" font-family="system-ui">Food</text>
+            <text x="54" y="142" font-size="13" fill="#111111" font-weight="700" font-family="system-ui">€420</text>
+          </g>
+          <g class="ob-float" style="animation-delay:.5s;animation-duration:4s">
+            <rect x="116" y="108" width="84" height="52" rx="14" fill="#ffffff" stroke="rgba(0,0,0,.06)" stroke-width="1"/>
+            <text x="132" y="130" font-size="14" font-family="system-ui">🏠</text>
+            <text x="150" y="128" font-size="8" fill="#aaaaaa" font-weight="600" font-family="system-ui">Rent</text>
+            <text x="150" y="142" font-size="13" fill="#111111" font-weight="700" font-family="system-ui">€950</text>
+          </g>
+          <g class="ob-donut">
+            <circle cx="110" cy="188" r="22" stroke="#eeeeee" stroke-width="7" fill="none"/>
+            <circle cx="110" cy="188" r="22" stroke="#111111" stroke-width="7" fill="none" stroke-dasharray="69 69" stroke-dashoffset="17" stroke-linecap="round"/>
+            <circle cx="110" cy="188" r="22" stroke="#999999" stroke-width="7" fill="none" stroke-dasharray="35 103" stroke-dashoffset="-52" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="ob-body">
+        <div class="ob-step">2 of 3</div>
+        <div class="ob-title">Master your budget</div>
+        <div class="ob-desc">Log income and expenses, set goals and see exactly where your money goes.</div>
+      </div>
+      <div class="ob-foot">
+        <div class="ob-dots">
+          <div class="ob-dot" style="width:8px"></div>
+          <div class="ob-dot on" style="width:20px"></div>
+          <div class="ob-dot" style="width:8px"></div>
+        </div>
+        <button class="ob-btn-main" onclick="obNext()">Continue</button>
+        <button class="ob-btn-skip" onclick="obToAuth()">Skip</button>
+      </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="ob-slide">
+      <div class="ob-visual">
+        <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <rect class="ob-bar1" x="36"  y="130" width="24" height="60" rx="7" fill="#eeeeee"/>
+          <rect class="ob-bar2" x="70"  y="110" width="24" height="80" rx="7" fill="#dddddd"/>
+          <rect class="ob-bar3" x="104" y="85"  width="24" height="105" rx="7" fill="#bbbbbb"/>
+          <rect class="ob-bar4" x="138" y="60"  width="24" height="130" rx="7" fill="#888888"/>
+          <rect class="ob-bar5" x="172" y="40"  width="24" height="150" rx="7" fill="#111111"/>
+          <path class="ob-line" d="M48,182 L82,162 L116,140 L150,112 L184,88" stroke="#111111" stroke-width="1.5" stroke-dasharray="300" stroke-linecap="round"/>
+          <g class="ob-float" style="animation-duration:2.5s">
+            <rect x="60" y="26" width="100" height="26" rx="13" fill="#111111"/>
+            <text x="110" y="43" text-anchor="middle" font-size="10" fill="#ffffff" font-weight="700" font-family="system-ui">+28.4% YTD</text>
+          </g>
+          <rect x="36"  y="200" width="44" height="16" rx="8" fill="#eeeeee"/>
+          <text x="58"  y="212" text-anchor="middle" font-size="8" fill="#555555" font-weight="600" font-family="system-ui">ETF</text>
+          <rect x="90"  y="200" width="50" height="16" rx="8" fill="#eeeeee"/>
+          <text x="115" y="212" text-anchor="middle" font-size="8" fill="#555555" font-weight="600" font-family="system-ui">STOCKS</text>
+          <rect x="150" y="200" width="46" height="16" rx="8" fill="#eeeeee"/>
+          <text x="173" y="212" text-anchor="middle" font-size="8" fill="#555555" font-weight="600" font-family="system-ui">BONDS</text>
+        </svg>
+      </div>
+      <div class="ob-body">
+        <div class="ob-step">3 of 3</div>
+        <div class="ob-title">Grow with smart investing</div>
+        <div class="ob-desc">Track ETFs, stocks and bonds. DCA strategies to build wealth over time.</div>
+      </div>
+      <div class="ob-foot">
+        <div class="ob-dots">
+          <div class="ob-dot" style="width:8px"></div>
+          <div class="ob-dot" style="width:8px"></div>
+          <div class="ob-dot on" style="width:20px"></div>
+        </div>
+        <button class="ob-btn-main" onclick="obNext()">Get Started</button>
+        <button class="ob-btn-skip" onclick="obToAuth()">Skip</button>
+      </div>
+    </div>
+
+    <!-- Auth slide -->
+    <div class="ob-auth">
+      <div class="ob-auth-top">
+        <img class="ob-auth-logo" src="data:image/png;base64,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" alt="LucidFolio">
+        <div class="ob-auth-h">Welcome to LucidFolio</div>
+        <div class="ob-auth-sub">Sign in to sync across devices, or skip to use offline.</div>
+      </div>
+      <div class="ob-auth-form">
+        <div class="ob-tabs">
+          <button class="ob-tab on" id="ob-t-in"  onclick="obTab('signin')">Sign In</button>
+          <button class="ob-tab"    id="ob-t-up"  onclick="obTab('signup')">Create Account</button>
+        </div>
+        <div class="ob-err" id="ob-err"></div>
+        <div class="ob-suc" id="ob-suc"></div>
+        <button class="ob-google" onclick="obGoogle()">
+          <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <div class="ob-divider"><span>or</span></div>
+        <div class="ob-field">
+          <label>Email</label>
+          <input type="email" id="ob-email" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <div class="ob-field">
+          <label>Password</label>
+          <input type="password" id="ob-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')obSubmit()">
+        </div>
+        <div class="ob-field" id="ob-name-wrap" style="display:none">
+          <label>Display Name</label>
+          <input type="text" id="ob-name" placeholder="Your name">
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="ob-forgot" id="ob-forgot" onclick="obForgot()">Forgot password?</button>
+        </div>
+      </div>
+      <div class="ob-auth-foot">
+        <button class="ob-auth-submit" id="ob-submit" onclick="obSubmit()">Sign In</button>
+        <button class="ob-guest" onclick="obDone()">Continue without signing in</button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
 <!-- AUTH MODAL -->
@@ -2589,6 +2794,7 @@ async function doSignOut() {
   updateAuthHeaderUI(null);
   closeAuthModal();
   showToast('Signed out');
+  if(typeof obSignedOut==='function') obSignedOut();
 }
 
 // ── State & save ────────────────────────
@@ -6888,30 +7094,71 @@ init();
 </div>
 
 <script>
-
 (function(){
   const KEY = 'lf_seen_v1';
   let cur = 0;
   const SLIDES = 3;
 
-  function setSlide(i){ document.getElementById('ob-track').style.transform=`translateX(-${i*100}vw)`; }
-  function hide(){
-    const el=document.getElementById('ob-overlay');
-    el.style.opacity='0';
-    setTimeout(()=>el.classList.add('ob-hidden'),350);
+  /* ── slide transition ── */
+  function setSlide(i){
+    const track = document.getElementById('ob-track');
+    track.style.transform = `translateX(-${i*100}vw)`;
+    // animate the incoming slide's content
+    const slides = track.querySelectorAll('.ob-slide, .ob-auth');
+    const target = slides[i];
+    if(!target) return;
+    // reset then replay entrance on the content blocks
+    ['ob-body','ob-foot','ob-visual','ob-auth-top','ob-auth-form','ob-auth-foot'].forEach(cls=>{
+      const el = target.querySelector('.'+cls);
+      if(!el) return;
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
   }
 
-  window.obNext = function(){ cur<SLIDES-1 ? setSlide(++cur) : obToAuth(); };
-  window.obToAuth = function(){ cur=SLIDES; setSlide(cur); };
-  window.obDone = function(){ localStorage.setItem(KEY,'1'); hide(); };
+  /* ── show / hide overlay ── */
+  function show(){
+    const el = document.getElementById('ob-overlay');
+    el.classList.remove('ob-hidden');
+    el.style.opacity = '0';
+    void el.offsetWidth;
+    el.style.opacity = '1';
+    // reset to slide 0
+    cur = 0;
+    document.getElementById('ob-track').style.transition = 'none';
+    document.getElementById('ob-track').style.transform = 'translateX(0)';
+    void document.getElementById('ob-track').offsetWidth;
+    document.getElementById('ob-track').style.transition = '';
+  }
+
+  function hide(){
+    const el = document.getElementById('ob-overlay');
+    el.style.opacity = '0';
+    setTimeout(()=>{ el.classList.add('ob-hidden'); el.style.opacity = '1'; }, 380);
+  }
+
+  /* ── public API ── */
+  window.obNext = function(){
+    cur < SLIDES-1 ? setSlide(++cur) : obToAuth();
+  };
+  window.obToAuth = function(){ cur = SLIDES; setSlide(cur); };
+  window.obDone = function(){
+    localStorage.setItem(KEY,'1');
+    hide();
+  };
+  /* called by doSignOut so onboarding shows next refresh */
+  window.obSignedOut = function(){
+    localStorage.removeItem(KEY);
+  };
 
   window.obTab = function(t){
-    const si=t==='signin';
-    document.getElementById('ob-t-in').classList.toggle('on',si);
-    document.getElementById('ob-t-up').classList.toggle('on',!si);
-    document.getElementById('ob-submit').textContent=si?'Sign In':'Create Account';
-    document.getElementById('ob-name-wrap').style.display=si?'none':'flex';
-    document.getElementById('ob-forgot').style.display=si?'block':'none';
+    const si = t==='signin';
+    document.getElementById('ob-t-in').classList.toggle('on', si);
+    document.getElementById('ob-t-up').classList.toggle('on', !si);
+    document.getElementById('ob-submit').textContent = si ? 'Sign In' : 'Create Account';
+    document.getElementById('ob-name-wrap').style.display = si ? 'none' : 'flex';
+    document.getElementById('ob-forgot').style.display = si ? 'block' : 'none';
     document.getElementById('ob-err').classList.remove('on');
     document.getElementById('ob-suc').classList.remove('on');
   };
@@ -6919,62 +7166,70 @@ init();
   window.obGoogle = function(){
     if(typeof doGoogle==='function'){
       if(typeof firebase!=='undefined'&&firebase.auth){
-        const u=firebase.auth().onAuthStateChanged(user=>{if(user){obDone();u();}});
+        const u=firebase.auth().onAuthStateChanged(user=>{ if(user){ obDone(); u(); } });
       }
       doGoogle();
     }
   };
 
   window.obSubmit = function(){
-    const si=document.getElementById('ob-t-in').classList.contains('on');
-    const em=document.getElementById('ob-email').value.trim();
-    const pw=document.getElementById('ob-pass').value;
-    const err=document.getElementById('ob-err');
-    const suc=document.getElementById('ob-suc');
+    const si = document.getElementById('ob-t-in').classList.contains('on');
+    const em = document.getElementById('ob-email').value.trim();
+    const pw = document.getElementById('ob-pass').value;
+    const err = document.getElementById('ob-err');
+    const suc = document.getElementById('ob-suc');
     err.classList.remove('on'); suc.classList.remove('on');
-    if(!em||!pw){err.textContent='Please enter your email and password.';err.classList.add('on');return;}
-    const btn=document.getElementById('ob-submit');
+    if(!em||!pw){ err.textContent='Please enter your email and password.'; err.classList.add('on'); return; }
+    const btn = document.getElementById('ob-submit');
     btn.textContent='…'; btn.disabled=true;
     if(typeof firebase==='undefined'||!firebase.auth){
-      err.textContent='Auth unavailable — continue as guest.';err.classList.add('on');
-      btn.textContent=si?'Sign In':'Create Account';btn.disabled=false;return;
+      err.textContent='Auth unavailable — continue as guest.'; err.classList.add('on');
+      btn.textContent=si?'Sign In':'Create Account'; btn.disabled=false; return;
     }
-    const auth=firebase.auth();
-    (si?auth.signInWithEmailAndPassword(em,pw):auth.createUserWithEmailAndPassword(em,pw))
+    const auth = firebase.auth();
+    (si ? auth.signInWithEmailAndPassword(em,pw) : auth.createUserWithEmailAndPassword(em,pw))
     .then(c=>{
       const nm=document.getElementById('ob-name')?.value?.trim();
-      if(!si&&nm&&c.user)return c.user.updateProfile({displayName:nm}).then(()=>c);
+      if(!si&&nm&&c.user) return c.user.updateProfile({displayName:nm}).then(()=>c);
       return c;
     }).then(()=>{
-      suc.textContent=si?'Signed in! Loading…':'Account created!';suc.classList.add('on');
-      setTimeout(obDone,700);
+      suc.textContent = si?'Signed in! Loading…':'Account created!'; suc.classList.add('on');
+      setTimeout(obDone, 700);
     }).catch(e=>{
       const m={'auth/wrong-password':'Incorrect password.','auth/user-not-found':'No account with this email.','auth/email-already-in-use':'Email already registered.','auth/weak-password':'Password needs 6+ characters.','auth/invalid-email':'Invalid email address.','auth/invalid-credential':'Invalid email or password.'};
-      err.textContent=m[e.code]||e.message;err.classList.add('on');
-      btn.textContent=si?'Sign In':'Create Account';btn.disabled=false;
+      err.textContent=m[e.code]||e.message; err.classList.add('on');
+      btn.textContent=si?'Sign In':'Create Account'; btn.disabled=false;
     });
   };
 
   window.obForgot = function(){
     const em=document.getElementById('ob-email').value.trim();
-    const err=document.getElementById('ob-err');const suc=document.getElementById('ob-suc');
-    err.classList.remove('on');suc.classList.remove('on');
-    if(!em){err.textContent='Enter your email above first.';err.classList.add('on');return;}
-    if(typeof firebase==='undefined'||!firebase.auth)return;
-    firebase.auth().sendPasswordResetEmail(em).then(()=>{suc.textContent='Reset email sent!';suc.classList.add('on');}).catch(e=>{err.textContent=e.message;err.classList.add('on');});
+    const err=document.getElementById('ob-err'); const suc=document.getElementById('ob-suc');
+    err.classList.remove('on'); suc.classList.remove('on');
+    if(!em){ err.textContent='Enter your email above first.'; err.classList.add('on'); return; }
+    if(typeof firebase==='undefined'||!firebase.auth) return;
+    firebase.auth().sendPasswordResetEmail(em)
+      .then(()=>{ suc.textContent='Reset email sent!'; suc.classList.add('on'); })
+      .catch(e=>{ err.textContent=e.message; err.classList.add('on'); });
   };
 
   function init(){
-    if(localStorage.getItem(KEY)){document.getElementById('ob-overlay').classList.add('ob-hidden');return;}
+    if(localStorage.getItem(KEY)){
+      document.getElementById('ob-overlay').classList.add('ob-hidden');
+      return;
+    }
+    show();
     if(typeof firebase!=='undefined'&&firebase.apps&&firebase.apps.length){
       firebase.auth().onAuthStateChanged(u=>{
-        if(u&&!document.getElementById('ob-overlay').classList.contains('ob-hidden'))setTimeout(obDone,500);
+        if(u && !document.getElementById('ob-overlay').classList.contains('ob-hidden'))
+          setTimeout(obDone, 500);
       });
     }
   }
-  document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
+  document.readyState==='loading'
+    ? document.addEventListener('DOMContentLoaded', init)
+    : init();
 })();
-
 </script>
 </body>
 </html>
