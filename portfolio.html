@@ -1315,7 +1315,7 @@ html, body { overscroll-behavior-x: none; }
         </div>
       </div>
       <div class="lf-auth-foot">
-        <button class="lf-submit" id="lf-submit" onclick="lfSubmit()">Sign In</button>
+        <button class="lf-submit" id="lf-submit" onclick="lfSubmit()" disabled style="opacity:0.5">Loading…</button>
         <button class="lf-guest" onclick="lfDone()">Continue without signing in</button>
       </div>
     </div>
@@ -1428,7 +1428,7 @@ html, body { overscroll-behavior-x: none; }
     if(!a){
       setTimeout(function(){
         var a2=getAuth();
-        if(!a2){ err.textContent='Sign-in unavailable. Continue as guest.'; err.classList.add('on'); btn.textContent=si?'Sign In':'Create Account'; btn.disabled=false; }
+        if(!a2){ lfDone(); }
         else{ btn.textContent=si?'Sign In':'Create Account'; btn.disabled=false; window.lfSubmit(); }
       },1500); return;
     }
@@ -1465,6 +1465,8 @@ html, body { overscroll-behavior-x: none; }
     function tryAuth(){
       var a=getAuth();
       if(a&&typeof a.onAuthStateChanged==='function'){
+        var sub=getEl('lf-submit');
+        if(sub){ sub.disabled=false; sub.textContent='Sign In'; sub.style.opacity='1'; }
         a.onAuthStateChanged(function(u){
           if(u&&!getEl('lf-ob').classList.contains('lf-gone')) setTimeout(lfDone,500);
         });
