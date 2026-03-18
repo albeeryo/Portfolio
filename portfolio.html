@@ -1185,29 +1185,37 @@ html, body { overscroll-behavior-x: none; }
         <svg id="lf-sav-svg" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" fill="none">
           <defs>
             <style>
-              @keyframes lf2-fill{0%{transform:translateY(0)}100%{transform:translateY(-260px)}}
               @keyframes lf2-wave{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-              .lf2-fill-g{animation:lf2-fill 3s .3s cubic-bezier(.4,0,.2,1) both}
               .lf2-wf{animation:lf2-wave 1.8s linear infinite}
               .lf2-ws{animation:lf2-wave 3s linear infinite}
             </style>
             <clipPath id="lf2-clip"><circle cx="110" cy="100" r="82"/></clipPath>
           </defs>
+          <!-- Circle background -->
           <circle cx="110" cy="100" r="82" fill="#f5f3ef" stroke="#111" stroke-width="5"/>
+          <!-- Water fill clipped to circle — JS animates the rect y from 182 down to 18 -->
           <g clip-path="url(#lf2-clip)">
-            <g class="lf2-fill-g">
+            <!-- Solid fill base -->
+            <rect id="lf2-water-base" x="18" y="182" width="184" height="170" fill="#4b6cb7" opacity="0.7"/>
+            <!-- Back wave -->
+            <g id="lf2-wave-back">
               <path class="lf2-ws"
-                d="M-440,186 Q-410,176 -380,186 Q-350,196 -320,186 Q-290,176 -260,186 Q-230,196 -200,186 Q-170,176 -140,186 Q-110,196 -80,186 Q-50,176 -20,186 Q10,196 40,186 Q70,176 100,186 Q130,196 160,186 Q190,176 220,186 Q250,196 280,186 Q310,176 340,186 Q370,196 400,186 Q430,176 460,186 L460,400 L-440,400Z"
-                fill="#111" opacity="0.09"/>
+                d="M-440,182 Q-410,172 -380,182 Q-350,192 -320,182 Q-290,172 -260,182 Q-230,192 -200,182 Q-170,172 -140,182 Q-110,192 -80,182 Q-50,172 -20,182 Q10,192 40,182 Q70,172 100,182 Q130,192 160,182 Q190,172 220,182 Q250,192 280,182 Q310,172 340,182 Q370,192 400,182 Q430,172 460,182 L460,400 L-440,400Z"
+                fill="#7b9ed9" opacity="0.5"/>
+            </g>
+            <!-- Front wave -->
+            <g id="lf2-wave-front">
               <path class="lf2-wf"
-                d="M-440,186 Q-410,180 -380,186 Q-350,192 -320,186 Q-290,180 -260,186 Q-230,192 -200,186 Q-170,180 -140,186 Q-110,192 -80,186 Q-50,180 -20,186 Q10,192 40,186 Q70,180 100,186 Q130,192 160,186 Q190,180 220,186 Q250,192 280,186 Q310,180 340,186 Q370,192 400,186 Q430,180 460,186 L460,400 L-440,400Z"
-                fill="#111" opacity="0.18"/>
-              <rect x="-440" y="192" width="900" height="220" fill="#111" opacity="0.12"/>
+                d="M-440,182 Q-410,176 -380,182 Q-350,188 -320,182 Q-290,176 -260,182 Q-230,188 -200,182 Q-170,176 -140,182 Q-110,188 -80,182 Q-50,176 -20,182 Q10,188 40,182 Q70,176 100,182 Q130,188 160,182 Q190,176 220,182 Q250,188 280,182 Q310,176 340,182 Q370,188 400,182 Q430,176 460,182 L460,400 L-440,400Z"
+                fill="#a8c4e8" opacity="0.6"/>
             </g>
           </g>
+          <!-- Circle outline on top -->
           <circle cx="110" cy="100" r="82" fill="none" stroke="#111" stroke-width="5"/>
+          <!-- % label — JS updates this -->
           <text id="lf-pct" x="110" y="108" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="36" font-weight="700" fill="#111">0%</text>
-          <text x="110" y="128" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#888">of goal reached</text>
+          <text id="lf-pct-sub" x="110" y="128" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#888">of goal reached</text>
+          <!-- Coin slot -->
           <rect x="96" y="10" width="28" height="7" rx="3.5" fill="#111" opacity="0.2"/>
         </svg>
       </div>
@@ -1321,13 +1329,55 @@ html, body { overscroll-behavior-x: none; }
   }
 
   function animatePct(){
-    var el=getEl('lf-pct');
-    if(!el) return;
-    el.textContent='0%';
-    var p=0, iv=setInterval(function(){
-      p+=2; el.textContent=p+'%';
-      if(p>=100){ el.textContent='100%'; clearInterval(iv); }
-    },50);
+    var pctEl = getEl('lf-pct');
+    var base   = getEl('lf2-water-base');
+    var waveB  = getEl('lf2-wave-back');
+    var waveF  = getEl('lf2-wave-front');
+    if(!pctEl) return;
+
+    // SVG coords: circle bottom=182, circle top=18, travel=164 units
+    var svgBottom = 182;
+    var svgTop    = 18;
+    var travel    = svgBottom - svgTop; // 164 SVG units
+
+    var p = 0;
+    var duration = 3000; // ms
+    var start = null;
+
+    function step(ts){
+      if(!start) start = ts;
+      var elapsed = ts - start;
+      var progress = Math.min(elapsed / duration, 1);
+      // ease out cubic
+      var ease = 1 - Math.pow(1 - progress, 3);
+      p = Math.round(ease * 100);
+
+      // Update % text
+      pctEl.textContent = p + '%';
+      pctEl.setAttribute('fill', p > 55 ? '#ffffff' : '#111111');
+      var subEl = getEl('lf-pct-sub');
+      if(subEl) subEl.setAttribute('fill', p > 65 ? '#ddeeff' : '#888888');
+
+      // Move water: y goes from 182 down to 18
+      var newY = svgBottom - ease * travel;
+      if(base){
+        base.setAttribute('y', newY);
+        base.setAttribute('height', 200 - newY + 50);
+      }
+      // Move wave groups to match
+      var offset = ease * travel;
+      if(waveB) waveB.setAttribute('transform', 'translate(0,-' + offset + ')');
+      if(waveF) waveF.setAttribute('transform', 'translate(0,-' + offset + ')');
+
+      if(progress < 1) requestAnimationFrame(step);
+      else {
+        p = 100;
+        pctEl.textContent = '100%';
+        pctEl.setAttribute('fill', '#ffffff');
+      }
+    }
+
+    requestAnimationFrame(step);
   }
 
   function show(){
