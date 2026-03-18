@@ -1070,7 +1070,7 @@ html, body { overscroll-behavior-x: none; }
 
 <!-- ══════════ ONBOARDING ══════════ -->
 <style>
-#lf-ob{position:fixed;inset:0;z-index:99999;background:#efede8;display:flex;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif}
+#lf-ob{position:fixed;inset:0;z-index:99999;background:#efede8;display:flex;flex-direction:column;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;transition:opacity .6s ease}
 [data-theme=dark] #lf-ob{background:#141416}
 #lf-ob.lf-gone{display:none!important}
 #lf-track{display:flex;flex:1;width:100%;transition:transform .42s cubic-bezier(.4,0,.2,1);will-change:transform}
@@ -1175,7 +1175,7 @@ html, body { overscroll-behavior-x: none; }
           <div class="lf-dot" style="width:8px"></div>
         </div>
         <button class="lf-btn" onclick="lfNext()">Continue</button>
-        <button class="lf-skip" onclick="lfAuth()">Skip</button>
+        <button class="lf-skip" onclick="lfDone()">Skip</button>
       </div>
     </div>
 
@@ -1185,7 +1185,7 @@ html, body { overscroll-behavior-x: none; }
         <svg id="lf-sav-svg" viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" fill="none">
           <defs>
             <style>
-              @keyframes lf2-fill{0%{transform:translateY(0)}100%{transform:translateY(-170px)}}
+              @keyframes lf2-fill{0%{transform:translateY(0)}100%{transform:translateY(-255px)}}
               @keyframes lf2-wave{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
               .lf2-fill-g{animation:lf2-fill 3s .3s cubic-bezier(.4,0,.2,1) both}
               .lf2-wf{animation:lf2-wave 1.8s linear infinite}
@@ -1223,14 +1223,14 @@ html, body { overscroll-behavior-x: none; }
           <div class="lf-dot" style="width:8px"></div>
         </div>
         <button class="lf-btn" onclick="lfNext()">Continue</button>
-        <button class="lf-skip" onclick="lfAuth()">Skip</button>
+        <button class="lf-skip" onclick="lfDone()">Skip</button>
       </div>
     </div>
 
     <!-- Slide 3: bars growing -->
     <div class="lf-slide">
       <div class="lf-vis">
-        <svg viewBox="0 0 220 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <svg viewBox="0 0 220 215" xmlns="http://www.w3.org/2000/svg" fill="none">
           <defs>
             <style>
               @keyframes lf3b{from{transform:scaleY(0)}to{transform:scaleY(1)}}
@@ -1274,51 +1274,11 @@ html, body { overscroll-behavior-x: none; }
           <div class="lf-dot" style="width:8px"></div>
           <div class="lf-dot a" style="width:20px"></div>
         </div>
-        <button class="lf-btn" onclick="lfNext()">Get Started</button>
-        <button class="lf-skip" onclick="lfAuth()">Skip</button>
+        <button class="lf-btn" onclick="lfDone()">Get Started</button>
+        <button class="lf-skip" onclick="lfDone()">Skip</button>
       </div>
     </div>
 
-    <!-- Auth slide -->
-    <div class="lf-auth">
-      <div class="lf-auth-top">
-        <img class="lf-auth-logo" src="data:image/png;base64,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" alt="LucidFolio">
-        <div class="lf-auth-h">Welcome to LucidFolio</div>
-        <div class="lf-auth-sub">Sign in to sync across devices, or skip to use offline.</div>
-      </div>
-      <div class="lf-auth-body">
-        <div class="lf-tabs">
-          <button class="lf-tab on" id="lf-t-in"  onclick="lfTab('signin')">Sign In</button>
-          <button class="lf-tab"    id="lf-t-up"   onclick="lfTab('signup')">Create Account</button>
-        </div>
-        <div class="lf-err" id="lf-err"></div>
-        <div class="lf-suc" id="lf-suc"></div>
-        <button class="lf-google" onclick="lfGoogle()">
-          <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-          Continue with Google
-        </button>
-        <div class="lf-div"><span>or</span></div>
-        <div class="lf-field">
-          <label>Email</label>
-          <input type="email" id="lf-email" placeholder="you@email.com" autocomplete="email">
-        </div>
-        <div class="lf-field">
-          <label>Password</label>
-          <input type="password" id="lf-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')lfSubmit()">
-        </div>
-        <div class="lf-field" id="lf-name-wrap" style="display:none">
-          <label>Display Name</label>
-          <input type="text" id="lf-name" placeholder="Your name">
-        </div>
-        <div style="display:flex;justify-content:flex-end">
-          <button class="lf-forgot" id="lf-forgot" onclick="lfForgot()">Forgot password?</button>
-        </div>
-      </div>
-      <div class="lf-auth-foot">
-        <button class="lf-submit" id="lf-submit" onclick="lfSubmit()" disabled style="opacity:0.5">Loading…</button>
-        <button class="lf-guest" onclick="lfDone()">Continue without signing in</button>
-      </div>
-    </div>
 
   </div>
 </div>
@@ -1373,9 +1333,43 @@ html, body { overscroll-behavior-x: none; }
 
   function hide(){
     stopTimer();
-    var el=getEl('lf-ob');
-    el.style.opacity='0';
-    setTimeout(function(){ el.classList.add('lf-gone'); el.style.opacity='1'; },350);
+    var ob = getEl('lf-ob');
+
+    // Set app content to start below and invisible
+    var app = document.querySelector('.container');
+    var nav = document.querySelector('.bottom-nav');
+    var ticker = document.querySelector('.ticker-wrap');
+    [app, nav, ticker].forEach(function(el){
+      if(!el) return;
+      el.style.transition = 'none';
+      el.style.transform = 'translateY(32px)';
+      el.style.opacity = '0';
+    });
+
+    // Fade out overlay
+    ob.style.opacity = '0';
+
+    setTimeout(function(){
+      ob.classList.add('lf-gone');
+      // Slide app up into place
+      var delay = 0;
+      [app, nav, ticker].forEach(function(el){
+        if(!el) return;
+        el.style.transition = 'transform .5s cubic-bezier(.4,0,.2,1) '+delay+'ms, opacity .5s ease '+delay+'ms';
+        el.style.transform = 'translateY(0)';
+        el.style.opacity = '1';
+        delay += 60;
+      });
+      // Clean up
+      setTimeout(function(){
+        [app, nav, ticker].forEach(function(el){
+          if(!el) return;
+          el.style.transition = '';
+          el.style.transform = '';
+          el.style.opacity = '';
+        });
+      }, 700);
+    }, 550);
   }
 
   window.lfNext=function(){
@@ -1384,10 +1378,7 @@ html, body { overscroll-behavior-x: none; }
     else{ window.lfAuth(); }
   };
 
-  window.lfAuth=function(){
-    stopTimer();
-    cur=SLIDES; getEl('lf-track').style.transform='translateX(-'+(SLIDES*window.innerWidth)+'px)';
-  };
+  window.lfAuth=function(){ lfDone(); };
 
   window.lfDone=function(){
     localStorage.setItem(KEY,'1'); hide();
@@ -1462,17 +1453,6 @@ html, body { overscroll-behavior-x: none; }
   function init(){
     if(localStorage.getItem(KEY)){ getEl('lf-ob').classList.add('lf-gone'); return; }
     show();
-    function tryAuth(){
-      var a=getAuth();
-      if(a&&typeof a.onAuthStateChanged==='function'){
-        var sub=getEl('lf-submit');
-        if(sub){ sub.disabled=false; sub.textContent='Sign In'; sub.style.opacity='1'; }
-        a.onAuthStateChanged(function(u){
-          if(u&&!getEl('lf-ob').classList.contains('lf-gone')) setTimeout(lfDone,500);
-        });
-      } else { setTimeout(tryAuth,600); }
-    }
-    tryAuth();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
