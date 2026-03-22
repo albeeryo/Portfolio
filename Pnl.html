@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>THE DIGITAL LEDGER | PORTFOLIO</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-tertiary-container": "#ffffff",
+          "on-surface-variant": "#474747",
+          "surface-container-low": "#f3f3f4",
+          "primary-fixed-dim": "#474747",
+          "on-error": "#ffffff",
+          "surface-container": "#eeeeee",
+          "on-primary-fixed-variant": "#e2e2e2",
+          "on-secondary": "#ffffff",
+          "inverse-primary": "#c6c6c6",
+          "surface-container-highest": "#e2e2e2",
+          "surface": "#f9f9f9",
+          "on-background": "#1a1c1c",
+          "surface-container-lowest": "#ffffff",
+          "on-secondary-fixed-variant": "#3b3b3b",
+          "on-error-container": "#410002",
+          "tertiary-container": "#737575",
+          "secondary": "#5f5e5e",
+          "background": "#f9f9f9",
+          "tertiary-fixed": "#5d5f5f",
+          "surface-container-high": "#e8e8e8",
+          "on-secondary-container": "#1b1c1c",
+          "outline-variant": "#c6c6c6",
+          "on-primary": "#e2e2e2",
+          "on-tertiary": "#e2e2e2",
+          "error-container": "#ffdad6",
+          "inverse-on-surface": "#f0f1f1",
+          "primary-fixed": "#5e5e5e",
+          "on-primary-container": "#ffffff",
+          "on-primary-fixed": "#ffffff",
+          "on-tertiary-fixed-variant": "#e2e2e2",
+          "on-surface": "#1a1c1c",
+          "surface-tint": "#5e5e5e",
+          "on-tertiary-fixed": "#ffffff",
+          "primary-container": "#3b3b3b",
+          "error": "#ba1a1a",
+          "outline": "#777777",
+          "secondary-fixed": "#c8c6c6",
+          "inverse-surface": "#2f3131",
+          "surface-bright": "#f9f9f9",
+          "tertiary": "#3a3c3c",
+          "surface-variant": "#e2e2e2",
+          "surface-dim": "#dadada",
+          "secondary-fixed-dim": "#acabab",
+          "tertiary-fixed-dim": "#454747",
+          "on-secondary-fixed": "#1b1c1c",
+          "secondary-container": "#d6d4d3",
+          "primary": "#000000"
+        },
+        fontFamily: {
+          "headline": ["Inter"],
+          "body": ["Inter"],
+          "label": ["Inter"]
+        },
+        borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "0px"},
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+  }
+  body {
+    background-color: #f9f9f9;
+    font-family: 'Inter', sans-serif;
+  }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #f9f9f9; }
+  ::-webkit-scrollbar-thumb { background: #e2e2e2; }
+
+  .ticker-pulse {
+    animation: pulse-price 0.4s ease-in-out;
+  }
+  @keyframes pulse-price {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+  .progress-bar-fill {
+    transition: width 0.6s ease-in-out;
+  }
+  .pnl-number {
+    transition: all 0.4s ease;
+  }
+  #modal-overlay {
+    display: none;
+  }
+  #modal-overlay.active {
+    display: flex;
+  }
+  #suggestions-list {
+    display: none;
+  }
+  #suggestions-list.active {
+    display: block;
+  }
+  .suggestion-item:hover {
+    background: #e2e2e2;
+  }
+</style>
+</head>
+<body class="text-on-surface antialiased flex flex-col min-h-screen">
+
+
+
+<main class="flex-grow flex flex-col items-center justify-center px-6 py-16 md:py-24">
+
+  <!-- P&L Centerpiece -->
+  <section class="w-full max-w-4xl mb-32">
+    <div class="flex flex-col items-center text-center">
+      <span class="font-['Inter'] font-bold text-[12px] tracking-[0.4em] uppercase text-on-surface-variant mb-6">REAL-TIME PERFORMANCE</span>
+      <h1 id="pnl-display" class="pnl-number text-[5rem] md:text-[8rem] font-black tracking-tighter leading-none mb-8">P&L 0%</h1>
+
+      <!-- Break-even progress bar -->
+      <div class="w-full border-2 border-primary p-1.5">
+        <div class="w-full bg-transparent relative" style="height: 36px;">
+          <div id="progress-fill" class="progress-bar-fill absolute inset-y-0 left-0 bg-primary" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="flex justify-between w-full mt-4">
+        <span class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">INITIAL: <span id="initial-value">$0.00</span></span>
+        <span id="breakeven-label" class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase hidden">BREAK EVEN: <span id="breakeven-needed">0%</span> TO GO</span>
+        <span class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">CURRENT: <span id="current-value">$0.00</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Area -->
+  <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-20">
+
+    <!-- Add Holdings Section -->
+    <section class="lg:col-span-5 space-y-12">
+      <div>
+        <h2 class="text-2xl font-black tracking-tighter uppercase mb-2">ADD HOLDINGS</h2>
+        <p class="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">INSTRUMENT REGISTRY</p>
+      </div>
+      <div class="space-y-8">
+
+        <!-- Asset Search with Suggestions -->
+        <div class="space-y-2">
+          <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">SELECT ASSET</label>
+          <div class="relative">
+            <input id="asset-input" class="w-full bg-surface-container-low border-none p-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="BTC, ETH, SOL..." type="text" autocomplete="off"/>
+            <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2">expand_more</span>
+            <!-- Suggestions Dropdown -->
+            <div id="suggestions-list" class="absolute z-50 w-full bg-surface-container-lowest border border-outline-variant/20 mt-1 max-h-48 overflow-y-auto shadow-lg">
+            </div>
+          </div>
+          <p id="asset-error" class="text-[10px] font-bold text-error tracking-widest hidden">ASSET NOT FOUND</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">QUANTITY</label>
+            <input id="qty-input" class="w-full bg-surface-container-low border-none p-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
+          </div>
+          <div class="space-y-2">
+            <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">AVG PURCHASE PRICE</label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold">$</span>
+              <input id="price-input" class="w-full bg-surface-container-low border-none py-4 pl-8 pr-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
+            </div>
+          </div>
+        </div>
+
+        <button id="add-btn" class="w-full bg-primary text-on-primary py-5 font-black tracking-[0.3em] text-sm hover:opacity-90 transition-opacity uppercase">
+          EXECUTE ENTRY
+        </button>
+        <p id="form-error" class="text-[10px] font-bold text-error tracking-widest hidden text-center">FILL ALL FIELDS TO PROCEED</p>
+      </div>
+    </section>
+
+    <!-- Holdings List Section -->
+    <section class="lg:col-span-7 space-y-12">
+      <div class="flex justify-between items-end">
+        <div>
+          <h2 class="text-2xl font-black tracking-tighter uppercase mb-2">CURRENT LEDGER</h2>
+          <p class="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">VERIFIED ASSETS</p>
+        </div>
+        <div class="text-right">
+          <span class="block text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">TOTAL VALUE</span>
+          <span id="total-value-display" class="text-xl font-black">$0.00</span>
+        </div>
+      </div>
+
+      <!-- Holdings list -->
+      <div id="holdings-container" class="border-t border-outline-variant/20 pt-8 space-y-4">
+        <!-- Empty State -->
+        <div id="empty-state" class="flex items-center justify-center py-16 border-2 border-dashed border-outline-variant/30">
+          <div class="text-center">
+            <span class="material-symbols-outlined text-outline-variant mb-2" style="font-size: 48px;">inventory_2</span>
+            <p class="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase">NO HOLDINGS DETECTED</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Edit Modal -->
+<div id="modal-overlay" class="fixed inset-0 z-50 bg-black/50 items-center justify-center">
+  <div class="bg-surface-container-lowest p-10 w-full max-w-md space-y-8 mx-4">
+    <div>
+      <h2 class="text-2xl font-black tracking-tighter uppercase mb-2">EDIT HOLDING</h2>
+      <p id="modal-symbol" class="text-[11px] font-bold tracking-widest text-on-surface-variant uppercase"></p>
+    </div>
+    <input type="hidden" id="edit-index"/>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">QUANTITY</label>
+        <input id="edit-qty" class="w-full bg-surface-container-low border-none p-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">AVG PURCHASE PRICE</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold">$</span>
+          <input id="edit-price" class="w-full bg-surface-container-low border-none py-4 pl-8 pr-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-4">
+      <button id="save-edit-btn" class="flex-1 bg-primary text-on-primary py-4 font-black tracking-[0.2em] text-sm hover:opacity-90 transition-opacity uppercase">SAVE</button>
+      <button id="delete-btn" class="px-6 py-4 border border-error text-error font-black tracking-[0.2em] text-sm hover:bg-error hover:text-white transition-all uppercase">DELETE</button>
+      <button id="cancel-btn" class="px-6 py-4 border border-outline-variant font-black tracking-[0.2em] text-sm hover:bg-surface-container transition-colors uppercase">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-[#eeeeee] dark:bg-[#1a1a1a] text-slate-900 dark:text-slate-50 font-['Inter'] text-[10px] font-bold tracking-[0.2em] uppercase mt-auto">
+  <div class="w-full px-8 py-12 flex justify-end">
+    <div class="text-slate-500">MADE BY ZETAH</div>
+  </div>
+</footer>
+
+<script>
+// ─── SUPPORTED COINS ─────────────────────────────────────────────────────────
+const COINS = {
+  BTC: { id: 'bitcoin', name: 'Bitcoin', icon: 'currency_bitcoin' },
+  ETH: { id: 'ethereum', name: 'Ethereum', icon: 'currency_exchange' },
+  SOL: { id: 'solana', name: 'Solana', icon: 'bolt' },
+  BNB: { id: 'binancecoin', name: 'BNB', icon: 'payments' },
+  XRP: { id: 'ripple', name: 'XRP', icon: 'water_drop' },
+  ADA: { id: 'cardano', name: 'Cardano', icon: 'hexagon' },
+  DOGE: { id: 'dogecoin', name: 'Dogecoin', icon: 'pets' },
+  MATIC: { id: 'matic-network', name: 'Polygon', icon: 'polyline' },
+  DOT: { id: 'polkadot', name: 'Polkadot', icon: 'blur_circular' },
+  AVAX: { id: 'avalanche-2', name: 'Avalanche', icon: 'ac_unit' },
+  LINK: { id: 'chainlink', name: 'Chainlink', icon: 'link' },
+  LTC: { id: 'litecoin', name: 'Litecoin', icon: 'toll' },
+  UNI: { id: 'uniswap', name: 'Uniswap', icon: 'scatter_plot' },
+  ATOM: { id: 'cosmos', name: 'Cosmos', icon: 'public' },
+  XLM: { id: 'stellar', name: 'Stellar', icon: 'stars' },
+  ALGO: { id: 'algorand', name: 'Algorand', icon: 'diamond' },
+  NEAR: { id: 'near', name: 'NEAR Protocol', icon: 'radio_button_unchecked' },
+  FTM: { id: 'fantom', name: 'Fantom', icon: 'ghost' },
+  SAND: { id: 'the-sandbox', name: 'The Sandbox', icon: 'grid_view' },
+  MANA: { id: 'decentraland', name: 'Decentraland', icon: 'view_in_ar' },
+  CRO: { id: 'crypto-com-chain', name: 'Cronos', icon: 'currency_exchange' },
+  SHIB: { id: 'shiba-inu', name: 'Shiba Inu', icon: 'cruelty_free' },
+  APE: { id: 'apecoin', name: 'ApeCoin', icon: 'pest_control' },
+  OP: { id: 'optimism', name: 'Optimism', icon: 'flash_on' },
+  ARB: { id: 'arbitrum', name: 'Arbitrum', icon: 'hub' },
+  SUI: { id: 'sui', name: 'Sui', icon: 'water' },
+  TON: { id: 'the-open-network', name: 'Toncoin', icon: 'diamond' },
+  INJ: { id: 'injective-protocol', name: 'Injective', icon: 'inject' },
+  TIA: { id: 'celestia', name: 'Celestia', icon: 'star' },
+  JUP: { id: 'jupiter-exchange-solana', name: 'Jupiter', icon: 'explore' },
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let holdings = JSON.parse(localStorage.getItem('dlHoldings') || '[]');
+let livePrices = {}; // symbol -> current price
+let selectedCoin = null;
+let priceRefreshInterval = null;
+
+// ─── DOM REFS ─────────────────────────────────────────────────────────────────
+const assetInput = document.getElementById('asset-input');
+const suggestionsList = document.getElementById('suggestions-list');
+const qtyInput = document.getElementById('qty-input');
+const priceInput = document.getElementById('price-input');
+const addBtn = document.getElementById('add-btn');
+const formError = document.getElementById('form-error');
+const assetError = document.getElementById('asset-error');
+const holdingsContainer = document.getElementById('holdings-container');
+const emptyState = document.getElementById('empty-state');
+const pnlDisplay = document.getElementById('pnl-display');
+const progressFill = document.getElementById('progress-fill');
+
+const initialValueEl = document.getElementById('initial-value');
+const currentValueEl = document.getElementById('current-value');
+const breakevenLabel = document.getElementById('breakeven-label');
+const breakevenNeeded = document.getElementById('breakeven-needed');
+const totalValueDisplay = document.getElementById('total-value-display');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalSymbol = document.getElementById('modal-symbol');
+const editIndex = document.getElementById('edit-index');
+const editQty = document.getElementById('edit-qty');
+const editPrice = document.getElementById('edit-price');
+
+// ─── PRICE FETCHING ───────────────────────────────────────────────────────────
+async function fetchPrices() {
+  if (holdings.length === 0) return;
+  const symbols = [...new Set(holdings.map(h => h.symbol))];
+  if (symbols.length === 0) return;
+  try {
+    // Use Binance public API — no CORS issues, no API key needed
+    const results = await Promise.allSettled(
+      symbols.map(async sym => {
+        const pair = sym + 'USDT';
+        const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`);
+        if (!res.ok) throw new Error('not found');
+        const data = await res.json();
+        return { sym, price: parseFloat(data.price) };
+      })
+    );
+    results.forEach(r => {
+      if (r.status === 'fulfilled') {
+        livePrices[r.value.sym] = r.value.price;
+      }
+    });
+    renderHoldings();
+    updatePnL();
+  } catch (e) {
+    console.warn('Price fetch failed:', e);
+  }
+}
+
+// ─── SUGGESTIONS ──────────────────────────────────────────────────────────────
+assetInput.addEventListener('input', () => {
+  const val = assetInput.value.toUpperCase().trim();
+  selectedCoin = null;
+  assetError.classList.add('hidden');
+
+  if (!val) {
+    suggestionsList.classList.remove('active');
+    return;
+  }
+
+  const matches = Object.entries(COINS).filter(([sym, coin]) =>
+    sym.startsWith(val) || coin.name.toUpperCase().includes(val)
+  ).slice(0, 6);
+
+  if (matches.length === 0) {
+    suggestionsList.classList.remove('active');
+    return;
+  }
+
+  suggestionsList.innerHTML = '';
+  matches.forEach(([sym, coin]) => {
+    const div = document.createElement('div');
+    div.className = 'suggestion-item flex items-center gap-3 p-3 cursor-pointer';
+    div.innerHTML = `
+      <span class="material-symbols-outlined text-sm">${coin.icon}</span>
+      <span class="font-black text-sm">${sym}</span>
+      <span class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">${coin.name}</span>
+    `;
+    div.addEventListener('click', () => {
+      selectCoin(sym, coin);
+    });
+    suggestionsList.appendChild(div);
+  });
+  suggestionsList.classList.add('active');
+});
+
+function selectCoin(sym, coin) {
+  selectedCoin = sym;
+  assetInput.value = `${sym} — ${coin.name}`;
+  suggestionsList.classList.remove('active');
+  assetError.classList.add('hidden');
+}
+
+document.addEventListener('click', (e) => {
+  if (!assetInput.contains(e.target) && !suggestionsList.contains(e.target)) {
+    suggestionsList.classList.remove('active');
+  }
+});
+
+// ─── ADD HOLDING ──────────────────────────────────────────────────────────────
+addBtn.addEventListener('click', () => {
+  formError.classList.add('hidden');
+  assetError.classList.add('hidden');
+
+  if (!selectedCoin) {
+    assetError.classList.remove('hidden');
+    return;
+  }
+
+  const qty = parseFloat(qtyInput.value);
+  const avgPrice = parseFloat(priceInput.value);
+
+  if (!qty || !avgPrice || qty <= 0 || avgPrice <= 0) {
+    formError.classList.remove('hidden');
+    return;
+  }
+
+  // Check if symbol already exists — merge
+  const existingIdx = holdings.findIndex(h => h.symbol === selectedCoin);
+  if (existingIdx >= 0) {
+    const existing = holdings[existingIdx];
+    const totalQty = existing.qty + qty;
+    const totalCost = existing.qty * existing.avgPrice + qty * avgPrice;
+    holdings[existingIdx].qty = totalQty;
+    holdings[existingIdx].avgPrice = totalCost / totalQty;
+  } else {
+    holdings.push({ symbol: selectedCoin, qty, avgPrice });
+  }
+
+  saveHoldings();
+  resetForm();
+  fetchPrices();
+  renderHoldings();
+  updatePnL();
+});
+
+function resetForm() {
+  assetInput.value = '';
+  qtyInput.value = '';
+  priceInput.value = '';
+  selectedCoin = null;
+}
+
+// ─── RENDER HOLDINGS ──────────────────────────────────────────────────────────
+function renderHoldings() {
+  // Remove all items except empty state
+  const items = holdingsContainer.querySelectorAll('.holding-item');
+  items.forEach(i => i.remove());
+
+  if (holdings.length === 0) {
+    emptyState.style.display = 'flex';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  holdings.forEach((h, idx) => {
+    const coin = COINS[h.symbol] || { icon: 'currency_exchange', name: h.symbol };
+    const currentPrice = livePrices[h.symbol] || null;
+    const currentVal = currentPrice ? currentPrice * h.qty : null;
+    const costBasis = h.avgPrice * h.qty;
+    const pnlVal = currentVal !== null ? currentVal - costBasis : null;
+    const pnlPct = pnlVal !== null ? (pnlVal / costBasis) * 100 : null;
+
+    const div = document.createElement('div');
+    div.className = 'holding-item group flex items-center justify-between p-6 bg-surface-container-lowest hover:bg-surface-container transition-colors';
+
+    let pnlHtml = '';
+    if (pnlPct !== null) {
+      const color = pnlPct >= 0 ? 'text-emerald-600' : 'text-red-600';
+      const sign = pnlPct >= 0 ? '+' : '';
+      pnlHtml = `<p class="font-black text-sm ${color}">${sign}${pnlPct.toFixed(2)}%</p>`;
+    } else {
+      pnlHtml = `<p class="font-black text-sm text-on-surface-variant">LOADING...</p>`;
+    }
+
+    div.innerHTML = `
+      <div class="flex items-center gap-6">
+        <div class="w-10 h-10 bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-white" style="font-size:20px">${coin.icon}</span>
+        </div>
+        <div>
+          <h3 class="font-black tracking-tight text-lg">${h.symbol}</h3>
+          <p class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">${h.qty} UNITS</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-6 md:gap-12">
+        <div class="text-right hidden md:block">
+          <p class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">VALUATION</p>
+          <p class="font-black" id="val-${idx}">${currentVal !== null ? '$' + fmt(currentVal) : '—'}</p>
+          ${pnlHtml}
+        </div>
+        <div class="text-right hidden md:block">
+          <p class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase">COST BASIS</p>
+          <p class="font-black">$${fmt(costBasis)}</p>
+        </div>
+        <button data-idx="${idx}" class="edit-btn px-4 py-2 text-[10px] font-black tracking-widest border border-primary hover:bg-primary hover:text-white transition-all uppercase">
+          EDIT
+        </button>
+      </div>
+    `;
+    holdingsContainer.insertBefore(div, emptyState);
+  });
+
+  // Bind edit buttons
+  holdingsContainer.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openModal(parseInt(btn.dataset.idx)));
+  });
+}
+
+// ─── P&L UPDATE ───────────────────────────────────────────────────────────────
+function updatePnL() {
+  let totalCost = 0;
+  let totalCurrentValue = 0;
+  let hasLivePrice = false;
+
+  holdings.forEach(h => {
+    const costBasis = h.avgPrice * h.qty;
+    totalCost += costBasis;
+    const price = livePrices[h.symbol];
+    if (price !== undefined) {
+      totalCurrentValue += price * h.qty;
+      hasLivePrice = true;
+    } else {
+      totalCurrentValue += costBasis; // fallback to cost if no price yet
+    }
+  });
+
+  initialValueEl.textContent = '$' + fmt(totalCost);
+  currentValueEl.textContent = '$' + fmt(totalCurrentValue);
+  totalValueDisplay.textContent = '$' + fmt(totalCurrentValue);
+
+  if (totalCost === 0) {
+    pnlDisplay.textContent = 'P&L 0%';
+    progressFill.style.width = '0%';
+    breakevenLabel.classList.add('hidden');
+    return;
+  }
+
+  const pnlPct = ((totalCurrentValue - totalCost) / totalCost) * 100;
+  const sign = pnlPct >= 0 ? '+' : '';
+  pnlDisplay.textContent = `P&L ${sign}${pnlPct.toFixed(2)}%`;
+
+  // Progress bar logic:
+  // If pnl is negative (user is underwater), show how far to breakeven
+  // Bar represents recovery: 0% = fully underwater at current loss, 100% = break even
+  if (pnlPct < 0) {
+    // How much % does coin need to rise to break even?
+    // If you bought at $100 and it's at $80, you need +25% to break even
+    const pctNeededToBreakEven = (totalCost / totalCurrentValue - 1) * 100;
+    // Progress = how much of that recovery has already happened (inverted loss)
+    // We cap the display: current loss vs the loss needed to be 100% down
+    // Show progress as: 1 - (pctNeededToBreakEven / some_max)
+    // Simple approach: bar width = max(0, 100 + pnlPct) so at -100% bar=0, at 0% bar=100
+    const barWidth = Math.max(0, Math.min(100, 100 + pnlPct));
+    progressFill.style.width = barWidth + '%';
+    breakevenLabel.classList.remove('hidden');
+    breakevenNeeded.textContent = '+' + pctNeededToBreakEven.toFixed(2) + '%';
+  } else {
+    // Profitable or break-even: full bar
+    progressFill.style.width = '100%';
+    breakevenLabel.classList.add('hidden');
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(idx) {
+  const h = holdings[idx];
+  editIndex.value = idx;
+  modalSymbol.textContent = `${h.symbol} — ${COINS[h.symbol]?.name || ''}`;
+  editQty.value = h.qty;
+  editPrice.value = h.avgPrice;
+  modalOverlay.classList.add('active');
+}
+
+document.getElementById('cancel-btn').addEventListener('click', () => {
+  modalOverlay.classList.remove('active');
+});
+
+document.getElementById('save-edit-btn').addEventListener('click', () => {
+  const idx = parseInt(editIndex.value);
+  const qty = parseFloat(editQty.value);
+  const price = parseFloat(editPrice.value);
+  if (!qty || !price || qty <= 0 || price <= 0) return;
+  holdings[idx].qty = qty;
+  holdings[idx].avgPrice = price;
+  saveHoldings();
+  modalOverlay.classList.remove('active');
+  fetchPrices();
+  renderHoldings();
+  updatePnL();
+});
+
+document.getElementById('delete-btn').addEventListener('click', () => {
+  const idx = parseInt(editIndex.value);
+  holdings.splice(idx, 1);
+  // Remove stale prices for removed coins
+  const remaining = new Set(holdings.map(h => h.symbol));
+  Object.keys(livePrices).forEach(sym => {
+    if (!remaining.has(sym)) delete livePrices[sym];
+  });
+  saveHoldings();
+  modalOverlay.classList.remove('active');
+  renderHoldings();
+  updatePnL();
+});
+
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) modalOverlay.classList.remove('active');
+});
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1000) return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (n >= 1) return n.toFixed(2);
+  return n.toFixed(4);
+}
+
+function saveHoldings() {
+  localStorage.setItem('dlHoldings', JSON.stringify(holdings));
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderHoldings();
+updatePnL();
+fetchPrices();
+// Refresh prices every 30 seconds
+setInterval(fetchPrices, 30000);
+</script>
+</body>
+</html>
