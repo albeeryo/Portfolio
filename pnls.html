@@ -232,7 +232,8 @@
             <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">AVG PURCHASE PRICE (USD)</label>
             <div class="relative">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold">$</span>
-              <input id="price-input" class="w-full bg-surface-container-low border-none py-4 pl-8 pr-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
+              <input id="price-input" class="w-full bg-surface-container-low border-none py-4 pl-8 pr-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0" step="any"/>
+            </div>
             </div>
           </div>
         </div>
@@ -285,9 +286,9 @@
         <input id="edit-qty" class="w-full bg-surface-container-low border-none p-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
       </div>
       <div class="space-y-2">
-        <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">AVG PURCHASE PRICE (USD)</label>
+        <label class="text-[10px] font-black tracking-[0.2em] uppercase text-on-surface-variant">AVG PURCHASE PRICE (<span id="modal-price-currency-label">USD</span>)</label>
         <div class="relative">
-          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold">$</span>
+          <span id="modal-price-symbol" class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold">$</span>
           <input id="edit-price" class="w-full bg-surface-container-low border-none py-4 pl-8 pr-4 text-sm font-bold tracking-tight focus:bg-surface-container-highest transition-colors outline-none" placeholder="0.00" type="number" min="0"/>
         </div>
       </div>
@@ -466,6 +467,7 @@ async function fetchEurRate() {
   }
 }
 
+
 // ─── ASSET TYPE TOGGLE ────────────────────────────────────────────────────────
 function setAssetType(type) {
   currentAssetType = type;
@@ -531,78 +533,84 @@ async function fetchCryptoPrice(sym) {
 }
 
 // --- STOCK / ETF PRICE FETCHER ---
-// Fetches ALL stock/ETF prices in ONE Anthropic API call (web_search tool, server-side).
-// This completely bypasses CORS — no browser restrictions apply.
+// Tries multiple real public sources directly in the browser, same pattern as crypto.
+// Source 1: stooq.com  — serves CSV with CORS headers, no key needed
+// Source 2: Yahoo Finance v8 via allorigins.win CORS proxy
+// Source 3: Yahoo Finance v8 via corsproxy.io
+// Source 4: Yahoo Finance v7 quote via allorigins.win
 
-async function fetchAllStockPrices(symbols) {
-  if (!symbols || symbols.length === 0) return {};
+async function fetchStockPrice(sym) {
+  const ticker = sym.replace('_', '-');
 
+  // --- Source 1: stooq.com (CORS-enabled, no key, real-time delayed) ---
   try {
-    const symbolList = symbols.join(', ');
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{
-          role: 'user',
-          content: `Search for the current market prices of these US stock/ETF ticker symbols: ${symbolList}. Return ONLY a valid JSON object mapping each ticker to its current USD price, like: {"AAPL": 189.50, "NVDA": 875.20}. No markdown, no explanation, just the JSON.`
-        }]
-      })
-    });
-
-    if (!response.ok) throw new Error(`API ${response.status}`);
-    const data = await response.json();
-
-    // Find the final text block (comes after tool_use + tool_result)
-    const textBlocks = (data.content || []).filter(b => b.type === 'text');
-    for (const block of textBlocks) {
-      const clean = block.text.replace(/```json|```/g, '').trim();
-      try {
-        const parsed = JSON.parse(clean);
-        // Validate it looks like price data
-        const result = {};
-        for (const [k, v] of Object.entries(parsed)) {
-          if (typeof v === 'number' && v > 0) result[k.toUpperCase()] = v;
-        }
-        if (Object.keys(result).length > 0) return result;
-      } catch (_) {
-        // Try extracting JSON from within the text
-        const match = clean.match(/\{[^{}]+\}/s);
-        if (match) {
-          try {
-            const parsed = JSON.parse(match[0]);
-            const result = {};
-            for (const [k, v] of Object.entries(parsed)) {
-              if (typeof v === 'number' && v > 0) result[k.toUpperCase()] = v;
-            }
-            if (Object.keys(result).length > 0) return result;
-          } catch (_) {}
+    const url = `https://stooq.com/q/l/?s=${ticker.toLowerCase()}.us&f=sd2t2ohlcv&h&e=csv`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      if (lines.length >= 2) {
+        const cols = lines[1].split(',');
+        // CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+        const close = parseFloat(cols[6]);
+        if (close > 0 && !isNaN(close)) {
+          console.log(`[PnL] stooq ${sym}: $${close}`);
+          return { sym, price: close };
         }
       }
     }
-  } catch (e) {
-    console.warn('[PnL] AI batch fetch failed:', e.message);
-  }
+  } catch (_) {}
 
-  // Fallback: try codetabs -> Yahoo for each symbol individually
-  const results = {};
-  await Promise.all(symbols.map(async sym => {
-    try {
-      const yahooSym = sym.replace('_', '-');
-      const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
-      const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yUrl)}`, { cache: 'no-store' });
-      if (!res.ok) return;
+  // --- Source 2: Yahoo Finance v8 via allorigins.win ---
+  try {
+    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`;
+    const res = await fetch(proxyUrl, { cache: 'no-store' });
+    if (res.ok) {
+      const wrapper = await res.json();
+      const d = JSON.parse(wrapper.contents);
+      const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (price > 0) {
+        console.log(`[PnL] allorigins/yahoo ${sym}: $${price}`);
+        return { sym, price };
+      }
+    }
+  } catch (_) {}
+
+  // --- Source 3: Yahoo Finance v8 via corsproxy.io ---
+  try {
+    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(yUrl)}`;
+    const res = await fetch(proxyUrl, { cache: 'no-store' });
+    if (res.ok) {
       const d = await res.json();
       const price = d?.chart?.result?.[0]?.meta?.regularMarketPrice;
-      if (price > 0) results[sym] = price;
-    } catch (_) {}
-  }));
-  return results;
-}
+      if (price > 0) {
+        console.log(`[PnL] corsproxy/yahoo ${sym}: $${price}`);
+        return { sym, price };
+      }
+    }
+  } catch (_) {}
 
+  // --- Source 4: Yahoo Finance v7 quote via allorigins.win ---
+  try {
+    const yUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${ticker}`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`;
+    const res = await fetch(proxyUrl, { cache: 'no-store' });
+    if (res.ok) {
+      const wrapper = await res.json();
+      const d = JSON.parse(wrapper.contents);
+      const price = d?.quoteResponse?.result?.[0]?.regularMarketPrice;
+      if (price > 0) {
+        console.log(`[PnL] allorigins/yahoo-v7 ${sym}: $${price}`);
+        return { sym, price };
+      }
+    }
+  } catch (_) {}
+
+  console.warn(`[PnL] All sources failed for ${sym}`);
+  return null;
+}
 
 async function fetchPrices() {
   if (holdings.length === 0) return;
@@ -610,28 +618,21 @@ async function fetchPrices() {
   const cryptoHoldings   = holdings.filter(h => h.type === 'crypto');
   const stockEtfHoldings = holdings.filter(h => h.type === 'stock' || h.type === 'etf');
 
-  // Run crypto and stock/ETF fetches fully in parallel
-  const [cryptoResults, stockPriceMap] = await Promise.all([
-    // Crypto: Binance USDT -> Binance BUSD -> CoinGecko, one call per coin
+  // Run ALL fetches in parallel — one per symbol, each with its own fallback chain
+  const [cryptoResults, stockResults] = await Promise.all([
     Promise.all(cryptoHoldings.map(h => fetchCryptoPrice(h.symbol))),
-    // Stocks/ETFs: single batch AI call for all tickers at once
-    fetchAllStockPrices(stockEtfHoldings.map(h => h.symbol))
+    Promise.all(stockEtfHoldings.map(h => fetchStockPrice(h.symbol)))
   ]);
 
-  // Apply crypto prices
-  cryptoResults.forEach(r => {
-    if (r) livePrices[r.sym] = r.price;
-  });
-
-  // Apply stock/ETF prices
-  Object.entries(stockPriceMap).forEach(([sym, price]) => {
-    livePrices[sym] = price;
-  });
+  cryptoResults.forEach(r => { if (r) livePrices[r.sym] = r.price; });
+  stockResults.forEach(r  => { if (r) livePrices[r.sym] = r.price; });
 
   holdings.forEach(h => { h._fetchAttempted = true; });
   renderHoldings();
   updatePnL();
 }
+
+
 
 // ─── SUGGESTIONS ──────────────────────────────────────────────────────────────
 assetInput.addEventListener('input', () => {
@@ -854,7 +855,18 @@ function openModal(idx) {
   const info = ALL_ASSETS[h.symbol];
   modalSymbol.textContent = `${h.symbol} — ${info?.name || h.symbol} (${(h.type||'').toUpperCase()})`;
   editQty.value   = h.qty;
-  editPrice.value = h.avgPrice;
+
+  // Show avg price in currently selected display currency
+  const displayPrice = toDisplay(h.avgPrice);
+  editPrice.value = parseFloat(displayPrice.toFixed(4));
+  editPrice.dataset.inEur = (currency === 'EUR') ? '1' : '0';
+
+  // Update modal label
+  const lbl = currency === 'EUR' ? 'EUR' : 'USD';
+  const sym = currSymbol();
+  document.getElementById('modal-price-currency-label').textContent = lbl;
+  document.getElementById('modal-price-symbol').textContent = sym;
+
   modalOverlay.classList.add('active');
 }
 
@@ -865,8 +877,14 @@ document.getElementById('cancel-btn').addEventListener('click', () => {
 document.getElementById('save-edit-btn').addEventListener('click', () => {
   const idx   = parseInt(editIndex.value);
   const qty   = parseFloat(editQty.value);
-  const price = parseFloat(editPrice.value);
+  let price   = parseFloat(editPrice.value);
   if (!qty || !price || qty <= 0 || price <= 0) return;
+
+  // If user edited price while in EUR mode, convert back to USD for storage
+  if (editPrice.dataset.inEur === '1' && eurRate) {
+    price = price / eurRate;
+  }
+
   holdings[idx].qty      = qty;
   holdings[idx].avgPrice = price;
   saveHoldings();
