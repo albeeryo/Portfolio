@@ -531,62 +531,71 @@ async function fetchCryptoPrice(sym) {
 }
 
 // --- STOCK / ETF PRICE FETCHER ---
-// Uses multiple CORS-friendly free sources. No API key needed.
+// Strategy: try 6 different approaches so at least one succeeds.
 async function fetchStockPrice(sym, assetType) {
   const yahooSym = sym.replace('_', '-');
   const stooqSym = yahooSym.toLowerCase();
 
-  // Stooq suffix logic:
-  // - Regular US stocks: symbol.us  (e.g. aapl.us, nvda.us)
-  // - US-listed ETFs: no suffix needed (e.g. qqq, spy, voo)
-  // - Foreign stocks listed on US exchange: symbol.us works for most (tsm, asml)
-  const stooqSuffixed = assetType === 'etf' ? stooqSym : `${stooqSym}.us`;
+  // --- Stooq tries (free, truly no CORS issues from browser) ---
+  // Stooq serves prices for US stocks/ETFs. Suffix rules:
+  // Stocks: ticker.us | ETFs: ticker (no suffix) | Some ETFs also work with .us
+  const suffixes = assetType === 'etf'
+    ? [stooqSym, `${stooqSym}.us`]
+    : [`${stooqSym}.us`, stooqSym];
 
-  // Source 1: Stooq JSON (free, no API key, CORS-open)
-  try {
-    const res = await fetch(
-      `https://stooq.com/q/l/?s=${stooqSuffixed}&f=sd2c&h&e=json`,
-      { cache: 'no-store' }
-    );
-    if (!res.ok) throw new Error('stooq http');
-    const data = await res.json();
-    const close = parseFloat(data?.symbols?.[0]?.close);
-    if (close > 0) return { sym, price: close };
-  } catch (_) {}
+  for (const s of suffixes) {
+    try {
+      const res = await fetch(`https://stooq.com/q/l/?s=${s}&f=sd2c&h&e=json`, { cache: 'no-store' });
+      if (!res.ok) { console.warn(`[PnL] Stooq ${s} HTTP ${res.status}`); continue; }
+      const data = await res.json();
+      const close = parseFloat(data?.symbols?.[0]?.close);
+      console.log(`[PnL] Stooq ${s}:`, data?.symbols?.[0], '-> close:', close);
+      if (close > 0) return { sym, price: close };
+    } catch (e) { console.warn(`[PnL] Stooq ${s} error:`, e.message); }
+  }
 
-  // Source 2: Stooq with opposite suffix (retry with/without .us)
-  try {
-    const altSuffix = assetType === 'etf' ? `${stooqSym}.us` : stooqSym;
-    const res = await fetch(
-      `https://stooq.com/q/l/?s=${altSuffix}&f=sd2c&h&e=json`,
-      { cache: 'no-store' }
-    );
-    if (!res.ok) throw new Error('stooq alt http');
-    const data = await res.json();
-    const close = parseFloat(data?.symbols?.[0]?.close);
-    if (close > 0) return { sym, price: close };
-  } catch (_) {}
+  // --- Yahoo Finance via multiple CORS proxies ---
+  const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
+  const proxies = [
+    `https://corsproxy.io/?${encodeURIComponent(yUrl)}`,
+    `https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`,
+    `https://thingproxy.freeboard.io/fetch/${yUrl}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yUrl)}`,
+  ];
 
-  // Source 3: corsproxy.io -> Yahoo Finance v8
-  try {
-    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
-    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
-    if (!res.ok) throw new Error('corsproxy http');
-    const data = await res.json();
-    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (price > 0) return { sym, price };
-  } catch (_) {}
+  for (const proxyUrl of proxies) {
+    try {
+      const res = await fetch(proxyUrl, { cache: 'no-store' });
+      if (!res.ok) continue;
 
-  // Source 4: allorigins -> Yahoo Finance v8
-  try {
-    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
-    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
-    if (!res.ok) throw new Error('allorigins http');
-    const wrapper = await res.json();
-    const data = JSON.parse(wrapper.contents);
-    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (price > 0) return { sym, price };
-  } catch (_) {}
+      let data;
+      // allorigins wraps the response in {contents: "..."}
+      if (proxyUrl.includes('allorigins')) {
+        const wrapper = await res.json();
+        data = JSON.parse(wrapper.contents);
+      } else {
+        data = await res.json();
+      }
+
+      const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+      if (price > 0) return { sym, price };
+    } catch (_) {}
+  }
+
+  // --- Last resort: Stooq CSV format (different endpoint, different CORS path) ---
+  for (const s of suffixes) {
+    try {
+      const res = await fetch(`https://stooq.com/q/l/?s=${s}&f=sd2t2ohlcv&h&e=csv`, { cache: 'no-store' });
+      if (!res.ok) continue;
+      const text = await res.text();
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) continue;
+      const cols = lines[1].split(',');
+      // CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+      const close = parseFloat(cols[6]);
+      if (close > 0) return { sym, price: close };
+    } catch (_) {}
+  }
 
   return null;
 }
@@ -605,10 +614,16 @@ async function fetchPrices() {
     tasks.push(fetchCryptoPrice(sym));
   });
 
-  // --- Stocks & ETFs via multiple free sources with fallbacks ---
-  holdings.filter(h => h.type === 'stock' || h.type === 'etf').forEach(h => {
-    tasks.push(fetchStockPrice(h.symbol, h.type));
-  });
+  // --- Stocks & ETFs: stagger requests to avoid proxy rate-limits ---
+  const stockEtfHoldings = holdings.filter(h => h.type === 'stock' || h.type === 'etf');
+  for (let i = 0; i < stockEtfHoldings.length; i++) {
+    const h = stockEtfHoldings[i];
+    // Small stagger: 200ms between each to avoid hammering proxies simultaneously
+    tasks.push(
+      new Promise(resolve => setTimeout(resolve, i * 200))
+        .then(() => fetchStockPrice(h.symbol, h.type))
+    );
+  }
 
   const results = await Promise.all(tasks);
   results.forEach(r => {
