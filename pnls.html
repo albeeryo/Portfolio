@@ -374,6 +374,7 @@ const STOCKS = {
   COIN:  { name: 'Coinbase Global',        icon: 'toll',            type: 'stock' },
   SQ:    { name: 'Block Inc.',             icon: 'point_of_sale',   type: 'stock' },
   SHOP:  { name: 'Shopify Inc.',           icon: 'store',           type: 'stock' },
+  AECOM: { name: 'AECOM',                    icon: 'engineering',     type: 'stock' },
 };
 
 // ─── SUPPORTED ETFs ───────────────────────────────────────────────────────────
@@ -490,46 +491,44 @@ function setAssetType(type) {
   assetInput.placeholder = placeholders[type];
 }
 
-// ─── STOCK / ETF PRICE FETCHER (multi-source, all free & no API key) ──────────
+// --- STOCK / ETF PRICE FETCHER ---
+// Stooq (free, no key, CORS-open) -> corsproxy+Yahoo fallback -> allorigins+Yahoo fallback
 async function fetchStockPrice(sym) {
   const yahooSym = sym.replace('_', '-');
+  const stooqSym = yahooSym.toLowerCase();
 
-  // Source 1: Yahoo Finance via allorigins CORS proxy
+  // Source 1: Stooq JSON - truly free, no API key, good CORS support
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error();
+    const res = await fetch(
+      `https://stooq.com/q/l/?s=${stooqSym}.us&f=sd2c&h&e=json`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) throw new Error('stooq fail');
+    const data = await res.json();
+    const close = parseFloat(data?.symbols?.[0]?.close);
+    if (close > 0) return { sym, price: close };
+  } catch (_) {}
+
+  // Source 2: corsproxy.io -> Yahoo Finance v8
+  try {
+    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
+    const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
+    if (!res.ok) throw new Error('corsproxy fail');
+    const data = await res.json();
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (price > 0) return { sym, price };
+  } catch (_) {}
+
+  // Source 3: allorigins -> Yahoo Finance v8
+  try {
+    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
+    if (!res.ok) throw new Error('allorigins fail');
     const wrapper = await res.json();
     const data = JSON.parse(wrapper.contents);
     const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-    if (price && price > 0) return { sym, price };
-  } catch {}
-
-  // Source 2: Stooq CSV (free, no key, good CORS)
-  try {
-    const stooqSym = yahooSym.toLowerCase();
-    const res = await fetch(`https://stooq.com/q/l/?s=${stooqSym}.us&f=sd2t2ohlcv&h&e=csv`);
-    if (!res.ok) throw new Error();
-    const text = await res.text();
-    const lines = text.trim().split('\n');
-    if (lines.length < 2) throw new Error();
-    const cols = lines[1].split(',');
-    // CSV columns: Symbol,Date,Time,Open,High,Low,Close,Volume
-    const close = parseFloat(cols[6]);
-    if (close && close > 0) return { sym, price: close };
-  } catch {}
-
-  // Source 3: Yahoo Finance v7 quote via cors-anywhere (public instance)
-  try {
-    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${yahooSym}`;
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    const price = data?.quoteResponse?.result?.[0]?.regularMarketPrice;
-    if (price && price > 0) return { sym, price };
-  } catch {}
+    if (price > 0) return { sym, price };
+  } catch (_) {}
 
   return null;
 }
