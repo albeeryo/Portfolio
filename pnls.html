@@ -309,7 +309,8 @@
 
 <script>
 // ─── SUPPORTED COINS (Crypto) ─────────────────────────────────────────────────
-const COINS = {
+window.COINS = window.COINS || {};
+const COINS = window.COINS = {
   BTC:  { id: 'bitcoin',                   name: 'Bitcoin',        icon: 'currency_bitcoin', type: 'crypto' },
   ETH:  { id: 'ethereum',                  name: 'Ethereum',       icon: 'currency_exchange', type: 'crypto' },
   SOL:  { id: 'solana',                    name: 'Solana',         icon: 'bolt', type: 'crypto' },
@@ -491,39 +492,96 @@ function setAssetType(type) {
   assetInput.placeholder = placeholders[type];
 }
 
+// --- CRYPTO PRICE FETCHER ---
+// Binance primary (fastest, no key) -> CoinGecko fallback (no key)
+async function fetchCryptoPrice(sym) {
+  // Source 1: Binance USDT pair
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}USDT`);
+    if (!res.ok) throw new Error('binance');
+    const data = await res.json();
+    const price = parseFloat(data.price);
+    if (price > 0) return { sym, price };
+  } catch (_) {}
+
+  // Source 2: Binance BUSD pair (older coins)
+  try {
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}BUSD`);
+    if (!res.ok) throw new Error('binance busd');
+    const data = await res.json();
+    const price = parseFloat(data.price);
+    if (price > 0) return { sym, price };
+  } catch (_) {}
+
+  // Source 3: CoinGecko simple price (free, no key, generous rate limit)
+  const coinId = (window.COINS[sym] || {}).id;
+  if (coinId) {
+    try {
+      const res = await fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`
+      );
+      if (!res.ok) throw new Error('coingecko');
+      const data = await res.json();
+      const price = data?.[coinId]?.usd;
+      if (price > 0) return { sym, price };
+    } catch (_) {}
+  }
+
+  return null;
+}
+
 // --- STOCK / ETF PRICE FETCHER ---
-// Stooq (free, no key, CORS-open) -> corsproxy+Yahoo fallback -> allorigins+Yahoo fallback
-async function fetchStockPrice(sym) {
+// Uses multiple CORS-friendly free sources. No API key needed.
+async function fetchStockPrice(sym, assetType) {
   const yahooSym = sym.replace('_', '-');
   const stooqSym = yahooSym.toLowerCase();
 
-  // Source 1: Stooq JSON - truly free, no API key, good CORS support
+  // Stooq suffix logic:
+  // - Regular US stocks: symbol.us  (e.g. aapl.us, nvda.us)
+  // - US-listed ETFs: no suffix needed (e.g. qqq, spy, voo)
+  // - Foreign stocks listed on US exchange: symbol.us works for most (tsm, asml)
+  const stooqSuffixed = assetType === 'etf' ? stooqSym : `${stooqSym}.us`;
+
+  // Source 1: Stooq JSON (free, no API key, CORS-open)
   try {
     const res = await fetch(
-      `https://stooq.com/q/l/?s=${stooqSym}.us&f=sd2c&h&e=json`,
+      `https://stooq.com/q/l/?s=${stooqSuffixed}&f=sd2c&h&e=json`,
       { cache: 'no-store' }
     );
-    if (!res.ok) throw new Error('stooq fail');
+    if (!res.ok) throw new Error('stooq http');
     const data = await res.json();
     const close = parseFloat(data?.symbols?.[0]?.close);
     if (close > 0) return { sym, price: close };
   } catch (_) {}
 
-  // Source 2: corsproxy.io -> Yahoo Finance v8
+  // Source 2: Stooq with opposite suffix (retry with/without .us)
+  try {
+    const altSuffix = assetType === 'etf' ? `${stooqSym}.us` : stooqSym;
+    const res = await fetch(
+      `https://stooq.com/q/l/?s=${altSuffix}&f=sd2c&h&e=json`,
+      { cache: 'no-store' }
+    );
+    if (!res.ok) throw new Error('stooq alt http');
+    const data = await res.json();
+    const close = parseFloat(data?.symbols?.[0]?.close);
+    if (close > 0) return { sym, price: close };
+  } catch (_) {}
+
+  // Source 3: corsproxy.io -> Yahoo Finance v8
   try {
     const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
     const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(yUrl)}`);
-    if (!res.ok) throw new Error('corsproxy fail');
+    if (!res.ok) throw new Error('corsproxy http');
     const data = await res.json();
     const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
     if (price > 0) return { sym, price };
   } catch (_) {}
 
-  // Source 3: allorigins -> Yahoo Finance v8
+  // Source 4: allorigins -> Yahoo Finance v8
   try {
     const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
     const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`);
-    if (!res.ok) throw new Error('allorigins fail');
+    if (!res.ok) throw new Error('allorigins http');
     const wrapper = await res.json();
     const data = JSON.parse(wrapper.contents);
     const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
@@ -542,19 +600,14 @@ async function fetchPrices() {
 
   const tasks = [];
 
-  // --- Crypto via Binance (free, no key) ---
+  // --- Crypto via Binance (primary) then CoinGecko (fallback) ---
   cryptoSymbols.forEach(sym => {
-    tasks.push(
-      fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}USDT`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(d => ({ sym, price: parseFloat(d.price) }))
-        .catch(() => null)
-    );
+    tasks.push(fetchCryptoPrice(sym));
   });
 
   // --- Stocks & ETFs via multiple free sources with fallbacks ---
-  stockEtfSymbols.forEach(sym => {
-    tasks.push(fetchStockPrice(sym));
+  holdings.filter(h => h.type === 'stock' || h.type === 'etf').forEach(h => {
+    tasks.push(fetchStockPrice(h.symbol, h.type));
   });
 
   const results = await Promise.all(tasks);
