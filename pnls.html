@@ -490,6 +490,50 @@ function setAssetType(type) {
   assetInput.placeholder = placeholders[type];
 }
 
+// ─── STOCK / ETF PRICE FETCHER (multi-source, all free & no API key) ──────────
+async function fetchStockPrice(sym) {
+  const yahooSym = sym.replace('_', '-');
+
+  // Source 1: Yahoo Finance via allorigins CORS proxy
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`;
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error();
+    const wrapper = await res.json();
+    const data = JSON.parse(wrapper.contents);
+    const price = data?.chart?.result?.[0]?.meta?.regularMarketPrice;
+    if (price && price > 0) return { sym, price };
+  } catch {}
+
+  // Source 2: Stooq CSV (free, no key, good CORS)
+  try {
+    const stooqSym = yahooSym.toLowerCase();
+    const res = await fetch(`https://stooq.com/q/l/?s=${stooqSym}.us&f=sd2t2ohlcv&h&e=csv`);
+    if (!res.ok) throw new Error();
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) throw new Error();
+    const cols = lines[1].split(',');
+    // CSV columns: Symbol,Date,Time,Open,High,Low,Close,Volume
+    const close = parseFloat(cols[6]);
+    if (close && close > 0) return { sym, price: close };
+  } catch {}
+
+  // Source 3: Yahoo Finance v7 quote via cors-anywhere (public instance)
+  try {
+    const url = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${yahooSym}`;
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+    const res = await fetch(proxyUrl);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const price = data?.quoteResponse?.result?.[0]?.regularMarketPrice;
+    if (price && price > 0) return { sym, price };
+  } catch {}
+
+  return null;
+}
+
 // ─── PRICE FETCHING ───────────────────────────────────────────────────────────
 async function fetchPrices() {
   if (holdings.length === 0) return;
@@ -509,28 +553,18 @@ async function fetchPrices() {
     );
   });
 
-  // --- Stocks & ETFs via Yahoo Finance query (free, no key) ---
-  // Uses Yahoo Finance v8 chart endpoint - public, no API key needed
+  // --- Stocks & ETFs via multiple free sources with fallbacks ---
   stockEtfSymbols.forEach(sym => {
-    // Yahoo uses BRK_B internally as BRK-B
-    const yahooSym = sym.replace('_', '-');
-    tasks.push(
-      fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${yahooSym}?interval=1d&range=1d`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(d => {
-          const result = d?.chart?.result?.[0];
-          const price = result?.meta?.regularMarketPrice;
-          if (!price) throw new Error();
-          return { sym, price };
-        })
-        .catch(() => null)
-    );
+    tasks.push(fetchStockPrice(sym));
   });
 
   const results = await Promise.all(tasks);
   results.forEach(r => {
     if (r) livePrices[r.sym] = r.price;
   });
+
+  // Mark all holdings as having been attempted so UI can show "PRICE N/A" vs "FETCHING..."
+  holdings.forEach(h => { h._fetchAttempted = true; });
 
   renderHoldings();
   updatePnL();
@@ -657,13 +691,18 @@ function renderHoldings() {
     const div = document.createElement('div');
     div.className = 'holding-item group flex items-center justify-between p-6 bg-surface-container-lowest hover:bg-surface-container transition-colors';
 
+    const isLoadingPrice = priceUSD === null;
+    const isPriceFailed  = priceUSD === undefined && h._fetchAttempted;
+
     let pnlHtml = '';
     if (pnlPct !== null) {
       const color = pnlPct >= 0 ? 'text-emerald-600' : 'text-red-600';
       const sign  = pnlPct >= 0 ? '+' : '';
       pnlHtml = `<p class="font-black text-sm ${color}">${sign}${pnlPct.toFixed(2)}%</p>`;
+    } else if (isPriceFailed) {
+      pnlHtml = `<p class="font-black text-[10px] text-on-surface-variant tracking-widest">PRICE N/A</p>`;
     } else {
-      pnlHtml = `<p class="font-black text-sm text-on-surface-variant">LOADING...</p>`;
+      pnlHtml = `<p class="font-black text-sm text-on-surface-variant">FETCHING...</p>`;
     }
 
     const badgeClass = info.type === 'crypto' ? 'badge-crypto' : info.type === 'stock' ? 'badge-stock' : 'badge-etf';
