@@ -607,40 +607,28 @@ async function fetchAllStockPrices(symbols) {
 async function fetchPrices() {
   if (holdings.length === 0) return;
 
-  const cryptoSymbols = holdings.filter(h => h.type === 'crypto').map(h => h.symbol);
-  const stockEtfSymbols = holdings.filter(h => h.type === 'stock' || h.type === 'etf').map(h => h.symbol);
+  const cryptoHoldings   = holdings.filter(h => h.type === 'crypto');
+  const stockEtfHoldings = holdings.filter(h => h.type === 'stock' || h.type === 'etf');
 
-  const tasks = [];
-
-  // --- Crypto via Binance (primary) then CoinGecko (fallback) ---
-  cryptoSymbols.forEach(sym => {
-    tasks.push(fetchCryptoPrice(sym));
-  });
-
-  // --- Stocks & ETFs: ONE batch AI call for all symbols at once ---
-  const stockEtfSymbolList = holdings
-    .filter(h => h.type === 'stock' || h.type === 'etf')
-    .map(h => h.symbol);
-
-  // Run crypto + batch stock fetch in parallel
+  // Run crypto and stock/ETF fetches fully in parallel
   const [cryptoResults, stockPriceMap] = await Promise.all([
-    Promise.all(tasks), // crypto tasks
-    fetchAllStockPrices(stockEtfSymbolList)
+    // Crypto: Binance USDT -> Binance BUSD -> CoinGecko, one call per coin
+    Promise.all(cryptoHoldings.map(h => fetchCryptoPrice(h.symbol))),
+    // Stocks/ETFs: single batch AI call for all tickers at once
+    fetchAllStockPrices(stockEtfHoldings.map(h => h.symbol))
   ]);
 
-  // Apply crypto results
+  // Apply crypto prices
   cryptoResults.forEach(r => {
     if (r) livePrices[r.sym] = r.price;
   });
 
-  // Apply stock/ETF results
+  // Apply stock/ETF prices
   Object.entries(stockPriceMap).forEach(([sym, price]) => {
     livePrices[sym] = price;
   });
 
-  // Mark all holdings as having been attempted so UI can show "PRICE N/A" vs "FETCHING..."
   holdings.forEach(h => { h._fetchAttempted = true; });
-
   renderHoldings();
   updatePnL();
 }
