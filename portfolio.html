@@ -5611,7 +5611,6 @@ function confirmAddInvest() {
   const _iid = Date.now();
   const _ilabel = desc || t.label;
   entries.push({ id: _iid, type: 'investment', amount: amt, desc: _ilabel, cat: 'investment-auto', itype: _investType, date });
-  entries.push({ id: _iid+1, type: 'expense', amount: amt, desc: _ilabel + ' (invested)', cat: 'investment-expense', date, linkedInvest: true });
   bgtSave(entries);
   closeInvestModal();
   showToast('Investment added ✓');
@@ -5657,8 +5656,7 @@ function saveEditInvest() {
 }
 
 function delInvestEntry(id) {
-  // Also remove the linked expense entry (id+1)
-  bgtSave(bgtLoad().filter(e => e.id !== id && !(e.linkedInvest && e.id === id+1)));
+  bgtSave(bgtLoad().filter(e => e.id !== id));
   renderBudget();
   showToast('Investment entry removed ✓');
 }
