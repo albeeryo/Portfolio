@@ -2679,7 +2679,7 @@ function coinIconHTML(coin, sym, size, imgCls, wrapCls) {
 // ══════════════════════════════════════════
 // CONSTANTS & STATE
 // ══════════════════════════════════════════
-const CG_KEY     = 'CG-vUyUd14raQgJohVNCfawiSUS';
+const CG_KEY     = 'CG-GDtiTH7T5LixpyALe5HvVPBP';
 const STORE      = 'cfolio_v12';
 const COLORS     = ['#22d3a0','#38bdf8','#ffd700','#ff6b6b','#a78bfa','#fb923c','#34d399','#f472b6','#60a5fa','#facc15'];
 const REFRESH_MS = 30000;
@@ -3967,7 +3967,7 @@ async function fetchPriceHistory(coinId, days) {
   const daysParam = days === 'max' ? 'max' : days;
   // Use hourly for <=90 days, daily for longer
   const interval  = (parseInt(days) <= 90 || days === 'max') ? '' : '&interval=daily';
-  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${daysParam}${interval}&x_cg_demo_api_key=CG-vUyUd14raQgJohVNCfawiSUS`;
+  const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=${daysParam}${interval}&x_cg_demo_api_key=CG-GDtiTH7T5LixpyALe5HvVPBP`;
   try {
     const res  = await fetch(url);
     if (!res.ok) throw new Error('HTTP ' + res.status);
