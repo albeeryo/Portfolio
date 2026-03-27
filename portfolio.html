@@ -4839,49 +4839,87 @@ function bgtSaveMonthKeys(keys) { localStorage.setItem('bgt_month_tabs', JSON.st
 function bgtEnsureCurrentMonth() {
   const keys = bgtGetMonthKeys();
   const cur = _nowKey();
-  if (!keys.includes(cur)) { keys.unshift(cur); bgtSaveMonthKeys(keys); }
+  if (!keys.includes(cur)) {
+    keys.push(cur);
+    keys.sort((a, b) => b.localeCompare(a));
+    bgtSaveMonthKeys(keys);
+  }
 }
 
 function bgtAddMonth() {
-  // Prompt user to pick a month via a small inline picker
   const existing = bgtGetMonthKeys();
-  // Build a list of the last 24 months not yet added
-  const options = [];
   const now = new Date();
-  for (let i = 0; i < 36; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if (!existing.includes(key)) {
-      const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-      options.push({ key, label });
-    }
-    if (options.length >= 24) break;
-  }
-  // Also allow future months (next 12)
-  for (let i = 1; i <= 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    if (!existing.includes(key)) {
-      const label = d.toLocaleString('default', { month: 'long', year: 'numeric' });
-      options.push({ key, label });
-    }
+  let pickerYear = now.getFullYear();
+  let pickerSelected = null; // 'YYYY-MM'
+
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function buildPicker() {
+    const yearRange = [];
+    for (let y = now.getFullYear() + 1; y >= now.getFullYear() - 10; y--) yearRange.push(y);
+
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-size:16px;font-weight:700;color:var(--text)">Add Month</div>
+        <button id="bmp-close" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;padding:0;min-height:unset;line-height:1">✕</button>
+      </div>
+      <div style="margin-bottom:20px">
+        <select id="bmp-year" style="appearance:none;-webkit-appearance:none;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;padding:8px 36px 8px 14px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;outline:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23888%22 stroke-width=%222%22><polyline points=%226 9 12 15 18 9%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;font-family:inherit">
+          ${yearRange.map(y => `<option value="${y}" ${y===pickerYear?'selected':''}>${y}</option>`).join('')}
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px" id="bmp-grid">
+        ${MONTH_NAMES.map((mn, i) => {
+          const key = `${pickerYear}-${String(i+1).padStart(2,'0')}`;
+          const isExisting = existing.includes(key);
+          const isSelected = pickerSelected === key;
+          return `<button data-key="${key}" ${isExisting?'disabled':''} style="padding:11px 6px;border-radius:22px;border:none;font-size:13px;font-weight:600;font-family:inherit;cursor:${isExisting?'default':'pointer'};transition:all .15s;
+            background:${isSelected?'var(--accent2)':isExisting?'var(--surface2)':'var(--surface2)'};
+            color:${isSelected?'#fff':isExisting?'var(--border2)':'var(--text)'};
+            opacity:${isExisting?'.45':'1'}">${mn}</button>`;
+        }).join('')}
+      </div>
+      <div style="display:flex;gap:10px">
+        <button id="bmp-cancel" style="flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border2);background:none;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Cancel</button>
+        <button id="bmp-ok" style="flex:1;padding:13px;border-radius:14px;border:none;background:var(--accent2);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;opacity:${pickerSelected?'1':'.45'}">OK</button>
+      </div>`;
   }
 
-  // Show a simple modal-style picker
   const overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:8000;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .15s';
-  const sheet = document.createElement('div');
-  sheet.style.cssText = 'background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:70vh;display:flex;flex-direction:column;gap:12px;animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)';
-  sheet.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div style="font-size:16px;font-weight:700;color:var(--text)">Add Month</div>
-      <button onclick="this.closest('.bgt-month-picker').remove()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;padding:0;min-height:unset">✕</button>
-    </div>
-    <div style="overflow-y:auto;display:flex;flex-direction:column;gap:6px" id="month-picker-list">
-      ${options.map(o => `<button onclick="bgtSelectNewMonth('${o.key}',this.closest('.bgt-month-picker'))" style="width:100%;text-align:left;padding:12px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background='var(--surface2)'">${o.label}</button>`).join('')}
-    </div>`;
   overlay.classList.add('bgt-month-picker');
-  overlay.appendChild(sheet);
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .15s';
+
+  const card = document.createElement('div');
+  card.style.cssText = 'background:var(--surface);border-radius:20px;padding:22px 22px 20px;width:100%;max-width:320px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:modalIn .25s cubic-bezier(.34,1.56,.64,1)';
+
+  function render() {
+    card.innerHTML = buildPicker();
+
+    card.querySelector('#bmp-close').onclick = () => overlay.remove();
+    card.querySelector('#bmp-cancel').onclick = () => overlay.remove();
+
+    card.querySelector('#bmp-year').onchange = e => {
+      pickerYear = +e.target.value;
+      // Deselect if selected month doesn't belong to new year
+      if (pickerSelected && !pickerSelected.startsWith(pickerYear + '-')) pickerSelected = null;
+      render();
+    };
+
+    card.querySelectorAll('#bmp-grid button:not([disabled])').forEach(btn => {
+      btn.onclick = () => {
+        pickerSelected = btn.dataset.key;
+        render();
+      };
+    });
+
+    card.querySelector('#bmp-ok').onclick = () => {
+      if (!pickerSelected) return;
+      bgtSelectNewMonth(pickerSelected, overlay);
+    };
+  }
+
+  render();
+  overlay.appendChild(card);
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
@@ -4912,7 +4950,7 @@ function bgtSetActiveMonth(key) {
 
 function renderMonthTabs() {
   bgtEnsureCurrentMonth();
-  const keys = bgtGetMonthKeys();
+  const keys = bgtGetMonthKeys().slice().sort((a, b) => b.localeCompare(a));
   const active = activeMonthKey || _nowKey();
   const wrap = document.getElementById('bgt-month-tabs');
   if (!wrap) return;
